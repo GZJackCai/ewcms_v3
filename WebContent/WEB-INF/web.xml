@@ -1,28 +1,127 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
-  <display-name>spring_shiro_demo</display-name>
-	<!-- Spring ApplicationContext配置文件的路径,可使用通配符,多个路径用,号分隔此参数用于后面的Spring Context Loader -->
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+
+	<display-name>ewcms_v3</display-name>
+
+	<!-- Spring ApplicationContext配置文件的路径,可使用通配符，用于后面的Spring Context Loader -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>
 			classpath*:/applicationContext.xml
-			classpath*:/applicationContext-shiro.xml
-			classpath*:/applicationContext-jcaptcha.xml
+			classpath*:/applicationContext-import.xml
 		</param-value>
 	</context-param>
-	
+
 	<!-- 设定Spring Context的默认Profile -->
 	<context-param>
-    	<param-name>spring.profiles.default</param-name>
-    	<param-value>production</param-value>
+		<param-name>spring.profiles.default</param-name>
+		<param-value>production</param-value>
 	</context-param>
-	
-	<!--Spring的ApplicationContext 载入 -->
+
+	<!--Spring ApplicationContext 载入 -->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
-	<!-- Filter 定义  -->
+	<!-- Spring MVC Servlet -->
+	<servlet>
+		<servlet-name>springServlet</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath*:/ewcms-mvc.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>springServlet</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+
+	<!-- 验证码 -->
+	<servlet>
+		<servlet-name>jcaptcha</servlet-name>
+		<servlet-class>com.ewcms.web.servlet.ImageCaptchaServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>jcaptcha</servlet-name>
+		<url-pattern>/checkcode.jpg</url-pattern>
+	</servlet-mapping>
+
+	<!-- 资源 -->
+	<servlet>
+		<servlet-name>resource</servlet-name>
+		<servlet-class>com.ewcms.web.servlet.ResourceServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>resource</servlet-name>
+		<url-pattern>/pub_res/*</url-pattern>
+	</servlet-mapping>
+
+	<!-- 问卷调查 -->
+	<servlet>
+		<servlet-name>voteSubmit</servlet-name>
+		<servlet-class>com.ewcms.content.vote.web.SubmitServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>voteSubmit</servlet-name>
+		<url-pattern>/submit.vote</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>voteView</servlet-name>
+		<servlet-class>com.ewcms.content.vote.web.ViewServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>voteView</servlet-name>
+		<url-pattern>/view.vote</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>voteResult</servlet-name>
+		<servlet-class>com.ewcms.content.vote.web.ResultServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>voteResult</servlet-name>
+		<url-pattern>/result.vote</url-pattern>
+	</servlet-mapping>
+
+	<!-- Java Simple Monitoring Console Servlet -->
+	<!-- 
+	<servlet>
+		<servlet-name>SimonConsoleServlet</servlet-name>
+		<servlet-class>org.javasimon.console.SimonConsoleServlet</servlet-class>
+		<init-param>
+			<param-name>url-prefix</param-name>
+			<param-value>/javasimon</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SimonConsoleServlet</servlet-name>
+		<url-pattern>/javasimon/*</url-pattern>
+	</servlet-mapping>
+ 	-->
+	<!-- Filter 定义 -->
+	<!-- Shiro Security filter -->
+	<filter>
+		<filter-name>shiroFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<init-param>
+			<param-name>targetFilterLifecycle</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>shiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+	</filter-mapping>
+
 	<!-- Character Encoding filter -->
 	<filter>
 		<filter-name>encodingFilter</filter-name>
@@ -39,6 +138,8 @@
 	<filter-mapping>
 		<filter-name>encodingFilter</filter-name>
 		<url-pattern>/*</url-pattern>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
 	</filter-mapping>
 
 	<!-- Open Entity Manager in View filter -->
@@ -50,75 +151,33 @@
 		<filter-name>openEntityManagerInViewFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-	
-	<!-- Shiro Security filter-->
-	<filter>
-		<filter-name>shiroFilter</filter-name>
-		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-			<init-param>
-    			<param-name>targetFilterLifecycle</param-name>
-     			<param-value>true</param-value>
-   			</init-param>
-	</filter>
-	<filter-mapping>
-		<filter-name>shiroFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping> 
 
-	<!-- SiteMesh Web-Page Layout filter -->
-	<!-- 
+	<!-- Cache Control Header filter -->
+	<!-- <filter> <filter-name>cacheControlHeaderFilter</filter-name> <filter-class>com.ewcms.web.filter.CacheControlHeaderFilter</filter-class> 
+		</filter> <filter-mapping> <filter-name>cacheControlHeaderFilter</filter-name> 
+		<url-pattern>/static/*</url-pattern> </filter-mapping> -->
+
+	<!-- <filter> <filter-name>error404Filter</filter-name> <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class> 
+		<init-param> <param-name>targetBeanName</param-name> <param-value>error404Filter</param-value> 
+		</init-param> <init-param> <param-name>targetFilterLifecycle</param-name> 
+		<param-value>true</param-value> </init-param> </filter> <filter-mapping> 
+		<filter-name>error404Filter</filter-name> <url-pattern>/*</url-pattern> <dispatcher>REQUEST</dispatcher> 
+		<dispatcher>FORWARD</dispatcher> </filter-mapping> -->
+
 	<filter>
-		<filter-name>sitemeshFilter</filter-name>
-		<filter-class>com.opensymphony.sitemesh.webapp.SiteMeshFilter</filter-class>
-	</filter>
-	<filter-mapping>
-		<filter-name>sitemeshFilter</filter-name>
-		<url-pattern>/*</url-pattern>
-	</filter-mapping>
-      -->
-    <!-- Captcha Servlet -->
-	<servlet>
-		<servlet-name>jcaptcha</servlet-name>
-		<servlet-class>com.ewcms.web.servlet.ImageCaptchaServlet</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>jcaptcha</servlet-name>
-		<url-pattern>/checkcode.jpg</url-pattern>
-	</servlet-mapping>
-	
-	<!-- Spring MVC Servlet -->
-	<servlet>
-		<servlet-name>springServlet</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<filter-name>previewFilter</filter-name>
+		<filter-class>com.ewcms.web.filter.PreviewFilter</filter-class>
 		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath*:/ewcms-mvc.xml</param-value>
+			<param-name>targetFilterLifecycle</param-name>
+			<param-value>true</param-value>
 		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>springServlet</servlet-name>
-		<url-pattern>/</url-pattern>
-	</servlet-mapping>
+	</filter>
+	<filter-mapping>
+		<filter-name>previewFilter</filter-name>
+		<url-pattern>/template/preview</url-pattern>
+	</filter-mapping>
 
-	<!-- session超时定义,单位为分钟 -->
 	<session-config>
 		<session-timeout>20</session-timeout>
 	</session-config>
-
-	<!-- 出错页面定义 -->
-	<!-- 
-	<error-page>
-		<exception-type>java.lang.Throwable</exception-type>
-		<location>/WEB-INF/views/error/500.jsp</location>
-	</error-page>
-	<error-page>
-		<error-code>500</error-code>
-		<location>/WEB-INF/views/error/500.jsp</location>
-	</error-page>
-	<error-page>
-		<error-code>404</error-code>
-		<location>/WEB-INF/views/error/404.jsp</location>
-	</error-page>
-	 -->
 </web-app>

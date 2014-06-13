@@ -24,13 +24,13 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "acct_permission")
-@SequenceGenerator(name = "seq_acc_permission", sequenceName = "seq_acct_permission_id", allocationSize = 1)
+@SequenceGenerator(name = "seq_acct_permission", sequenceName = "seq_acct_permission_id", allocationSize = 1)
 public class Permission implements Serializable {
 
 	private static final long serialVersionUID = 6992071754156726733L;
 
 	@Id
-	@GeneratedValue(generator = "seq_acc_permission", strategy = GenerationType.SEQUENCE)
+	@GeneratedValue(generator = "seq_acct_permission", strategy = GenerationType.SEQUENCE)
 	@Column(name = "id")
 	private Long id;
 	@Column(name = "name", nullable = false, unique = true)
@@ -77,7 +77,6 @@ public class Permission implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
 
@@ -94,11 +93,6 @@ public class Permission implements Serializable {
 			if (other.id != null)
 				return false;
 		} else if (!id.equals(other.id))
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
 			return false;
 		return true;
 	}

@@ -1,6 +1,7 @@
 package com.ewcms.web.vo;
 
 import java.io.Serializable;
+import java.util.Map;
 
 public class PropertyGrid implements Serializable{
 
@@ -9,11 +10,13 @@ public class PropertyGrid implements Serializable{
 	private Object name;
     private Object value;
     private String group;
+    private Map<String,Object> editor;
     
-    public PropertyGrid(Object name,Object value,String group){
+    public PropertyGrid(Object name,Object value,String group, Map<String, Object> editor){
         this.name = name;
         this.value = value;
         this.group = group;
+        this.editor = editor;
     }
     
     public Object getName() {
@@ -27,6 +30,10 @@ public class PropertyGrid implements Serializable{
     public String getGroup() {
         return group;
     }
+
+	public Map<String, Object> getEditor() {
+		return editor;
+	}
 
 	@Override
 	public int hashCode() {

@@ -6,8 +6,11 @@
 
 package com.ewcms.web;
 
+import static org.springframework.data.domain.Sort.Direction;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,76 +28,91 @@ public class QueryParameter {
 	private String sort;
 	private String order;
 	private String cacheKey;
-	private Map<String,String> parameters = new HashMap<String,String>(0);
+	private Map<String, Object> parameters = new HashMap<String, Object>(0);
 	private List<String> selections = new ArrayList<String>();
-	
+	private Map<String, Direction> sorts = new LinkedHashMap<String, Direction>();
+
 	public int getPage() {
 		return page;
 	}
+
 	public void setPage(int page) {
 		this.page = page;
 	}
-	
+
 	public int getRows() {
 		return rows;
 	}
+
 	public void setRows(int rows) {
 		this.rows = rows;
 	}
-	
+
 	public String getSort() {
 		return sort;
 	}
+
 	public void setSort(String sort) {
 		this.sort = sort;
 	}
-	
+
 	public String getOrder() {
 		return order;
 	}
+
 	public void setOrder(String order) {
 		this.order = order;
 	}
-	
+
 	public String getCacheKey() {
 		return cacheKey;
 	}
+
 	public void setCacheKey(String cacheKey) {
 		this.cacheKey = cacheKey;
 	}
-	public Map<String, String> getParameters() {
+
+	public Map<String, Object> getParameters() {
 		return parameters;
 	}
-	public void setParameters(Map<String, String> parameters) {
+
+	public void setParameters(Map<String, Object> parameters) {
 		this.parameters = parameters;
 	}
-	
+
 	public List<String> getSelections() {
 		return selections;
 	}
+
 	public void setSelections(List<String> selections) {
 		this.selections = selections;
 	}
-	
-	public String getParameterValue(String parameterName){
+
+	public Object getParameterValue(String parameterName) {
 		return parameters.get(parameterName);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((order == null) ? 0 : order.hashCode());
 		result = prime * result + page;
-		result = prime * result
-				+ ((parameters == null) ? 0 : parameters.hashCode());
+		result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
 		result = prime * result + rows;
-		result = prime * result
-				+ ((selections == null) ? 0 : selections.hashCode());
+		result = prime * result + ((selections == null) ? 0 : selections.hashCode());
 		result = prime * result + ((sort == null) ? 0 : sort.hashCode());
 		return result;
 	}
-	
+
+	public Map<String, Direction> getSorts() {
+		return sorts;
+	}
+
+	public void setSorts(Map<String, Direction> sorts) {
+		this.sorts = sorts;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

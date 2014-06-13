@@ -1,11 +1,13 @@
 ﻿/**
- * jQuery EasyUI 1.2.6
+ * jQuery EasyUI 1.3.2
  * 
- * Licensed under the GPL terms
- * To use it on other terms please contact us
+ * Copyright (c) 2009-2013 www.jeasyui.com. All rights reserved.
  *
- * Copyright(c) 2009-2012 stworthy [ stworthy@gmail.com ] 
- * 
+ * Licensed under the GPL or commercial licenses
+ * To use it on other terms please contact us: jeasyui@gmail.com
+ * http://www.gnu.org/licenses/gpl.txt
+ * http://www.jeasyui.com/license_commercial.php
+ *
  */
 (function($){
 function _1(_2){
@@ -15,7 +17,7 @@ $(_2).addClass("l-btn");
 if(_3.id){
 $(_2).attr("id",_3.id);
 }else{
-$(_2).removeAttr("id");
+$(_2).attr("id","");
 }
 if(_3.plain){
 $(_2).addClass("l-btn-plain");
@@ -25,7 +27,7 @@ $(_2).removeClass("l-btn-plain");
 if(_3.text){
 $(_2).html(_3.text).wrapInner("<span class=\"l-btn-left\">"+"<span class=\"l-btn-text\">"+"</span>"+"</span>");
 if(_3.iconCls){
-$(_2).find(".l-btn-text").addClass(_3.iconCls).css("padding-left","20px");
+$(_2).find(".l-btn-text").addClass(_3.iconCls).addClass(_3.iconAlign=="left"?"l-btn-icon-left":"l-btn-icon-right");
 }
 }else{
 $(_2).html("&nbsp;").wrapInner("<span class=\"l-btn-left\">"+"<span class=\"l-btn-text\">"+"<span class=\"l-btn-empty\"></span>"+"</span>"+"</span>");
@@ -96,8 +98,8 @@ _4(this,true);
 }};
 $.fn.linkbutton.parseOptions=function(_c){
 var t=$(_c);
-return {id:t.attr("id"),disabled:(t.attr("disabled")?true:undefined),plain:(t.attr("plain")?t.attr("plain")=="true":undefined),text:$.trim(t.html()),iconCls:(t.attr("icon")||t.attr("iconCls"))};
+return $.extend({},$.parser.parseOptions(_c,["id","iconCls","iconAlign",{plain:"boolean"}]),{disabled:(t.attr("disabled")?true:undefined),text:$.trim(t.html()),iconCls:(t.attr("icon")||t.attr("iconCls"))});
 };
-$.fn.linkbutton.defaults={id:null,disabled:false,plain:false,text:"",iconCls:null};
+$.fn.linkbutton.defaults={id:null,disabled:false,plain:false,text:"",iconCls:null,iconAlign:"left"};
 })(jQuery);
 

@@ -6,16 +6,16 @@
  
 var updateUsername = function(name){
     $('#user-name').html(name);
-}
+};
 
 var home = function(refurbish,windowId){
     this._refurbish = refurbish || true;
     this._windowId = windowId || '#edit-window';
-}
+};
 
-home.prototype.addTab=function(title,src){
-    var tabob = $('#systemtab');
-    var content = '<iframe src='  + src+ ' width=100% frameborder=0 height=100%/>';
+home.prototype.addTab=function(id, title,src){
+    var tabob = $(id);
+    var content = '<iframe src='  + src+ ' width="100%" height="100%" frameborder="0"/>';
     
     if (tabob.tabs('exists', title) && this._refurbish) {
         tabob.tabs('select', title);
@@ -33,7 +33,7 @@ home.prototype.addTab=function(title,src){
             closable : true
         });
     }    
-}
+};
 
 home.prototype.init = function(opts){
     var windowId = this._windowId;
@@ -51,15 +51,15 @@ home.prototype.init = function(opts){
     });
     
     $('#user-menu').bind('click',function(){
-        openWindow(windowId,{width:550,height:300,title:'修改用户信息',url:opts.user}); 
+        $.ewcms.openWindow({windowId:windowId,iframeId:'#editifr',src:opts.user,width:550,height:300,title:'修改用户信息'});
     });
     $('#password-menu').bind('click',function(){
-        openWindow(windowId,{width:550,height:230,title:'修改密码',url:opts.password}); 
+    	$.ewcms.openWindow({windowId:windowId,iframeId:'#editifr',src:opts.password,width:550,height:250,title:'修改密码'});
     });
     $('#switch-menu').bind('click',function(){
         var item = $('#mm').menu('getItem','#switch-menu');
         if(!item.disabled){
-            openWindow(windowId,{width:450,height:280,title:'站点切换',url:opts.siteswitch});            
+        	$.ewcms.openWindow({windowId:windowId,iframeId:'#editifr',src:opts.siteswitch,width:450,height:246,title:'站点切换'});
         }
     });
     $('#progress-menu').bind('click',function(){
@@ -70,12 +70,51 @@ home.prototype.init = function(opts){
     });
     
     if(!opts.hasSite){
-        $('#mainmenu').accordion('remove','站点建设');
-        $('#mainmenu').accordion('remove','站点内容');
-        $('#mainmenu').accordion('remove','站点资源');
+        //$('#mainmenu').accordion('remove','站点建设');
+        //$('#mainmenu').accordion('remove','站点内容');
+        //$('#mainmenu').accordion('remove','站点资源');
         $('#mm').menu('disableItem','#switch-menu');
     }
-}
+    
+    $('#tt-visit').tree({
+    	checkbox : false,
+        url:opts.visitTreeUrl,
+        onClick : function(node) {
+        	var url = node.attributes.url;
+			if (typeof(url) == 'undefined' || url == ''){
+				return false;
+			}else{
+				_home.addTab('#tab-visit', node.text,opts.visitUrl + url + '/index');
+			}
+        }
+//        ,
+//    	onLoadSuccess : function(node, data){
+//    		var nodeSel = $('#tt-visit').tree('find', 2);
+//    		$('#tt-visit').tree('select', nodeSel.target);
+//    		_home.addTab('#tab-visit', nodeSel.text, opts.visitUrl + '/' + nodeSel.attributes.url);
+//    	}
+    });
+	
+	$('li[id^="menu-"]').bind('click', function(){
+		var id = $(this).get(0).id.substring(5);
+		
+		$('li[id^="menu-"]').removeClass('tabs-selected');
+		$('div[id^="menusub-"]').css('display','none');
+		$('div[id^="tab-"]').css('display','none');
+		
+		$('#menu-' + id).addClass('tabs-selected');
+		$('#menusub-' + id).css('display', '');
+		$('#tab-' + id).css('display', '');
+		
+		if (id == 'index'){
+			$('#center').css('display','none');
+		}else{
+			$('#center').css('display','');
+			$('#west').panel('setTitle', $(this).text());
+			$('#tab-' + id).tabs('resize');
+		}
+	});
+};
 
 home.prototype.getPopMessage=function(jsonPop, reread){
 	if (!reread) return;
@@ -83,7 +122,7 @@ home.prototype.getPopMessage=function(jsonPop, reread){
 	$.each(dataObj.pops, function(idx, item){
 	    $.messager.show({title:item.title,msg:item.content,width:350,height:200,timeout:5000,showType:'fade'});
 	});
-}
+};
 
 var detailUrl = "/message/detail/index.do";
 var noticesDetailUrl = detailUrl + "?type=notice";
@@ -98,10 +137,10 @@ home.prototype.getNoticeMessage = function(jsonNotice, reread){
 	    	pro.push('<tr><td width="80%"><a href="javascript:void(0);" onclick="showRecord(\'' + noticesDetailUrl + '\',' + item.id + ');" style="text-decoration:none;" alt="' + item.title + '"><span class="ellipsis">' + item.title + '</span></a></td><td width="10%">[' + item.userName + ']' + '</td><td width="10%" align="right">' + item.sendTime + '</td></tr>');
 	    });
 	    var html = pro.join("");
-	    noticesHtml += html + '</table></div>'
+	    noticesHtml += html + '</table></div>';
 	    $(noticesHtml).appendTo('#notice');
     }
-}
+};
 
 var subDetailUrl = detailUrl + "?type=subscription";
 home.prototype.getSubscription = function(jsonSub, reread){
@@ -115,10 +154,10 @@ home.prototype.getSubscription = function(jsonSub, reread){
         	pro.push('<tr><td width="80%"><a href="javascript:void(0);" onclick="showRecord(\'' + subDetailUrl + '\',' + item.id + ');" style="text-decoration:none;"><span class="ellipsis">' + item.title + '</span></a></td><td width="10%">[' + item.userName + ']' + '</td><td width="10%" align="right">' + item.sendTime + '</td></tr>');
         });
         var html = pro.join("");
-        subscriptionHtml += html + '</table></div>'
+        subscriptionHtml += html + '</table></div>';
         $(subscriptionHtml).appendTo('#subscription');
     }
-}
+};
 
 home.prototype.getUnReadMessage=function(count, reread){
 	if (!reread) return;
@@ -129,7 +168,7 @@ home.prototype.getUnReadMessage=function(count, reread){
 	}
 	html += '</span>';
 	$(html).appendTo('#tipMessage');
-}
+};
 
 home.prototype.getBeApproval=function(jsonBeApproval, reread){
 	if (!reread) return;
@@ -142,16 +181,16 @@ home.prototype.getBeApproval=function(jsonBeApproval, reread){
    			pro.push('<tr><td width="50%"><a href="javascript:void(0);" style="text-decoration:none;">栏目：『' + item.channelName + '』 共有 ' + item.articleCount + ' 条需要审批</a></td></tr>');
    		});
    		var html = pro.join("");
-   		beApprovalHtml += html + '</table></div>'
+   		beApprovalHtml += html + '</table></div>';
    		$(beApprovalHtml).appendTo('#other');
 	}
-}
+};
 
 function showRecord(url, id){
 	url = url + '&id=' + id;
 	$('#editifr_detail').attr('src',url);
 	ewcmsBOBJ.openWindow('#detail-window',{width:700,height:400,title:'内容'});
-}
+};
 
 function Clock() {
 	var date = new Date();
@@ -180,4 +219,4 @@ function Clock() {
 		ele.innerHTML = clock.toString();
 		window.setTimeout(function() {clock.display(ele);}, 1000);
 	};
-}
+};

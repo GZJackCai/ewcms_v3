@@ -2,6 +2,7 @@ package com.ewcms.security.model;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -38,13 +39,13 @@ import com.ewcms.util.Collections3;
  */
 @Entity
 @Table(name = "acct_role")
-@SequenceGenerator(name = "seq_acc_role", sequenceName = "seq_acct_role_id", allocationSize = 1)
+@SequenceGenerator(name = "seq_acct_role", sequenceName = "seq_acct_role_id", allocationSize = 1)
 public class Role implements Serializable {
 
 	private static final long serialVersionUID = -6368774703931624240L;
 		
 	@Id
-    @GeneratedValue(generator = "seq_acc_role",strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(generator = "seq_acct_role",strategy = GenerationType.SEQUENCE)
 	@Column(name = "id")
 	private Long id;
 	@Column(name = "role_name", nullable = false, unique = true)
@@ -88,9 +89,16 @@ public class Role implements Serializable {
 		this.permissions = permissions;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Transient
-	public String getPermissionNames() {
-		return Collections3.extractToString(permissions, "caption", ", ");
+	public List<String> getPermissionNames() {
+		return Collections3.extractToList(permissions, "name");
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Transient
+	public List<String> getPermissionExpressions(){
+		return Collections3.extractToList(permissions, "expression");
 	}
 
 	@Override

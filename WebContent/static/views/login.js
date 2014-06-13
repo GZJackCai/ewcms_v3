@@ -6,7 +6,7 @@
 
 var login = function(checkCodeUrl){
     this._checkCodeUrl = checkCodeUrl;
-}
+};
 
 login.prototype.init = function(){
     var _login = this;
@@ -42,7 +42,7 @@ login.prototype.init = function(){
         return ;
     }
    $('input[name=captcha]').focus();
-}
+};
 
 login.prototype.isEmpty = function(input){
     if (input.val() && $.trim(input.val()) != "") {
@@ -51,11 +51,11 @@ login.prototype.isEmpty = function(input){
         input.focus();
         return true;
     }
-}
+};
 
 login.prototype.showErrorMessage = function(msg){
     $('#id_error_msg').html(msg);
-}
+};
 
 login.prototype.submit = function(){
     if (this.isEmpty($('input[name=username]'))) {
@@ -71,5 +71,5 @@ login.prototype.submit = function(){
         return;
     }
     $('form')[0].submit();
-}
+};
      

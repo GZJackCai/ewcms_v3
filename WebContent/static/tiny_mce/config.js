@@ -19,7 +19,7 @@ tinyMCE.init({
 	theme_advanced_statusbar_location : "bottom",
 	theme_advanced_resizing : false,
 	content_css : tinyMCE.baseURI.getURI() + "/css/content.css",
-	execcommand_callback : "window_resize",
+	execcommand_callback : "ArticleEdit.windowResize",
 	theme_advanced_fonts : "宋体=宋体;"+
 	  					   "仿宋_GB2312=仿宋_GB2312;"+
 	   					   "方正舒体=方正舒体;"+
@@ -66,45 +66,40 @@ tinyMCE.init({
 		   	title : '插入图片',
 		   	image : ed.baseURI.getURI() + '/image/image.gif',
 		   	onclick : function() {
-				//var url = ed.baseURI.getURI() + "/../../resource/insert.do";
 		   		ed.focus();
-		   		openImageWindow(true);
+		   		ArticleEdit.openImageWindow(true);
 	       	}
 		});
 		ed.addButton('ewcmsAnnex',{
 			title : '插入附件',
 			image : ed.baseURI.getURI() + '/image/annex.gif',
 			onclick : function(){
-				//var url = ed.baseURI.getURI() + "/../../resource/insert.do";
 				ed.focus();
-				openAnnexWindow();
+				ArticleEdit.openAnnexWindow();
 			}
 		});
 		ed.addButton('ewcmsVote',{
 			title : '插入调查投票',
 			image : ed.baseURI.getURI() + '/image/vote.gif',
 			onclick : function(){
-				//var url = ed.baseURI.getURI() + "/../../vote/questionnaire/article.do";
 				ed.focus();
-				openVoteWidnow();
+				ArticleEdit.openVoteWindow();
 			}
 		});
 		ed.addButton('ewcmsFlash',{
 			title : '插入Flash',
 			image : ed.baseURI.getURI() + '/image/flash.gif',
 			onclick : function(){
-				//var url = ed.baseURI.getURI() + "/../../resource/insert.do";
 				ed.focus();
-				openFlashWindow();
+				ArticleEdit.openFlashWindow();
 			}
 		});
 		ed.addButton('ewcmsVideo',{
 			title : '插入视频',
 			image : ed.baseURI.getURI() + '/image/video.gif',
 			onclick : function(){
-				//var url = ed.baseURI.getURI() + "/../../resource/insert.do";
 				ed.focus();
-				openVideoWindow();
+				ArticleEdit.openVideoWindow();
 			}
 		});
 	}

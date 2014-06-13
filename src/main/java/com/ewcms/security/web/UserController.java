@@ -6,7 +6,6 @@
 package com.ewcms.security.web;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,18 +15,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.ewcms.common.query.cache.CacheResultable;
-import com.ewcms.common.query.jpa.EntityQueryable;
-import com.ewcms.common.query.jpa.QueryFactory;
 import com.ewcms.security.model.Role;
 import com.ewcms.security.model.User;
-import com.ewcms.security.service.AccountManager;
+import com.ewcms.security.service.AccountService;
 import com.ewcms.security.service.ServiceException;
 import com.ewcms.web.QueryParameter;
 import com.ewcms.web.vo.ComboBox;
@@ -37,9 +34,7 @@ import com.ewcms.web.vo.ComboBox;
 public class UserController {
 
 	@Autowired
-	private AccountManager accountManager;
-	@Autowired
-	protected QueryFactory queryFactory;
+	private AccountService accountService;
 	
 	@RequiresPermissions("user:view")
 	@RequestMapping(value = "/index")
@@ -54,12 +49,12 @@ public class UserController {
 			model.addAttribute("user", new User());
 			model.addAttribute("selections", new ArrayList<Long>(0));
 		}else{
-			User user = accountManager.getUser(selections.get(0));
+			User user = accountService.getUser(selections.get(0));
 			user = (user == null ? new User() : user);
 			model.addAttribute("user", user);
 			model.addAttribute("selections", selections);
 		}
-		model.addAttribute("allRoles", accountManager.getAllRole());
+		model.addAttribute("allRoles", accountService.getAllRole());
 		return "security/user/edit";
 	}
 	
@@ -69,22 +64,22 @@ public class UserController {
 		try{
 			Boolean close = Boolean.FALSE;
 			if (user.getId() != null && StringUtils.hasText(user.getId().toString())){
-				User oldUser = accountManager.getUser(user.getId());
+				User oldUser = accountService.getUser(user.getId());
 				
 				user.setPermissions(oldUser.getPermissions());
 				user.setRoles(oldUser.getRoles());
 				
-				accountManager.saveUser(user, true);
+				accountService.saveUser(user, true);
 				selections.remove(0);
 				if(selections == null || selections.isEmpty()){
 					close = Boolean.TRUE;
 				}else{
-					user = accountManager.getUser(selections.get(0));
+					user = accountService.getUser(selections.get(0));
 					model.addAttribute("user", user);
 					model.addAttribute("selections", selections);
 				}
 			}else{
-				accountManager.saveUser(user, true);
+				accountService.saveUser(user, true);
 				selections = selections == null ? new ArrayList<Long>() : selections;
 				selections.add(0, user.getId());
 				model.addAttribute("user", new User());
@@ -102,7 +97,7 @@ public class UserController {
 	public String remove(@RequestParam("selections") List<Long> selections, RedirectAttributes redirectAttributes){
 		for (Long id : selections){
 			try{
-				accountManager.deleteUser(id);
+				accountService.deleteUser(id);
 			}catch(ServiceException e){
 				redirectAttributes.addFlashAttribute("message", e.getMessage());
 			}
@@ -113,9 +108,8 @@ public class UserController {
 	
 	@RequiresPermissions("user:edit")
 	@RequestMapping(value = "/checkLoginName")
-	@ResponseBody
-	public String checkLoginName(@RequestParam("oldLoginName") String oldLoginName,	@RequestParam("loginName") String loginName) {
-		if (loginName.equals(oldLoginName) || accountManager.findUserByLoginName(loginName) == null) {
+	public @ResponseBody String checkLoginName(@RequestParam("oldLoginName") String oldLoginName,	@RequestParam("loginName") String loginName) {
+		if (loginName.equals(oldLoginName) || accountService.findUserByLoginName(loginName) == null) {
 			return "true";
 		}
 		return "false";
@@ -123,14 +117,13 @@ public class UserController {
 	
 	@RequiresPermissions("user:edit")
 	@RequestMapping(value = "/findAllRole")
-	@ResponseBody
-	public List<ComboBox> findAllRole(@RequestParam("id") Long id){
-		List<Role> roles = accountManager.getAllRole();
+	public @ResponseBody List<ComboBox> findAllRole(@RequestParam("id") Long id){
+		List<Role> roles = accountService.getAllRole();
 		List<ComboBox> comboBoxs = new ArrayList<ComboBox>();
 		if (roles == null || roles.isEmpty()) return comboBoxs;
 		for (Role role : roles){
 			ComboBox comboBox = new ComboBox();
-			Role entity = accountManager.findSelectedRole(id, role.getId());
+			Role entity = accountService.findSelectedRole(id, role.getId());
 			if (entity != null) comboBox.setSelected(true);
 			comboBox.setId(role.getId());
 			comboBox.setText(role.getRoleName());
@@ -139,40 +132,44 @@ public class UserController {
 		return comboBoxs;
 	}
 	
+	@RequestMapping(value = "/password")
+	public String password(){
+		return "/security/account/password";
+	}
+	
+	@RequestMapping(value = "/savePassword")
+	public String savePassword(@RequestParam(value = "loginName") String loginName, @RequestParam(value = "newPassword") String newPassword, RedirectAttributes redirectAttributes){
+		try{
+			accountService.updatePassword(loginName, newPassword);
+			return "redirect:/logout";
+		}catch(ServiceException e){
+			redirectAttributes.addFlashAttribute("message", e.getMessage());
+			return "redirect:/security/user/password";
+		}
+	}
+	
+	@RequestMapping(value = "/info/{loginName}")
+	public String info(@PathVariable(value = "loginName") String loginName, Model model){
+		User user = accountService.findUserByLoginName(loginName);
+		model.addAttribute("user", user);
+		return "/security/account/user";
+	}
+	
+	@RequestMapping(value = "/saveUserInfo")
+	public String updUserInfo(@ModelAttribute("user")User user, RedirectAttributes redirectAttributes){
+		try{
+			accountService.updUserInfo(user);
+			return "redirect:/logout";
+		}catch(Exception e){
+			redirectAttributes.addFlashAttribute("message", e.getMessage());
+			return "redirect:/security/user/info/" + user.getLoginName();
+		}
+	}
+	
 	@RequiresPermissions("user:view")
 	@RequestMapping(value = "/query")
-	@ResponseBody
-	public Map<String, Object> query(@ModelAttribute QueryParameter params) {
-		int page =  params.getPage() - 1;
-		int pageSize = params.getRows();
-		
-		EntityQueryable query = queryFactory.createEntityQuery(User.class).setPage(page).setRow(pageSize);
-
-		String order = params.getOrder();
-		if (order != null) {
-			String sort = params.getSort();
-			if (order.equals("asc")) {
-				query.orderAsc(sort);
-			} else {
-				query.orderDesc(sort);
-			}
-		}
-		
-		List<String> selections = params.getSelections();
-		if (selections != null && !selections.isEmpty()) {
-			String[] selectArr = selections.toArray(new String[0]);
-			List<Long> selectionArr = new ArrayList<Long>();
-			for (String arr : selectArr) {
-				selectionArr.add(Long.valueOf(arr));
-			}
-			query.in("id", selectionArr);
-		}
-		
-		CacheResultable result = query.queryCacheResult(params.getCacheKey());
-		Map<String, Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("total", result.getCount());
-		resultMap.put("cacheKey", result.getCacheKey());
-		resultMap.put("rows", result.getResultList());
-		return resultMap;
+	public @ResponseBody Map<String, Object> query(@ModelAttribute QueryParameter params) {
+		return accountService.searchUser(params);
 	}
+	
 }

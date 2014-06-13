@@ -50,4 +50,4 @@ var pubsub = {
             pubsub.connection = false;
         }
     }
-}
+};

@@ -1,11 +1,13 @@
 ﻿/**
- * jQuery EasyUI 1.2.6
+ * jQuery EasyUI 1.3.2
  * 
- * Licensed under the GPL terms
- * To use it on other terms please contact us
+ * Copyright (c) 2009-2013 www.jeasyui.com. All rights reserved.
  *
- * Copyright(c) 2009-2012 stworthy [ stworthy@gmail.com ] 
- * 
+ * Licensed under the GPL or commercial licenses
+ * To use it on other terms please contact us: jeasyui@gmail.com
+ * http://www.gnu.org/licenses/gpl.txt
+ * http://www.jeasyui.com/license_commercial.php
+ *
  */
 (function($){
 var _1=false;
@@ -42,11 +44,8 @@ _5.top=_5.startTop+e.pageY-_5.startY;
 function _9(e){
 var _a=e.data;
 var _b=_a.target;
-if(!$.boxModel&&$.browser.msie){
-$(_b).css({width:_a.width,height:_a.height,left:_a.left,top:_a.top});
-}else{
-$(_b).css({width:_a.width-_a.deltaWidth,height:_a.height-_a.deltaHeight,left:_a.left,top:_a.top});
-}
+$(_b).css({left:_a.left,top:_a.top});
+$(_b)._outerWidth(_a.width)._outerHeight(_a.height);
 };
 function _c(e){
 _1=true;
@@ -66,7 +65,7 @@ _4(e,true);
 _9(e);
 $.data(e.data.target,"resizable").options.onStopResize.call(e.data.target,e);
 $(document).unbind(".resizable");
-$("body").css("cursor","auto");
+$("body").css("cursor","");
 return false;
 };
 return this.each(function(){
@@ -76,7 +75,7 @@ if(_10){
 $(this).unbind(".resizable");
 _f=$.extend(_10.options,_2||{});
 }else{
-_f=$.extend({},$.fn.resizable.defaults,_2||{});
+_f=$.extend({},$.fn.resizable.defaults,$.fn.resizable.parseOptions(this),_2||{});
 $.data(this,"resizable",{options:_f});
 }
 if(_f.disabled==true){
@@ -92,6 +91,8 @@ $(e.data.target).css("cursor","");
 }else{
 $(e.data.target).css("cursor",dir+"-resize");
 }
+}).bind("mouseleave.resizable",{target:this},function(e){
+$(e.data.target).css("cursor","");
 }).bind("mousedown.resizable",{target:this},function(e){
 var dir=_11(e);
 if(dir==""){
@@ -110,8 +111,6 @@ $(document).bind("mousedown.resizable",_13,_c);
 $(document).bind("mousemove.resizable",_13,_d);
 $(document).bind("mouseup.resizable",_13,_e);
 $("body").css("cursor",dir+"-resize");
-}).bind("mouseleave.resizable",{target:this},function(e){
-$(e.data.target).css("cursor","");
 });
 function _11(e){
 var tt=$(e.data.target);
@@ -156,6 +155,10 @@ return jq.each(function(){
 $(this).resizable({disabled:true});
 });
 }};
+$.fn.resizable.parseOptions=function(_1a){
+var t=$(_1a);
+return $.extend({},$.parser.parseOptions(_1a,["handles",{minWidth:"number",minHeight:"number",maxWidth:"number",maxHeight:"number",edge:"number"}]),{disabled:(t.attr("disabled")?true:undefined)});
+};
 $.fn.resizable.defaults={disabled:false,handles:"n, e, s, w, ne, se, sw, nw, all",minWidth:10,minHeight:10,maxWidth:10000,maxHeight:10000,edge:5,onStartResize:function(e){
 },onResize:function(e){
 },onStopResize:function(e){

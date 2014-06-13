@@ -15,19 +15,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.ewcms.common.query.jpa.QueryFactory;
 import com.ewcms.security.model.Role;
 import com.ewcms.security.model.Permission;
-import com.ewcms.security.service.AccountManager;
+import com.ewcms.security.service.AccountService;
 import com.ewcms.web.QueryParameter;
 
 @Controller
 @RequestMapping(value = "/security/roledetail")
 public class RoleDetailController {
 	@Autowired
-	private AccountManager accountManager;
-	@Autowired
-	protected QueryFactory queryFactory;
+	private AccountService accountService;
 	
 	@RequiresPermissions("user:edit")
 	@RequestMapping(value = "/index")
@@ -38,9 +35,8 @@ public class RoleDetailController {
 
 	@RequiresPermissions("user:edit")
 	@RequestMapping(value = "/query")
-	@ResponseBody
-	public Map<String, Object> query(@ModelAttribute QueryParameter params, @RequestParam("id") Long id){
-		Role role = accountManager.getRole(id);
+	public @ResponseBody Map<String, Object> query(@ModelAttribute QueryParameter params, @RequestParam("id") Long id){
+		Role role = accountService.getRole(id);
 		Set<Permission> permissions = new HashSet<Permission>();
 		if (role != null){
 			permissions = role.getPermissions();
@@ -52,11 +48,10 @@ public class RoleDetailController {
 	}
 	
 	@RequestMapping(value = "/editPermission")
-	@ResponseBody
-	public String editPermission(@RequestParam(required = false) List<Long> permissionIds, @RequestParam("id") Long id, @RequestParam("isRemove") Boolean isRemove){
+	public @ResponseBody String editPermission(@RequestParam(required = false) List<Long> permissionIds, @RequestParam("id") Long id, @RequestParam("isRemove") Boolean isRemove){
 		if (id == null) return "角色未选择";
 		
-		Role role = accountManager.getRole(id);
+		Role role = accountService.getRole(id);
 		if (role == null) return "角色不存在";
 		
 		if (permissionIds != null && !permissionIds.isEmpty()){
@@ -64,17 +59,17 @@ public class RoleDetailController {
 			if (isRemove){
 				if (permissions == null || permissions.isEmpty()) return "未有移除的权限";
 				for (Long permissionId : permissionIds){
-					Permission permission = accountManager.getPermission(permissionId);
+					Permission permission = accountService.getPermission(permissionId);
 					permissions.remove(permission);
 				}
 			}else{
 				for (Long permissionId : permissionIds){
-					Permission permission = accountManager.getPermission(permissionId);
+					Permission permission = accountService.getPermission(permissionId);
 					permissions.add(permission);
 				}
 			}
 			role.setPermissions(permissions);
-			accountManager.saveRole(role);
+			accountService.saveRole(role);
 		}
 		return "success";
 	}

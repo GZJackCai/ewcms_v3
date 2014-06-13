@@ -22,7 +22,6 @@
 </head>
 
 <body>
-<div><h1>系统发生内部错误.</h1></div>
-<div><a href="<c:url value="/"/>">返回首页</a></div>
+<div><h1>系统发生内部错误，请与开发人员联系.</h1></div>
 </body>
 </html>

@@ -1,0 +1,298 @@
+/**
+ * Copyright (c)2010-2011 Enterprise Website Content Management System(EWCMS), All rights reserved.
+ * EWCMS PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+ * http://www.ewcms.com
+ */
+
+package com.ewcms.content.vote.service;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+
+import com.ewcms.content.vote.dao.PersonDao;
+import com.ewcms.content.vote.dao.QuestionnaireDao;
+import com.ewcms.content.vote.model.Person;
+import com.ewcms.content.vote.model.Questionnaire;
+import com.ewcms.content.vote.model.Subject;
+import com.ewcms.content.vote.model.SubjectItem;
+import com.ewcms.web.QueryParameter;
+import com.ewcms.web.query.SearchMain;
+
+/**
+ * 问卷调查主体Service
+ * 
+ * @author 吴智俊
+ */
+@Component
+public class QuestionnaireService {
+	
+	protected static final Logger logger = LoggerFactory.getLogger(QuestionnaireService.class);
+
+	@Autowired
+	private QuestionnaireDao questionnaireDao;
+	@Autowired
+	private PersonDao personDao;
+	
+	public Long addQuestionnaire(Questionnaire questionnaire) {
+		Long channelId = questionnaire.getChannelId();
+		Assert.notNull(channelId);
+		if (questionnaire.getStartTime() == null){
+			questionnaire.setStartTime(new Date(Calendar.getInstance().getTime().getTime()));
+		}
+		Long maxSort = questionnaireDao.findQuestionnaireMaxSort(channelId);
+		if (maxSort == null) maxSort = 0L;
+		questionnaire.setSort(maxSort + 1);
+		questionnaireDao.save(questionnaire);
+		return questionnaire.getId();
+	}
+
+	public void delQuestionnaire(Long questionnaireId) {
+		questionnaireDao.delete(questionnaireId);
+	}
+
+	public Questionnaire findQuestionnaire(Long questionnaireId) {
+		return questionnaireDao.findOne(questionnaireId);
+	}
+
+	public Long updQuestionnaire(Questionnaire questionnaire) {
+		Long questionnaireId = questionnaire.getId();
+		Assert.notNull(questionnaireId);
+		Questionnaire questionnaire_old = questionnaireDao.findOne(questionnaireId);
+		Assert.notNull(questionnaire_old);
+		questionnaire.setSubjects(questionnaire_old.getSubjects());
+		questionnaireDao.save(questionnaire);
+		return questionnaire.getId();
+	}
+	
+	public StringBuffer getQuestionnaireViewToHtml(Long questionnaireId, String servletContentName){
+		try{
+//			if (!servletContentName.equals("")){
+//				servletContentName = servletContentName;
+//			}
+			StringBuffer view = new StringBuffer();
+			view.append("<link rel='stylesheet' type='text/css' href='" + servletContentName + "/static/views/content/vote/vote.css'/>\n");
+			view.append("<script language='javascript' src='" + servletContentName + "/static/views/content/vote/vote.js'></script>\n");
+			view.append("<div class='diaocha'>").append("<p class='bt01'></p>").append("<div class='dc_detail'>");			
+			
+			Questionnaire questionnaire = questionnaireDao.findOne(questionnaireId);
+			if (questionnaire == null) return view.append("<p class='dc_tit'>没有问卷调查</p>").append("</div>").append("</div>");
+			
+			view.append("<p class='dc_tit'>" + questionnaire.getTitle() + "</p>\n");
+			
+			if ((questionnaire.getVoteEnd()!= null && questionnaire.getVoteEnd()) || (questionnaire.getEndTime() != null && questionnaire.getEndTime().getTime() < Calendar.getInstance().getTime().getTime())){
+				view.append("<p class='dc_tit'>对不起，此调查已结束，不再接受投票</p>");
+			}else{
+				List<Subject> subjects = questionnaire.getSubjects();
+				if (subjects == null || subjects.isEmpty())	return new StringBuffer("<p>没有问卷调查</p>");
+				
+				view.append("<div id='vote_" + questionnaireId + "' class='votecontainer' style='text-align:left'>\n");
+				view.append("  <form id='voteForm_" + questionnaireId + "' name='voteForm_" + questionnaireId + "' action='" + servletContentName + "/submit.vote' method='post' target='_self'>\n");
+				view.append("  <input type='hidden' id='questionnaireId' name='questionnaireId' value='" + questionnaireId + "'/>\n");
+				view.append("  <input type='hidden' id='voteEnd' name='voteEnd' value='" + questionnaire.getVoteEnd() + "'/>\n");
+//				view.append("    <dl>\n");
+				
+				Boolean isItemEntity = false;
+				Long row = 1L;
+				for (Subject subject : subjects){
+					List<SubjectItem> subjectItems = subject.getSubjectItems();
+					
+					if (subjectItems == null || subjectItems.isEmpty()) continue;
+					
+					isItemEntity = true;
+					
+//					view.append("      <dt id='" + subject.getId() + "'>" + row + "." + subject.getTitle() + "</dt>\n");
+					view.append("      <ul id='" + subject.getId() + "' style='list-style:none;'>" + row + "." + subject.getTitle() + "\n");
+					Subject.Status subjectStatus = subject.getStatus();
+					String subjectStatusValue = "";
+					switch(subjectStatus){
+						case RADIO : 
+							subjectStatusValue = "radio";
+							break;
+						case OPTION :
+							subjectStatusValue = "checkbox";
+							break;
+						case INPUT :
+							subjectStatusValue = "text";
+							break;
+					}
+					for (SubjectItem subjectItem : subjectItems){
+						SubjectItem.Status subjectItemStatus = subjectItem.getStatus();
+//						view.append("      <dd>\n");
+						view.append("      <li>\n");
+						if (!subjectStatusValue.equals("text")){
+							view.append("      <label><input name='Subject_" + subject.getId() + "' type='" + subjectStatusValue + "' value='" + subjectItem.getId() + "' id='Subject_" + subject.getId() + "_Item_" + subjectItem.getId() + "_Button'/>" + subjectItem.getTitle() + "</label>\n");
+						}
+						switch(subjectItemStatus){
+							case CHOOSE :
+								break;
+							case SINGLETEXT :
+								if (subjectStatusValue.equals("text")){
+									view.append("      <input id='Subject_" + subject.getId() + "' name='Subject_" + subject.getId() + "' type='text' value=''/></dd>\n");
+								}else{
+									view.append("      <input id='Subject_" + subject.getId() + "_Item_" + subjectItem.getId() + "' name='Subject_" + subject.getId() + "_Item_" + subjectItem.getId() + "' type='text' value='' onClick=\"clickInput('Subject_" + subject.getId() + "_Item_" + subjectItem.getId() + "');\"/></dd>\n");
+								}
+								break;
+							case MULTITEXT :
+								if (subjectStatusValue.equals("text")){
+									view.append("      <textarea style='height:60px;width:400px;vertical-align:top;' id='Subject_" + subject.getId() + "' name='Subject_" + subject.getId() + "'/></textarea></dd>\n");
+								}else{
+									view.append("      <textarea style='height:60px;width:400px;vertical-align:top;' id='Subject_" + subject.getId() + "_Item_" + subjectItem.getId() + "' name='Subject_" + subject.getId() + "_Item_" + subjectItem.getId() + "' onClick=\"clickInput('Subject_" + subject.getId() + "_Item_" + subjectItem.getId() + "');\"/></textarea></dd>\n");
+								}
+								break;
+						}
+//						view.append("      </dd>\n");
+						view.append("      </li>\n");
+					}
+					row++;
+					view.append("    </ul>\n");
+				}
+				
+				if (!isItemEntity) return new StringBuffer("<p>没有问卷调查</p>");
+				
+//				view.append("    </dl>\n");
+				if (questionnaire.getVerifiCode()){
+					view.append("    <ul style='list-style:none;'>");
+					view.append("      <li>");
+//					view.append("    <dl>\n");
+//					view.append("      <dd>\n");
+					view.append("        <img id='id_checkcode' align='absmiddle' width='120px' src='" + servletContentName + "/checkcode.jpg' alt='点击刷新验证码' title='看不清，换一张' onclick='codeRefresh(this,\"" + servletContentName + "/checkcode.jpg\");' style='cursor:pointer;'/>\n");
+					view.append("        <input type='text' name='j_checkcode' class='checkcode' size='10' maxlength='4' title='验证码不区分大小写'/>");
+//					view.append("      </dd>\n");
+//					view.append("    </dl>\n");
+					view.append("      </li>");
+					view.append("    </ul>");
+				}
+				view.append("    <dl>\n");
+				view.append("       <dd>\n");
+				view.append("         <input type='submit' value='提交' onclick='return checkVote(" + questionnaireId + ");'>  ");
+				if (questionnaire.getStatus() != Questionnaire.Status.NOVIEW){
+					view.append("         <input type='button' value='查看' onclick='javascript:window.open(\"" + servletContentName + "/result.vote?id=" + questionnaireId + "\",\"_blank\")'>\n");
+				}
+				view.append("       </dd>\n");
+				view.append("    </dl>\n");
+				view.append("  </form>\n");
+				view.append("</div>\n");
+			}
+			view.append("</div>").append("</div>");
+			
+			return view;
+		}catch(Exception e){
+			return new StringBuffer("<p>没有问卷调查</p>");
+		}
+	}
+	
+	public StringBuffer getQuestionnaireResultClientToHtml(Long questionnaireId, String servletContentName, String ipAddr){
+		return getQuestionnaireResultToHtml(questionnaireId, servletContentName, ipAddr, true);
+	}
+	
+	public StringBuffer getQuestionnaireResultToHtml(Long questionnaireId, String servletContentName, String ipAddr, Boolean isView){
+		try{
+//			if (!servletContentName.equals("")){
+//				servletContentName = "/" + servletContentName;
+//			}
+			
+			Questionnaire questionnaire = questionnaireDao.findOne(questionnaireId);
+			if (questionnaire == null) return new StringBuffer("<p>没有问卷调查结果</p>");
+			
+			if (isView){
+				if (questionnaire.getStatus() == Questionnaire.Status.NOVIEW) return new StringBuffer("<p>不允许查看 " + questionnaire.getTitle() + " 结果</p>");
+				if (questionnaire.getStatus() == Questionnaire.Status.VOTEVIEW){
+					Person person = personDao.findByQuestionnaireIdAndIp(questionnaireId, ipAddr);
+					if (person == null) return new StringBuffer("<p>只有对 " + questionnaire.getTitle() + " 进行投票后才能查看结果&nbsp;<a href='javascript:history.go(-1);'>返回<a></p>");
+				}
+			}
+			
+			StringBuffer result = new StringBuffer();
+			
+			result.append("<div id='voteresult' style='height:100%;overflow-y:auto;text-align:left;'>\n");
+			result.append("<link rel='stylesheet' type='text/css' href='" + servletContentName + "/static/views/content/vote/voteresult.css'/>\n");
+			result.append("  <div style='padding:10px;overflow:hidden;_overflow:visible;_height:1%;'>\n");
+			result.append("    <h2 style='float:left;'>" + questionnaire.getTitle() + "：调查结果</h2>\n");
+			//result.append("    <h2 style='float:right;'>投票人数：" + questionnaire.getNumber() + "</h2>\n");
+			result.append("  </div>\n");
+			
+			List<Subject> subjects = questionnaire.getSubjects();
+			
+			if (subjects == null || subjects.isEmpty()) return new StringBuffer("<p>没有问卷调查结果</p>");
+			
+			Boolean isItemEntity = false;
+			Long subjectSort = 1L;
+			for (Subject subject : subjects){
+				if (subject.getStatus() == Subject.Status.INPUT) continue;
+				
+				List<SubjectItem> subjectItems = subject.getSubjectItems();
+				if (subjectItems == null || subjectItems.isEmpty()) continue; 
+				isItemEntity = true;
+				
+				result.append("  <div class='voteresultb'>\n");
+				result.append("    <h3>" + subjectSort + "." + subject.getTitle() + "[" + subject.getStatusDescription() + "]</h3>\n");
+				result.append("    <table name ='ChartTable'>\n");
+				result.append("      <tbody>\n");
+				result.append("        <tr class='row0'>\n");
+				result.append("          <th width='552' class='col1' scope='col'>选项</th>\n");
+				result.append("          <th width='264' class='col2' scope='col'>比例</th>\n");
+				result.append("        </tr>\n");
+					
+				Long subjectItemSort = 1L;
+				Long sum = CalculateSum(subject);
+				for (SubjectItem subjectItem : subjectItems){
+					String percentage = "0%";
+					if (sum > 0){
+						double value = (double)subjectItem.getVoteNumber()/sum;
+						DecimalFormat df = new DecimalFormat("##.00");
+						String dfValue = df.format(value);
+						value = Double.parseDouble(dfValue);
+						
+						NumberFormat nf = NumberFormat.getPercentInstance();
+						percentage = nf.format(value);
+					}
+					
+					result.append("        <tr class='row1'>\n");
+					result.append("          <td class='col1'><span>" + subjectItemSort + "</span><p>" + subjectItem.getTitle() + "</p></td>\n");
+					result.append("          <td class='col2'><div style='width:190px; line-height:33px;position:relative;'>" + subjectItem.getVoteNumber() + "票 比例:" + percentage + "<span class='percent_bg'><span class='percent' style='width:" + percentage + "'/></span></span></div>\n");
+					result.append("        </tr>\n");
+					subjectItemSort++;
+				}
+				result.append("      </tbody>\n");
+				result.append("    </table>\n");
+				result.append("  </div>\n");
+					
+				subjectSort++;
+			}
+			
+			if (!isItemEntity) return new StringBuffer("<p>没有问卷调查结果</p>");
+			
+			return result;
+		}catch(Exception e){
+			return new StringBuffer("<p>没有问卷调查结果</p>");
+		}
+	}
+	
+	private Long CalculateSum(Subject subject){
+		if (subject == null) return 0L;
+		List<SubjectItem> subjectItems = subject.getSubjectItems();
+		Long sum = 0L;
+		for (SubjectItem subjectItem : subjectItems){
+			sum += subjectItem.getVoteNumber();
+		}
+		return sum;
+	}
+	
+	public Map<String, Object> search(QueryParameter params, Long channelId){
+		Map<String, Object> parameters = params.getParameters();
+		parameters.put("EQ_channelId", channelId);
+		params.setParameters(parameters);
+		
+		return SearchMain.search(params, "IN_id", Long.class, questionnaireDao, Questionnaire.class);
+	}
+}

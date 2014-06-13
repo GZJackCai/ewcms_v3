@@ -3,20 +3,31 @@ var detailview = $.extend({}, $.fn.datagrid.defaults.view, {
 		var opts = $.data(target, 'datagrid').options;
 		if (index >= 0){
 			_add(index);
-			this.resetExpander(target);
 		} else {
 			var length = $(target).datagrid('getRows').length;
 			for(var i=0; i<length; i++){
 				_add(i);
 			}
+			opts.finder.getTr(target, 0, 'allfooter', 1).each(function(){
+				var s = '<td><div style="width:25px"></div></td>';
+				var tr = $(this);
+				if (tr.is(':empty')){
+					tr.html(s);
+				} else if (tr.children('td.datagrid-td-rownumber').length){
+					$(s).insertAfter(tr.children('td.datagrid-td-rownumber'));
+				} else {
+					$(s).insertBefore(tr.children('td:first'));
+				}
+			});
 		}
 		
 		function _add(rowIndex){
 			var tr = opts.finder.getTr(target, rowIndex, 'body', 1);
+			if (tr.find('span.datagrid-row-expander').length){return;}	// the expander is already exists
 			var cc = [];
 			cc.push('<td>');
-			cc.push('<div style="text-align:center;width:25px">');
-			cc.push('<div class="datagrid-row-expander datagrid-row-expand" row-index=' + rowIndex + ' style="cursor:pointer;height:14px;" />');
+			cc.push('<div style="text-align:center;width:25px;height:16px;">');
+			cc.push('<span class="datagrid-row-expander datagrid-row-expand" style="display:inline-block;width:16px;height:16px;cursor:pointer;" />');
 			cc.push('</div>');
 			cc.push('</td>');
 			if (tr.is(':empty')){
@@ -27,8 +38,8 @@ var detailview = $.extend({}, $.fn.datagrid.defaults.view, {
 				$(cc.join('')).insertBefore(tr.children('td:first'));
 			}
 			$(target).datagrid('fixRowHeight', rowIndex);
-			tr.find('div.datagrid-row-expander').unbind('.datagrid').bind('click.datagrid', function(e){
-				var rowIndex = $(this).attr('row-index');
+			tr.find('span.datagrid-row-expander').unbind('.datagrid').bind('click.datagrid', function(e){
+				var rowIndex = $(this).closest('tr').attr('datagrid-row-index');
 				if ($(this).hasClass('datagrid-row-expand')){
 					$(target).datagrid('expandRow', rowIndex);
 				} else {
@@ -37,33 +48,24 @@ var detailview = $.extend({}, $.fn.datagrid.defaults.view, {
 				$(target).datagrid('fixRowHeight');
 				return false;
 			});
-//			tr.children('td.datagrid-td-rownumber').attr('rowspan', 2);
 		}
 	},
 	
-	resetExpander: function(target){
-		var opts = $.data(target, 'datagrid').options;
-		opts.finder.getTr(target, '', 'allbody', 1).each(function(){
-			var tr = $(this);
-			var rowIndex = tr.attr('datagrid-row-index');
-			tr.find('div.datagrid-row-expander').attr('row-index', rowIndex);
-		});
-	},
-	
 	render: function(target, container, frozen){
-		var opts = $.data(target, 'datagrid').options;
-		var rows = $.data(target, 'datagrid').data.rows;
+		var state = $.data(target, 'datagrid');
+		var opts = state.options;
+		var rows = state.data.rows;
 		var fields = $(target).datagrid('getColumnFields', frozen);
 		var table = [];
 		for(var i=0; i<rows.length; i++) {
-			table.push('<table cellspacing="0" cellpadding="0" border="0"><tbody>');
+			table.push('<table class="datagrid-btable" cellspacing="0" cellpadding="0" border="0"><tbody>');
 			
 			// get the class and style attributes for this row
 			var cls = (i % 2 && opts.striped) ? 'class="datagrid-row datagrid-row-alt"' : 'class="datagrid-row"';
 			var styleValue = opts.rowStyler ? opts.rowStyler.call(target, i, rows[i]) : '';
 			var style = styleValue ? 'style="' + styleValue + '"' : '';
-			
-			table.push('<tr datagrid-row-index="' + i + '" ' + cls + ' ' + style + '>');
+			var rowId = state.rowIdPrefix + '-' + (frozen?1:2) + '-' + i;
+			table.push('<tr id="' + rowId + '" datagrid-row-index="' + i + '" ' + cls + ' ' + style + '>');
 			table.push(this.renderRow.call(this, target, fields, frozen, i, rows[i]));
 			table.push('</tr>');
 			
@@ -103,7 +105,7 @@ var detailview = $.extend({}, $.fn.datagrid.defaults.view, {
 			return;
 		}
 		
-		if (index == undefined || index == null || index > rowLength) {
+		if (index == undefined || index == null || index >= rowLength) {
 			index = rowLength;
 			isAppend = true;
 			this.canUpdateDetail = false;
@@ -145,13 +147,16 @@ var detailview = $.extend({}, $.fn.datagrid.defaults.view, {
 		var tr = opts.finder.getTr(target, index);
 		tr.parent().parent().remove();
 		$.fn.datagrid.defaults.view.deleteRow.call(this, target, index);
-		this.resetExpander(target);
 		dc.body2.triggerHandler('scroll');
 	},
 	
 	updateRow: function(target, rowIndex, row){
+		var dc = $.data(target, 'datagrid').dc;
 		var opts = $.data(target, 'datagrid').options;
+		var cls = $(target).datagrid('getExpander', rowIndex).attr('class');
 		$.fn.datagrid.defaults.view.updateRow.call(this, target, rowIndex, row);
+		this.addExpandColumn.call(this, target, rowIndex);
+		$(target).datagrid('getExpander', rowIndex).attr('class',cls);
 		
 		// update the detail content
 		if (this.canUpdateDetail){
@@ -165,6 +170,7 @@ var detailview = $.extend({}, $.fn.datagrid.defaults.view, {
 		var opts = $.data(target, 'datagrid').options;
 		var dc = $.data(target, 'datagrid').dc;
 		var panel = $(target).datagrid('getPanel');
+		
 		var t = dc.view1.children('div.datagrid-header').find('table');
 		if (t.find('div.datagrid-header-expander').length){
 			return;
@@ -216,7 +222,7 @@ var detailview = $.extend({}, $.fn.datagrid.defaults.view, {
 		this.addExpandColumn(target);
 		this.canUpdateDetail = true;	// define if to update the detail content when 'updateRow' method is called;
 		
-		dc.footer1.find('div.datagrid-row-expander').css('visibility', 'hidden');
+		dc.footer1.find('span.datagrid-row-expander').css('visibility', 'hidden');
 		$(target).datagrid('resize');
 	}
 });
@@ -239,6 +245,10 @@ $.extend($.fn.datagrid.methods, {
 			dc.body2.triggerHandler('scroll');
 		});
 	},
+	getExpander: function(jq, index){	// get row expander object
+		var opts = $.data(jq[0], 'datagrid').options;
+		return opts.finder.getTr(jq[0], index, 'body', 1).find('span.datagrid-row-expander');
+	},
 	// get row detail container
 	getRowDetail: function(jq, index){
 		var opts = $.data(jq[0], 'datagrid').options;
@@ -249,7 +259,7 @@ $.extend($.fn.datagrid.methods, {
 		return jq.each(function(){
 			var opts = $(this).datagrid('options');
 			var dc = $.data(this, 'datagrid').dc;
-			var expander = dc.body1.find('div.datagrid-row-expander[row-index='+index+']');
+			var expander = $(this).datagrid('getExpander', index);
 			if (expander.hasClass('datagrid-row-expand')){
 				expander.removeClass('datagrid-row-expand').addClass('datagrid-row-collapse');
 				var tr1 = opts.finder.getTr(this, index, 'body', 1).next();
@@ -268,7 +278,7 @@ $.extend($.fn.datagrid.methods, {
 		return jq.each(function(){
 			var opts = $(this).datagrid('options');
 			var dc = $.data(this, 'datagrid').dc;
-			var expander = dc.body1.find('div.datagrid-row-expander[row-index='+index+']');
+			var expander = $(this).datagrid('getExpander', index);
 			if (expander.hasClass('datagrid-row-collapse')){
 				expander.removeClass('datagrid-row-collapse').addClass('datagrid-row-expand');
 				var tr1 = opts.finder.getTr(this, index, 'body', 1).next();

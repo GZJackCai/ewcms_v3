@@ -16,7 +16,7 @@
         <title>Ewcms用户登录</title>
 		<link href="<c:url value='/static/jquery-validation/1.9.0/validate.css'/>" type="text/css" rel="stylesheet" />
         <link href="<c:url value='/static/views/login.css'/>"  type="text/css" rel="stylesheet"/>
-        <script src="<c:url value='/static/jquery/1.7.1/jquery.min.js'/>" type="text/javascript"></script>
+        <script src="<c:url value='/static/jquery/1.8.0/jquery.min.js'/>" type="text/javascript"></script>
         <script src="<c:url value='/static/views/login.js'/>" type="text/javascript"></script>
 		<script type="text/javascript">
             $(function() {

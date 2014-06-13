@@ -89,12 +89,12 @@
 						maximizable:false,
 						minimizable:true,
 						onClose:function(windowId){
-							$(windowId).find("iframe").attr('src','about:blank');
+							$(windowId).find("iframe").attr('src','');
 					    }
 				};
 				var opts = $.extend({}, defaults, options);  
 				if(!hasElementFor(opts.windowId)){
-						return;
+					return;
 				}
 				$(opts.windowId).removeAttr("style");
 				$(opts.windowId).window({
@@ -105,7 +105,11 @@
 					   top:(opts.top ? opts.top : ($(window).height() - opts.height)/2),
 					   modal: opts.modal,
 					   maximizable:opts.maximizable,
-					   minimizable:opts.minimizable,
+					   shadow: false, 
+					   closable: false,
+				       closed: true,
+				       minimizable: false,
+				       collapsible: false,
 					   onClose:opts.onClose(opts.windowId)
 				});
 				if(opts.src){
@@ -114,6 +118,97 @@
 							:$(opts.windowId).find('iframe').attr('src',opts.src);
 				}
 				$(opts.windowId).window('open');
+			},
+			openTopWindow: function(options){
+				var defaults = {
+						title : "新窗口",
+						width : 800,
+						height : 500,
+						modal:true,
+						maximizable:false,
+						minimizable:true,
+						datagridId:'#tt'
+				};
+				var opts = $.extend({}, defaults, options);  
+//				if(!hasElementFor(opts.windowId)){
+//					return;
+//				}
+				var win = window.top.document.createElement("div");
+				win.setAttribute("id", "open_window_top");
+				win.setAttribute("style", "padding:0px;");
+		        window.top.document.body.appendChild(win);
+		        var position = options.position ? options.position : "";
+		        window.top.$(win).window({
+		        	title: opts.title,
+					width: opts.width,
+					height: opts.height,
+					left:(opts.left ? opts.left : ($(window).width() - opts.width)/2),
+					top:(opts.top ? opts.top : ($(window).height() - opts.height)/2),
+					modal: opts.modal,
+					maximizable:opts.maximizable,
+					shadow: false, 
+					closable: false,
+			        closed: true,
+			        minimizable: false,
+			        collapsible: false,
+			        draggable:true,  
+			        zIndex:999,  
+			        inline:true,
+			        content:function(){
+			        	return position + '<iframe scrolling="no" frameborder="0"  src="' + options.url + '" style="width:100%;height:95%;"></iframe>';
+			        },
+			        onClose:function(){
+			        	$(options.datagridId).datagrid('clearSelections');
+			        	$(options.datagridId).datagrid("reload");
+			            window.setTimeout(function(){
+			            	window.top.$(win).window("destroy", false);
+			            },  100);
+			        }
+		        });
+		        window.top.$(win).window("open");
+			},
+			openArticleTopWindow: function(options){
+				var defaults = {
+						title : "新窗口",
+						width : 800,
+						height : 500,
+						modal:true,
+						maximizable:false,
+						minimizable:true,
+						datagridId:'#tt'
+				};
+				var opts = $.extend({}, defaults, options);  
+				var win = window.top.document.createElement("div");
+				win.setAttribute("id", "open_article_window_top");
+				win.setAttribute("style", "padding:0px;");
+		        window.top.document.body.appendChild(win);
+		        var position = options.position ? options.position : "";
+		        window.top.$(win).window({
+		        	title: opts.title,
+					width: opts.width,
+					height: opts.height,
+					modal: true,
+					maximizable:opts.maximizable,
+					shadow: false, 
+					closable: false,
+			        closed: true,
+			        minimizable: false,
+			        collapsible: false,
+			        draggable:true,  
+			        zIndex:999,  
+			        inline:true,
+			        content:function(){
+			        	return position + '<iframe scrolling="no" frameborder="0"  src="' + options.url + '" style="width:100%;height:100%;"></iframe>';
+			        },
+			        onClose:function(){
+				        options.dataGridObj.datagrid('clearSelections');
+				        options.dataGridObj.datagrid("reload");
+			            window.setTimeout(function(){
+			            	window.top.$(win).window("destroy", false);
+			            },  100);
+			        }
+		        });
+		        window.top.$(win).window("open");
 			},
 			query : function(options) {
 				var defaults = {
@@ -137,7 +232,24 @@
 						}
 					}
 				});
-				$(opts.datagridId).datagrid('load');
+				$(opts.datagridId).datagrid('reload');
+			},
+			defaultQuery : function(options){
+				var defaults = {
+					datagridId : '#tt',
+					formId : '#queryform',
+					url: "query",
+					selections : []
+				};
+				var opts = $.extend({}, defaults, options);
+				if(!hasElementFor(opts.datagridId)){
+					return ;
+				}
+				$(opts.datagridId).datagrid({
+					onBeforeLoad:function(param){
+						param = null;
+					}
+				});
 			},
 			save :function(options){
 				var defaults = {
@@ -145,7 +257,6 @@
 				};
 				var opts = $.extend({}, defaults, options);
 				$(opts.iframeId).contents().find('form').submit();
-
 			},
 			add : function(options){
 				var defaults = {
@@ -189,13 +300,12 @@
 				var defaults = {
 						src: "delete",
 						datagridId : '#tt',
-						windowId:'#edit-window',
 						getId : function(row){
 							return row.id;
 						}
 				};
 				var opts = $.extend({}, defaults, options);
-				if(!hasElementFor([opts.datagridId,opts.windowId])){
+				if(!hasElementFor([opts.datagridId])){
 					return;
 				}
 				

@@ -27,14 +27,17 @@ public class CaptchaFormAuthenticationFilter extends FormAuthenticationFilter {
 	}
 
 	protected AuthenticationToken createToken(ServletRequest request, ServletResponse response) {
-		String username = getUsername(request);
-		String password = getPassword(request);
-		String captcha = getCaptcha(request);
-		boolean rememberMe = isRememberMe(request);
-
-		String host = getHost(request);
-
-		return new CaptchaUsernamePasswordToken(username, password.toCharArray(), rememberMe, host, captcha);
-
+		try{
+			String username = getUsername(request);
+			String password = getPassword(request);
+			String captcha = getCaptcha(request);
+			boolean rememberMe = isRememberMe(request);
+	
+			String host = getHost(request);
+	
+			return new CaptchaUsernamePasswordToken(username, password.toCharArray(), rememberMe, host, captcha);
+		}catch(Exception e){
+			return new CaptchaUsernamePasswordToken();
+		}
 	}
 }
