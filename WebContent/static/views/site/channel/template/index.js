@@ -160,7 +160,7 @@ TemplateIndex.prototype.editTemplateContent = function(url, id, path, descriptio
 
 //预览
 TemplateIndex.prototype.preview = function(url, id){
-	window.open(src + '?templateId=' + id, "previewwin", "height=600, width=800, top=0, left=0, toolbar=no, menubar=no, scrollbars=yes, resizable=1, location=no, status=no");
+	window.open(url + '/' + id + '/true', "previewwin", "height=600, width=800, top=0, left=0, toolbar=no, menubar=no, scrollbars=yes, resizable=1, location=no, status=no");
 };
 
 //历史

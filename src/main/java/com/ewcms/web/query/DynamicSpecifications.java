@@ -28,12 +28,17 @@ public class DynamicSpecifications {
 			@Override
 			public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
 				if (EmptyUtil.isCollectionNotEmpty(filters)) {
-
 					List<Predicate> predicates = new ArrayList<Predicate>();
 					for (SearchFilter filter : filters) {
 						// nested path translate, 如Task的名为"user.name"的filedName, 转换为Task.user.name属性
 						String[] names = StringUtils.split(filter.fieldName, ".");
-						Path expression = root.get(names[0]);
+						Path expression;
+						try{
+							//字段为集合类时使用
+							expression = root.join(names[0]);
+						}catch (Exception e){
+							expression = root.get(names[0]);
+						}
 						for (int i = 1; i < names.length; i++) {
 							expression = expression.get(names[i]);
 						}

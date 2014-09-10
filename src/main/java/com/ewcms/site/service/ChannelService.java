@@ -36,7 +36,7 @@ import com.ewcms.web.QueryParameter;
 import com.ewcms.web.query.SearchMain;
 import com.ewcms.web.util.ChannelNode;
 import com.ewcms.publication.PublishException;
-import com.ewcms.publication.WebPublishFac;
+import com.ewcms.publication.PublishServiceable;
 
 /**
  * 栏目管理
@@ -55,7 +55,7 @@ public class ChannelService {
 	@Autowired
 	private TemplateSourceDao templateSourceDao;
 	@Autowired
-	private WebPublishFac webPublishFac;
+	private PublishServiceable publishService;
 	@Autowired
 	private AclService aclService;
 	
@@ -238,9 +238,9 @@ public class ChannelService {
 		return channelDao.getChannelByURL(siteId, path);
 	}
 
-	public void forceRelease(Long channelId, Boolean children) throws PublishException {
+	public void forceRelease(Long siteId, Long channelId, Boolean children) throws PublishException {
 		if (isNotNull(channelId)) {
-			webPublishFac.publishChannel(channelId, true, children);
+			publishService.pubChannel(siteId, channelId, true, children);
 		}
 	}
 

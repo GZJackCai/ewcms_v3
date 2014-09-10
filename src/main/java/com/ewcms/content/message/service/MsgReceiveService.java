@@ -13,11 +13,12 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.ewcms.content.message.dao.MsgReceiveDao;
 import com.ewcms.content.message.model.MsgReceive;
+import com.ewcms.content.message.push.PushApiService;
 import com.ewcms.util.EmptyUtil;
 import com.ewcms.util.EwcmsContextUtil;
 import com.ewcms.web.QueryParameter;
@@ -28,14 +29,19 @@ import com.ewcms.web.query.SearchMain;
  * @author wu_zhijun
  *
  */
-@Component
+@Service
 public class MsgReceiveService{
 	
 	@Autowired
 	private MsgReceiveDao msgReceiveDao;
+	@Autowired
+	private PushApiService pushApiService;
 
-	public void delMsgReceive(Long msgReceiveId) {
-		msgReceiveDao.delete(msgReceiveId);
+	public void delMsgReceive(String userName, List<Long> msgReceiveIds) {
+		for (Long msgReceive : msgReceiveIds){
+			msgReceiveDao.delete(msgReceive);
+		}
+		pushApiService.pushUnreadMessage(userName, findUnReadMessageCountByUserName(userName));
 	}
 
 	public MsgReceive findMsgReceive(Long msgReceiveId) {
@@ -46,8 +52,8 @@ public class MsgReceiveService{
 		return msgReceiveDao.findByUserName(EwcmsContextUtil.getLoginName());
 	}
 
-	public void markReadMsgReceive(Long msgReceiveId, Boolean read) {
-		MsgReceive msgReceive = msgReceiveDao.findByUserNameAndId(EwcmsContextUtil.getLoginName(), msgReceiveId);
+	public void markReadMsgReceive(String userName, Long msgReceiveId, Boolean read) {
+		MsgReceive msgReceive = msgReceiveDao.findByUserNameAndId(userName, msgReceiveId);
 		Assert.notNull(msgReceive);
 		if (msgReceive.getRead() != read){
 			msgReceive.setRead(read);
@@ -58,14 +64,15 @@ public class MsgReceiveService{
 			}
 			msgReceiveDao.save(msgReceive);
 		}
+		pushApiService.pushUnreadMessage(userName, findUnReadMessageCountByUserName(userName));
 	}
 
-	public List<MsgReceive> findMsgReceiveByUnRead() {
-		return msgReceiveDao.findByUserNameAndReadFalseOrderByIdDesc(EwcmsContextUtil.getLoginName());
+	public List<MsgReceive> findMsgReceiveByUnRead(String userName) {
+		return msgReceiveDao.findByUserNameAndReadFalseOrderByIdDesc(userName);
 	}
 
-	public void readMsgReceive(Long msgReceiveId) {
-		MsgReceive msgReceive = msgReceiveDao.findByUserNameAndId(EwcmsContextUtil.getLoginName(), msgReceiveId);
+	public void readMsgReceive(String userName, Long msgReceiveId) {
+		MsgReceive msgReceive = msgReceiveDao.findByUserNameAndId(userName, msgReceiveId);
 		Assert.notNull(msgReceive);
 		msgReceive.setRead(true);
 		msgReceive.setReadTime(new Date(Calendar.getInstance().getTime().getTime()));

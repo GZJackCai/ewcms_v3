@@ -28,8 +28,8 @@
         <table id="tt"></table>
         <input type="hidden" id="siteId" name="siteId" value="${siteId}"/>
         <div region="south" border="false" style="text-align:center;height:28px;line-height:28px;background-color:#f6f6f6">
-				<a class="easyui-linkbutton" icon="icon-save" href="javascript:pageSubmit();">切换</a>
-				<a class="easyui-linkbutton" icon="icon-cancel" href="javascript:document.forms[0].reset();">重置</a>
-			  </div>
+			<a class="easyui-linkbutton" icon="icon-save" href="javascript:pageSubmit();">切换</a>
+			<a class="easyui-linkbutton" icon="icon-undo" href="javascript:document.forms[0].reset();">重置</a>
+		</div>
 	</body>
 </html>

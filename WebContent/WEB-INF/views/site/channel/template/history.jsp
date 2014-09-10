@@ -25,6 +25,7 @@
 	  <div id="tb" style="padding:5px;height:auto;">
         <div class="toolbar" style="margin-bottom:2px">
 		  <a id="td-restore" href="#" class="easyui-linkbutton" plain="true" iconCls="icon-resume">还原</a>
+		  <a id="td-cancel" href="#" class="easyui-linkbutton" plain="true" iconCls="icon-cancel">关闭</a>
 		</div>
         <div  style="padding-left:5px;">
           <form id="queryform"  style="padding: 0;margin: 0;">

@@ -6,42 +6,56 @@
 
 package com.ewcms.publication.preview;
 
-import java.io.OutputStream;
+import java.io.Writer;
 
 import com.ewcms.publication.PublishException;
 
 /**
  * 预览接口
  * 
- * @author wangwei
+ * @author <a href="hhywangwei@gmail.com">王伟</a>
  */
 public interface PreviewServiceable {
 
     /**
      * 模板预览
      * 
-     * @param out       
+     * @param writer       
      *          输出数据流
-     * @param id
+     * @param siteId
+     *          站点编号
+     * @param channelId 
+     *          频道编号
+     * @param templateId
      *          模板编号
      * @param mock
      *          是否模拟 
      * @throws PublishException
      */
-    public void viewTemplate(OutputStream out,Long id,Boolean mock)throws PublishException;
+    void viewTemplate(Writer writer,Long siteId, Long channelId, Long templateId, boolean mock)throws PublishException;
        
     /**
      * 文章预览
      * 
-     * @param out       
+     * @param writer       
      *          输出数据流
      * @param channelId
      *          频道编号
-     * @param id
+     * @param articleId
      *          文章编号
      * @param pageNumber
      *          页数 
      * @throws PublishException
      */
-    public void viewArticle(OutputStream out,Long channelId,Long id,Integer pageNumber)throws PublishException;
+    void viewArticle(Writer writer, Long siteId, Long channelId, Long articleId, Integer pageNumber)throws PublishException;
+    
+    /**
+     * 验证模板是否有效，并更新模板数据库信息
+     * 
+     * @param siteId 站点编号
+     * @param channelId 频道编号
+     * @param templateId 模板编号
+     * @return
+     */
+    boolean verifyTemplate(Long siteId, Long channelId, Long templateId);
 }

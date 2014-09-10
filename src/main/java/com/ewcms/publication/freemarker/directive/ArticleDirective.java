@@ -6,107 +6,71 @@
 
 package com.ewcms.publication.freemarker.directive;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.Assert;
+import org.apache.commons.beanutils.PropertyUtils;
 
+import com.ewcms.publication.dao.ArticlePublishDaoable;
 import com.ewcms.publication.freemarker.GlobalVariable;
 import com.ewcms.publication.freemarker.directive.out.DateDirectiveOut;
 import com.ewcms.publication.freemarker.directive.out.DefaultDirectiveOut;
 import com.ewcms.publication.freemarker.directive.out.DirectiveOutable;
 import com.ewcms.publication.freemarker.directive.out.LengthDirectiveOut;
-import com.ewcms.publication.freemarker.directive.out.article.CategoriesDirectiveOut;
-import com.ewcms.publication.freemarker.directive.out.article.ContentDirectiveOut;
 import com.ewcms.publication.freemarker.directive.out.article.RelationsDirectiveOut;
-import com.ewcms.util.EmptyUtil;
-
-import freemarker.core.Environment;
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateModelException;
+import com.ewcms.publication.module.Article;
 
 /**
  * 文章属性标签
  * 
  * @author wangwei
  */
-public class ArticleDirective extends PropertyDirective{
-    private static final Logger logger = LoggerFactory.getLogger(ArticleDirective.class);
-    
-    private Map<String,String> aliasProperties = initDefaultAliasProperties();
-    private Map<String,DirectiveOutable> propertyDirectiveOuts = initDefaultPropertyDirectiveOuts();
-
+public class ArticleDirective extends ChannelDirective{
+	
+	private final ArticlePublishDaoable articlePublishDao;
+	
+	public ArticleDirective(ArticlePublishDaoable articlePublishDao){
+		this.articlePublishDao = articlePublishDao;
+	}
+	
     @Override
     protected String defaultValueParamValue(){
-        return GlobalVariable.ARTICLE.toString();
+        return GlobalVariable.ARTICLE.getVariable();
     }
     
-    @SuppressWarnings("rawtypes")
     @Override
-    protected Object loopValue(Object objectValue,String propertyName,Environment env, Map params)throws TemplateException, NoSuchMethodException{
-        DirectiveOutable out = getDirectiveOut(propertyName);
-        Object propertyValue = getValue(objectValue, propertyName);
-        if(EmptyUtil.isNull(propertyValue)){
-            return null;
+    protected Object getValue(Object objectValue,String property)throws NoSuchMethodException{
+        try{
+            return PropertyUtils.getProperty(objectValue, property);    
+        }catch(NoSuchMethodException e){
+        	return getAgainValue(objectValue, property);
+        }catch(Exception e){
+            throw new NoSuchMethodException(e.getMessage());
         }
-        if(propertyValue instanceof String 
-                && StringUtils.isBlank((String)propertyValue)){
-            return null;
-        }
-        return out.loopValue(propertyValue, env, params);
-    }
-    
-    @SuppressWarnings("rawtypes")
-    @Override
-    protected String constructOut(Object objectValue,String propertyName,Environment env, Map params)throws TemplateException, NoSuchMethodException{
-        DirectiveOutable out = getDirectiveOut(propertyName);
-        Object propertyValue = getValue(objectValue, propertyName);
-        if(EmptyUtil.isNull(propertyValue)){
-            return null;
-        }
-        return out.constructOut(propertyValue, env, params);
-    }
-    
-    @SuppressWarnings("rawtypes")
-    @Override
-    protected String getPropertyName(Environment env,Map params)throws TemplateException{
-        String value = super.getPropertyName(env,params);
-        return getPropertyName(value);
     }
     
     /**
-     * 通过别名或属性名，得到对应的属性名
+     * ArticleInfo对象中没有属性，再次从Article中得到属性
      * 
-     * @param name 别名或属性名
-     * @return 属性名
-     * @throws TemplateModelException
+     * @param objectValue 值对象
+     * @param property 属性名
+     * @return
+     * @throws NoSuchMethodException
      */
-    protected String getPropertyName(String name)throws TemplateModelException{
-        String property = aliasProperties.get(name);
-        if(EmptyUtil.isNull(property)){
-            logger.error("Get not property name of \"{}\"",name);
-            throw new TemplateModelException("Get not property name of \""+name+"\"");
-        }
-        return property;
-    }
-    
-    /**
-     * 通过属性名得到对应标签输出类
-     * 
-     * @param propertyName 属性名
-     * @return 输出标签对象
-     * @throws TemplateModelException
-     */
-    protected DirectiveOutable getDirectiveOut(String propertyName)throws TemplateModelException{
-        DirectiveOutable out = propertyDirectiveOuts.get(propertyName);
-        if(EmptyUtil.isNull(out)){
-            logger.error("Get not directive out of \"{}\"",propertyName);
-            throw new TemplateModelException("Get not directive out of \""+propertyName+"\"");
-        }
-        return out;
+    private Object getAgainValue(Object objectValue,String property)throws NoSuchMethodException{
+    	try {
+			Long id  = (Long)PropertyUtils.getProperty(objectValue, "id");
+			List<Article> list = articlePublishDao.findPrePublish(Arrays.asList(id));
+			Object value = null;
+			if(!list.isEmpty()){
+				value = PropertyUtils.getProperty(list.get(0), property);
+			}
+			return value;
+		} catch (Exception e) {
+			 throw new NoSuchMethodException(e.getMessage());
+		}
     }
     
     /**
@@ -156,26 +120,26 @@ public class ArticleDirective extends PropertyDirective{
         map.put("标签", "tag");
         map.put("tag", "tag");
         
-        map.put("分类", "categories");
-        map.put("categories", "categories");
-        
         map.put("链接地址", "url");
         map.put("url", "url");
         
         map.put("关联文章","relations");
         map.put("relations","relations");
         
-        map.put("正文", "contents");
-        map.put("contents", "contents");
+        map.put("正文", "content");
+        map.put("content", "content");
+        map.put("contents", "content");
         
         map.put("创建时间", "createTime");
         map.put("createTime", "createTime");
         
         map.put("修改时间", "modified");
         map.put("modified", "modified");
+        map.put("modifiedTime", "modified");
         
         map.put("发布时间", "published");
         map.put("published", "published");
+        map.put("publishedTime", "published");
                 
         return map;
     }
@@ -203,47 +167,12 @@ public class ArticleDirective extends PropertyDirective{
         map.put("keyword", new LengthDirectiveOut());
         map.put("tag", new LengthDirectiveOut());
         map.put("url", new DefaultDirectiveOut());
-        map.put("categories", new CategoriesDirectiveOut());
-        map.put("relations", new RelationsDirectiveOut());
-        map.put("contents",new ContentDirectiveOut());
+        map.put("relations", new RelationsDirectiveOut(articlePublishDao));
+        map.put("content",new DefaultDirectiveOut());
         map.put("createTime", new DateDirectiveOut());
         map.put("modified", new DateDirectiveOut());
         map.put("published", new DateDirectiveOut());
         
         return map;
-    }
-
-    /**
-     * 放入指定的属性标签
-     * 
-     * <p>标签存在则更新标签</p>
-     * 
-     * @param property 属性名
-     * @param directiveOut 标签输出
-     */
-    public void putDirective(String property,DirectiveOutable directiveOut){
-        Assert.hasText(property);
-        Assert.notNull(directiveOut);
-        
-        putDirective(property, property,directiveOut);
-    }
-    
-    /**
-     * 放入指定的属性标签
-     * 
-     * <p>标签存在则更新标签</p>
-     * 
-     * @param alias    属性别名
-     * @param property 属性名
-     * @param directiveOut 标签输出
-     */
-    public void putDirective(String alias,String property,DirectiveOutable directiveOut){
-        Assert.hasText(alias);
-        Assert.hasText(property);
-        Assert.notNull(directiveOut);
-        
-        aliasProperties.put(alias, property);    
-        aliasProperties.put(property, property);
-        propertyDirectiveOuts.put(property, directiveOut);
     }
 }

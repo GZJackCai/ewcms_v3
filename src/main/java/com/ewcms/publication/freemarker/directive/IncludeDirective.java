@@ -7,23 +7,27 @@
 package com.ewcms.publication.freemarker.directive;
 
 import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ewcms.util.EmptyUtil;
+import com.ewcms.publication.cache.Cacheable;
+import com.ewcms.publication.cache.NoneCache;
+import com.ewcms.publication.dao.ChannelPublishDaoable;
+import com.ewcms.publication.dao.TemplatePublishDaoable;
 import com.ewcms.publication.freemarker.FreemarkerUtil;
 import com.ewcms.publication.freemarker.GlobalVariable;
-import com.ewcms.publication.service.ChannelPublishService;
-import com.ewcms.publication.service.TemplatePublishService;
-import com.ewcms.site.model.Channel;
-import com.ewcms.site.model.Site;
-import com.ewcms.util.EmptyUtil;
+import com.ewcms.publication.module.Channel;
+import com.ewcms.publication.module.Site;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
-import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -33,52 +37,90 @@ import freemarker.template.TemplateModelException;
  * 
  * @author wangwei
  */
-public class IncludeDirective implements TemplateDirectiveModel {
-
+public class IncludeDirective extends BaseDirective {
     private final static Logger logger = LoggerFactory.getLogger(IncludeDirective.class);
+    private final static Cacheable<String, String> EMPTY_INCLUDE_CACHE = new NoneCache<String, String>();
     
     private final static String PATH_PARAM_NAME = "path";
     private final static String PARSE_PARAM_NAME = "parse";
     private final static String CHANNEL_PARAM_NAME = "channel";
     private final static String NAME_PARAM_NAME = "name";
+    private final static String CHARSET_PARAM_NAME = "charset";
     
-    private ChannelPublishService channelPublishService;
-    private TemplatePublishService templatePublishService;
+    private final ChannelPublishDaoable channelPublishDao;
+    private final TemplatePublishDaoable templatePublishDao;
     
     private String pathParam = PATH_PARAM_NAME;
     private String parseParam = PARSE_PARAM_NAME;
     private String channelParam = CHANNEL_PARAM_NAME;
     private String nameParam = NAME_PARAM_NAME;
+    private String charsetParam = CHARSET_PARAM_NAME;
     
-    public IncludeDirective(ChannelPublishService channelPublishService,TemplatePublishService templatePublishService){
-        this.channelPublishService = channelPublishService;
-        this.templatePublishService = templatePublishService;
+    public IncludeDirective(ChannelPublishDaoable channelPublishDao,TemplatePublishDaoable templatePublishDao){
+    	
+        this.channelPublishDao = channelPublishDao;
+        this.templatePublishDao = templatePublishDao;
     }
     
-    @SuppressWarnings("rawtypes")
     @Override
-    public void execute(final Environment env, final Map params, final TemplateModel[] loopVars, final TemplateDirectiveBody body) throws TemplateException, IOException {
-        String path = getPathValue(params);
-        Long siteId = getSiteIdValue(env);
-        String uniquePath = null;
-        if(EmptyUtil.isNotNull(path)){
-            uniquePath = getUniqueTemplatePath(siteId,path);
-        }else{
-            String name = getNameValue(params);
-            if(EmptyUtil.isNotNull(name)){
-            	Long channelId = getChannelIdValue(env,params,siteId);
-                uniquePath = getChannelTemplatePath(siteId,channelId,name);
-            }
-        }
-        if(EmptyUtil.isNull(uniquePath)){
-            logger.error("Include template path is null");
-            throw new TemplateModelException("Include template path is null");
-        }
-        logger.debug("Include template path is {}",uniquePath);
-        boolean parse = getParseValue(params);
-        env.include(uniquePath, env.getConfiguration().getDefaultEncoding(), parse);
-    }
+    @SuppressWarnings("rawtypes")
+	protected TemplateModel[] getLoopVars(Environment env, Map params)
+			throws TemplateException {
+    	
+    	throw new TemplateException("include not loop", env);
+	}
 
+	@Override
+	@SuppressWarnings("rawtypes")
+	protected void executeNoneBody(Environment env, Map params,
+			TemplateModel[] loopVars, TemplateDirectiveBody body)
+			throws TemplateException, IOException {
+		
+		String uniquePath = getTemplateUniquePath(env,params);
+	    logger.debug("Include template path is {}",uniquePath);
+	    boolean parse = isParse(params);
+	    String charset = getCharsetValue(env,params);
+        if(!parse){
+        	env.include(uniquePath, charset, parse);
+        }else{
+	        includeCache(env, params, body, uniquePath, charset);	
+        }
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private void includeCache(Environment env, Map params,
+			TemplateDirectiveBody body,String uniquePath,String charset)
+			throws TemplateException, IOException {
+		
+		Long channelId = this.getCurrentChannel(env).getId();
+		String taskId = this.getTaskId(env);
+		Cacheable<String,String> includeCache = getInclundeCache(env);
+		String key = getKey(channelId, uniquePath, taskId);
+		String content = includeCache.get(key);
+		if(content == null){
+			Writer out = env.getOut();
+	    	
+			StringWriter writer = new StringWriter(200);
+	    	env.setOut(writer);
+	    	env.include(uniquePath, charset, true);
+	    	writer.flush();
+	    	content = writer.getBuffer().toString();
+	    	writer.close();
+	    	
+	    	includeCache.add(key, content);
+	    	
+	    	env.setOut(out);			
+		}
+		
+		env.getOut().write(content);
+		env.getOut().flush();
+	}
+	
+	private String getKey(Long channelId,String path,String taskId){
+		String s = String.format("%d-%s-%s", channelId, path, taskId);
+		return DigestUtils.md5Hex(s.getBytes());
+	}
+	
     /**
      * 从Freemarker得到站点编号
      * 
@@ -96,6 +138,39 @@ public class IncludeDirective implements TemplateDirectiveModel {
         return site.getId();
     }
 
+    @Override
+	@SuppressWarnings("rawtypes")
+	protected void executeBody(Environment env, Map params,
+			TemplateModel[] loopVars, TemplateDirectiveBody body, Writer writer)
+			throws TemplateException, IOException {
+    	
+    	throw new TemplateException("Include not body", env);
+	}
+    
+    @SuppressWarnings("rawtypes")
+    private String getTemplateUniquePath(Environment env, Map params)throws TemplateException{
+    	
+    	String path = getPathValue(params);
+    	Long siteId = getSiteIdValue(env);
+        String uniquePath = null;
+        if(EmptyUtil.isNotNull(path)){
+            uniquePath = getUniqueTemplatePath(siteId,path);
+        }else{
+            String name = getNameValue(params);
+            if(EmptyUtil.isNotNull(name)){
+            	Long channelId = getChannelIdValue(env,params,siteId);
+                uniquePath = getChannelTemplatePath(siteId,channelId,name);
+            }
+        }
+        
+        if(EmptyUtil.isNull(uniquePath)){
+            logger.error("Include template path is null");
+            throw new TemplateModelException("Include template path is null");
+        }
+        
+        return uniquePath;
+    }
+    
     /**
      * 得到模板路径
      * 
@@ -136,18 +211,10 @@ public class IncludeDirective implements TemplateDirectiveModel {
         String path= FreemarkerUtil.getString(params, channelParam);
         logger.debug("Get channel by {}",path);
         if(EmptyUtil.isNotNull(path)){
-            channel = channelPublishService.getChannelByUrlOrPath(siteId, path);
+            channel = channelPublishDao.findPublishByUri(siteId, path);
         }
        
-        String name = GlobalVariable.CHANNEL.toString();
-        logger.debug("Get value param is {}", name);
-        channel = (Channel)FreemarkerUtil.getBean(env, name);
-        
-        if (EmptyUtil.isNull(channel)) {
-            logger.error("Channel is null in freemarker variable");
-            throw new TemplateModelException("Channel is null in freemarker variable");
-        }
-        
+        channel = this.getCurrentChannel(env);
         return channel.getId();
     }
     
@@ -173,9 +240,30 @@ public class IncludeDirective implements TemplateDirectiveModel {
      * @throws TemplateModelException
      */
     @SuppressWarnings("rawtypes")
-    private Boolean getParseValue(Map params) throws TemplateException {
+    private Boolean isParse(Map params) throws TemplateException {
         Boolean enabled = FreemarkerUtil.getBoolean(params, parseParam);
         return EmptyUtil.isNull(enabled) ? Boolean.TRUE : enabled;
+    }
+    
+    /**
+     * 得到是否解析模板
+     * 
+     * @param params 标签参数集合
+     * @return
+     * @throws TemplateModelException
+     */
+    @SuppressWarnings("rawtypes")
+    private String getCharsetValue(Environment env, Map params) throws TemplateException {
+        String charset = FreemarkerUtil.getString(params, charsetParam);
+        return EmptyUtil.isNull(charset) ? env.getConfiguration().getDefaultEncoding() : charset;
+    }
+    
+    @SuppressWarnings("unchecked")
+	private Cacheable<String, String> getInclundeCache(Environment env)throws TemplateException{
+    	Cacheable<String, String> cache = (Cacheable<String, String>)FreemarkerUtil.getBean(env, 
+    			GlobalVariable.INCLUDE_CACHE.getVariable());
+    	
+    	return cache == null ? EMPTY_INCLUDE_CACHE : cache;
     }
 
     /**
@@ -203,7 +291,7 @@ public class IncludeDirective implements TemplateDirectiveModel {
      * @return
      */
     String getChannelTemplatePath(Long siteId,Long channelId,String name){
-        return templatePublishService.getUniquePathOfChannelTemplate(siteId, channelId, name);
+        return templatePublishDao.findUniquePath(siteId, channelId, name);
     }
     
     /**
@@ -240,5 +328,20 @@ public class IncludeDirective implements TemplateDirectiveModel {
      */
     public void setNameParam(String nameParam) {
         this.nameParam = nameParam;
+    }
+    
+    /**
+     * 设置模板字符集参数名称
+     * 
+     * @param nameParam 模板参数名
+     */
+    public void setCharsetParam(String charsetParam){
+    	this.charsetParam = charsetParam;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    @Override
+	protected boolean getCacheValue(Map params) throws TemplateException {
+    	return false;
     }
 }

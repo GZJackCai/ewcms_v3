@@ -1,5 +1,7 @@
 package com.ewcms.web;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.ewcms.content.message.push.PushApiService;
 import com.ewcms.site.model.Site;
 import com.ewcms.site.service.SiteService;
 import com.ewcms.util.EwcmsContextUtil;
@@ -20,6 +23,13 @@ public class HomeController {
 
 	@Autowired
 	private SiteService siteService;
+	@Autowired
+	private PushApiService pushApiService;
+	
+	@ModelAttribute
+	public void init(Model model){
+		model.addAttribute("yearMap", getYears());
+	}
 	
 	@RequestMapping(value = "/home")
 	public String home(@RequestParam(value = "siteId", required = false) Long siteId, @RequestParam(value = "hasSite", required = false) Boolean hasSite, Model model){
@@ -32,6 +42,9 @@ public class HomeController {
 			model.addAttribute("siteName", site.getSiteName());
 		    initSiteInContext(site);
 		}
+		
+		pushApiService.offline(EwcmsContextUtil.getLoginName());
+		
 		return "home";
 	}
 	
@@ -77,5 +90,14 @@ public class HomeController {
      */
     private void initSiteInContext(Site site){
     	EwcmsContextUtil.setCurrentSite(site);
+	}
+    
+    private List<Integer> getYears(){
+    	Integer currentYear = Calendar.getInstance().get(Calendar.YEAR);
+		List<Integer> years = new ArrayList<Integer>();
+		for (int i = currentYear; i >= 2000; i--){
+			years.add(i);
+		}
+		return years;
 	}
 }

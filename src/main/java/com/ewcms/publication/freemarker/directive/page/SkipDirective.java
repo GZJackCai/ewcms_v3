@@ -8,18 +8,23 @@ package com.ewcms.publication.freemarker.directive.page;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ewcms.util.EmptyUtil;
+import com.ewcms.publication.PublishException;
 import com.ewcms.publication.freemarker.FreemarkerUtil;
 import com.ewcms.publication.freemarker.GlobalVariable;
+import com.ewcms.publication.freemarker.directive.page.skip.FirstSkip;
+import com.ewcms.publication.freemarker.directive.page.skip.LastSkip;
+import com.ewcms.publication.freemarker.directive.page.skip.NextSkip;
+import com.ewcms.publication.freemarker.directive.page.skip.Skipable;
+import com.ewcms.publication.freemarker.directive.page.skip.PreviousSkip;
 import com.ewcms.publication.uri.UriRuleable;
-import com.ewcms.util.EmptyUtil;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
@@ -30,12 +35,12 @@ import freemarker.template.TemplateModelException;
 /**
  * 页面跳转标签
  *
- * @author wangwei
+ * @author  <a href="hhywangwei@gmail.com">王伟</a>
  */
 public class SkipDirective extends SkipBaseDirective{
     private static final Logger logger = LoggerFactory.getLogger(SkipDirective.class);
     
-    private static final Map<String,SkipPageable> mapSkips = initTypeMapSkips();
+    private static final Map<String,Skipable> mapSkips = initTypeMapSkips();
     private static final String TYPE_PARAM_NAME = "type";
     private static final String LABEL_PARAM_NAME = "label";
     
@@ -43,50 +48,55 @@ public class SkipDirective extends SkipBaseDirective{
     private String labelParam = LABEL_PARAM_NAME;
     
     @SuppressWarnings("rawtypes")
-    @Override
-    public void execute(Environment env, Map params,
-            TemplateModel[] loopVars, TemplateDirectiveBody body) throws TemplateException, IOException {
+	@Override
+	protected TemplateModel[] getLoopVars(Environment env, Map params)throws TemplateException {
+		PageOut pageOut = getPageOut(env, params);
+		return new TemplateModel[]{env.getObjectWrapper().wrap(pageOut)};
+	}
 
-        Integer pageNumber = getPageNumberValue(env);
-        logger.debug("Page number is {}",pageNumber);
-        Integer pageCount = getPageCountValue(env);
-        logger.debug("Page count is {}",pageCount);
-        String label = getLabelValue(params);
-        logger.debug("Label is {}",label);
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected void executeBody(Environment env, Map params,	TemplateModel[] loopVars,
+			TemplateDirectiveBody body, Writer writer)throws TemplateException, IOException {
+		if(isOnlyOne(env))	return ;
+		PageOut pageOut = getPageOut(env, params);
+        FreemarkerUtil.setVariable(env, GlobalVariable.PAGE_OUT.getVariable(),pageOut);
+        body.render(writer);
+        FreemarkerUtil.removeVariable(env, GlobalVariable.PAGE_OUT.getVariable());
+	}
 
-        if (pageCount == 1) {
-            return;
-        }
-        String type = getTypeValue(params);
-        SkipPageable skip = getSkipPage(type);
-        UriRuleable rule = getUriRule(env);
-        PageOut pageOut = skip.skip(pageCount, pageNumber, label, rule);
-        
-        if (EmptyUtil.isArrayNotEmpty(loopVars)) {
-            loopVars[0] = env.getObjectWrapper().wrap(pageOut);
-            if(EmptyUtil.isNull(body)){
-                logger.warn("Body is null");
-            }else{
-                body.render(env.getOut());
-                env.getOut().flush();    
-            }
-        } else if(EmptyUtil.isNotNull(body)){
-            Writer writer = env.getOut();
-            FreemarkerUtil.setVariable(env, GlobalVariable.PAGE_OUT.toString(),pageOut);
-            body.render(writer);
-            FreemarkerUtil.removeVariable(env, GlobalVariable.PAGE_OUT.toString());
-        }else{
-            List<PageOut> pages = new ArrayList<PageOut>();
-            pages.add(pageOut);
-            String outValue = constructOut(pages);
-            if(EmptyUtil.isNotNull(outValue)){
-                Writer out = env.getOut();
-                out.write(outValue.toString());
-                out.flush();
-            }
-        }
-    }
-    
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected void executeNoneBody(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)throws TemplateException, IOException {
+		if(isOnlyOne(env))	return ;
+	     PageOut pageOut = getPageOut(env, params);
+         String outValue = constructOut(Arrays.asList(pageOut));
+         if(EmptyUtil.isNotNull(outValue)){
+             Writer out = env.getOut();
+             out.write(outValue.toString());
+             out.flush();
+         }
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private PageOut getPageOut(Environment env, Map params)throws TemplateException{
+		 Integer pageNumber = getPageNumberValue(env);
+         logger.debug("Page number is {}",pageNumber);
+         Integer pageCount = getPageCountValue(env);
+         logger.debug("Page count is {}",pageCount);
+         String label = getLabelValue(params);
+         logger.debug("Label is {}",label);
+         
+         Skipable skip = getSkipPage(params);
+         UriRuleable rule = getUriRule(env);
+         Map<String,Object> uriParams = getUriParams(env);
+         try {
+			return skip.skip(pageCount, pageNumber, label, rule,uriParams);
+		} catch (PublishException e) {
+			throw new TemplateModelException("PageOut create is error " + e.getMessage(),e);
+		}
+	}
+	
     @SuppressWarnings("rawtypes")
     private String getTypeValue(Map params) throws TemplateException {
         String value = FreemarkerUtil.getString(params, typeParam);
@@ -101,8 +111,10 @@ public class SkipDirective extends SkipBaseDirective{
         return FreemarkerUtil.getString(params, labelParam);
     }
     
-    SkipPageable getSkipPage(String type)throws TemplateException{
-        SkipPageable skipPage = mapSkips.get(type);
+    @SuppressWarnings("rawtypes")
+	Skipable getSkipPage(Map params)throws TemplateException{
+    	String type = getTypeValue(params);
+        Skipable skipPage = mapSkips.get(type);
         if(EmptyUtil.isNull(skipPage)){
             logger.error("Skip page has not {} of types",type);
             throw new TemplateModelException("Skip page has not " + type + "of types.");
@@ -110,28 +122,32 @@ public class SkipDirective extends SkipBaseDirective{
         return skipPage;
     }
     
-    static Map<String,SkipPageable> initTypeMapSkips(){
-        Map<String,SkipPageable> map = new HashMap<String,SkipPageable>();
+    private boolean isOnlyOne(Environment env)throws TemplateException {
+    	return getPageCountValue(env) == 1;
+    }
+    
+    static Map<String,Skipable> initTypeMapSkips(){
+        Map<String,Skipable> map = new HashMap<String,Skipable>();
         
-        map.put("f",new SkipPageFirst());
-        map.put("first", new SkipPageFirst());
-        map.put("首", new SkipPageFirst());
-        map.put("首页", new SkipPageFirst());
+        map.put("f",new FirstSkip());
+        map.put("first", new FirstSkip());
+        map.put("首", new FirstSkip());
+        map.put("首页", new FirstSkip());
         
-        map.put("p", new SkipPagePrevious());
-        map.put("prev", new SkipPagePrevious());
-        map.put("上", new SkipPagePrevious());
-        map.put("上一页", new SkipPagePrevious());
+        map.put("p", new PreviousSkip());
+        map.put("prev", new PreviousSkip());
+        map.put("上", new PreviousSkip());
+        map.put("上一页", new PreviousSkip());
         
-        map.put("n", new SkipPageNext());
-        map.put("next", new SkipPageNext());
-        map.put("下", new SkipPageNext());
-        map.put("下一页", new SkipPageNext());
+        map.put("n", new NextSkip());
+        map.put("next", new NextSkip());
+        map.put("下", new NextSkip());
+        map.put("下一页", new NextSkip());
         
-        map.put("l", new SkipPageLast());
-        map.put("last", new SkipPageLast());
-        map.put("末", new SkipPageLast());
-        map.put("末页", new SkipPageLast());
+        map.put("l", new LastSkip());
+        map.put("last", new LastSkip());
+        map.put("末", new LastSkip());
+        map.put("末页", new LastSkip());
         
         return map;
     }

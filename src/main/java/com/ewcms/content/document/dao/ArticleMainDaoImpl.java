@@ -104,12 +104,12 @@ public class ArticleMainDaoImpl implements ArticleMainDaoCustom {
     }
     
 	@Override
-	public Map<Long, Long> findBeApprovalArticleMain(final String userName, final List<String> groupNames){
+	public Map<Long, Long> findBeApprovalArticleMain(final String userName, final List<String> roleNames){
     	Map<Long, Long> map = new HashMap<Long, Long>();
-        String hql = "Select o.channelId, Count(o) From ArticleMain As o Left Join o.article AS r Left Join r.reviewProcess As p Left Join p.reviewUsers As u Left Join p.reviewGroups As g Where r.delete=false And r.status=:status And (u.userName=:userName ";
-        if (groupNames != null && !groupNames.isEmpty()){
-        	for (String groupName : groupNames)
-        		hql += " Or g.groupName='" + groupName + "' ";
+        String hql = "Select o.channelId, Count(o) From ArticleMain As o Left Join o.article AS r Left Join r.reviewProcess As p Left Join p.reviewUsers As u Left Join p.reviewRoles As g Where r.isDelete=false And r.status=:status And (u.userName=:userName ";
+        if (roleNames != null && !roleNames.isEmpty()){
+        	for (String roleName : roleNames)
+        		hql += " Or g.roleName='" + roleName + "' ";
         }
         hql += ") Group By o.channelId "; 
         
@@ -164,7 +164,7 @@ public class ArticleMainDaoImpl implements ArticleMainDaoCustom {
         		     "From ArticleMain As m Left Join m.article As a " +
         		     ", Channel As c Right Join c.site As s " +
         		     " Where c.id=m.channelId And s.id=:siteId " +
-        		     " And YEAR(a.createTime)=:year And a.delete=false " +
+        		     " And YEAR(a.createTime)=:year And a.isDelete=false " +
         		     " Group By MONTH(a.createTime)";
         
         TypedQuery<Object[]> query = em.createQuery(hql, Object[].class);
@@ -192,7 +192,7 @@ public class ArticleMainDaoImpl implements ArticleMainDaoCustom {
         			 "From ArticleMain As m Left Join m.article As a " +
         		     ", Channel As c Right Join c.site As s " +
         		     " Where c.id=m.channelId And s.id=:siteId " +
-        		     " And YEAR(a.published)=:year And a.status=:status And a.delete=false" +
+        		     " And YEAR(a.published)=:year And a.status=:status And a.isDelete=false" +
         			 " Group By MONTH(a.published)";
         
         TypedQuery<Object[]> query = em.createQuery(hql, Object[].class);
@@ -216,7 +216,7 @@ public class ArticleMainDaoImpl implements ArticleMainDaoCustom {
     				 "From ArticleMain As m Left Join m.article As a " +
 		     		 ", Channel As c Right Join c.site As s " +
     				 " Where c.id=m.channelId And s.id=:siteId " + 
-    				 " And YEAR(a.published)=:year And a.status=:status And a.delete=false " +
+    				 " And YEAR(a.published)=:year And a.status=:status And a.isDelete=false " +
     				 " Group By a.created";
     	TypedQuery<Object[]> query = em.createQuery(hql, Object[].class);
     	query.setParameter("year", year);
@@ -233,7 +233,7 @@ public class ArticleMainDaoImpl implements ArticleMainDaoCustom {
     
 	@Override
     public List<ArticleMain> findArticleMainByTitlePrerelease(){
-    	String hql = "Select m From ArticleMain As m Left Join m.article As a Where a.type=:type And a.status=:status And a.delete=false And m.reference=false And a.url Is Not Null";
+    	String hql = "Select m From ArticleMain As m Left Join m.article As a Where a.type=:type And a.status=:status And a.isDelete=false And m.reference=false And a.url Is Not Null";
     	
     	TypedQuery<ArticleMain> query = em.createQuery(hql, ArticleMain.class);
     	query.setParameter("type", Article.Genre.TITLE);

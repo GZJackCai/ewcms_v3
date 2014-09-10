@@ -24,6 +24,7 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import com.ewcms.content.document.dao.ArticleDao;
 import com.ewcms.content.document.dao.ArticleMainDao;
 import com.ewcms.content.document.dao.ReviewProcessDao;
 import com.ewcms.content.document.model.Article;
@@ -39,17 +40,16 @@ import com.ewcms.content.history.History;
 import com.ewcms.content.history.model.HistoryModel;
 import com.ewcms.content.history.service.HistoryModelService;
 import com.ewcms.content.history.util.HistoryUtil;
+import com.ewcms.content.message.push.PushApiService;
 import com.ewcms.plugin.BaseException;
 import com.ewcms.publication.PublishException;
-import com.ewcms.publication.WebPublishFac;
-import com.ewcms.publication.deploy.DeployOperatorable;
+import com.ewcms.publication.PublishServiceable;
+import com.ewcms.publication.deploy.operator.FileOperatorable;
 import com.ewcms.security.model.User;
 import com.ewcms.security.service.AccountService;
 import com.ewcms.site.dao.ChannelDao;
 import com.ewcms.site.dao.TemplateDao;
 import com.ewcms.site.model.Channel;
-import com.ewcms.site.model.Site;
-import com.ewcms.site.model.SiteServer;
 import com.ewcms.site.model.Template;
 import com.ewcms.util.Collections3;
 import com.ewcms.util.EwcmsContextUtil;
@@ -65,13 +65,17 @@ import com.ewcms.web.query.SearchMain;
 public class ArticleMainService{
 
 	@Autowired
+	private ArticleDao articleDao;
+	@Autowired
 	private ArticleMainDao articleMainDao;
 	@Autowired
 	private ReviewProcessDao reviewProcessDao;
 	@Autowired
 	private OperateTrackService operateTrackService;
 	@Autowired
-	private WebPublishFac webPublishFac;
+	private PublishServiceable publishService;
+	@Autowired
+	private FileOperatorable localFileOperator;
 	@Autowired
 	private ChannelDao channelDao;
 	@Autowired
@@ -80,6 +84,8 @@ public class ArticleMainService{
 	private AccountService accountService;
 	@Autowired
 	private HistoryModelService historyModelService;
+	@Autowired
+	private PushApiService pushApiService;
 //	@Autowired
 //	private RelationService relationService;
 	
@@ -119,11 +125,8 @@ public class ArticleMainService{
 		}
 		
 		if (oldStatus == Status.RELEASE){
-			Site site = EwcmsContextUtil.getCurrentSite();
-			SiteServer siteServer = site.getSiteServer();
-			DeployOperatorable output = siteServer.getOutputType().deployOperator(siteServer);
 			try {
-				output.delete(article.getUrl());
+				localFileOperator.delete(article.getUrl());
 			} catch (PublishException e) {
 			}
 			try {
@@ -145,7 +148,7 @@ public class ArticleMainService{
 		operateTrackService.addOperateTrack(articleMainId, article.getStatusDescription(), "从内容回收站还原。", "");
 	}
 
-	public void submitReviewArticleMain(List<Long> articleMainIds, Long channelId) throws BaseException {
+	public void submitReviewArticleMain(String userName, List<Long> articleMainIds, Long channelId) throws BaseException {
 		for (Long articleMainId : articleMainIds){
 			ArticleMain articleMain = articleMainDao.findArticleMainByArticleMainAndChannel(articleMainId, channelId);
 			Assert.notNull(articleMain);
@@ -183,6 +186,8 @@ public class ArticleMainService{
 				}
 				articleMain.setArticle(article);
 				articleMainDao.save(articleMain);
+				
+				pushApiService.pushTodo(userName, findBeApprovalArticleMain(userName));
 //			}else{
 //				throw new BaseException("","只有在初稿或重新编辑状态下才能提交审核");
 			}
@@ -302,7 +307,7 @@ public class ArticleMainService{
 					}
 				}
 			}
-			webPublishFac.publishChannel(channelId, again, children);
+			publishService.pubChannel(channel.getSite().getId(), channelId, again, children);
 		}
 	}
 	
@@ -313,7 +318,7 @@ public class ArticleMainService{
 			List<Template> templates = templateDao.getTemplatesInChannel(channelId);
 			if (templates != null && !templates.isEmpty()){
 				for (Template template : templates){
-					webPublishFac.publishTemplateContent(template.getId(), false);
+					publishService.pubTemplate(template.getSite().getId(),channelId, template.getId(), false);
 				}
 			}
 			List<Channel> channelChildrens = channelDao.getChannelChildren(channelId);
@@ -372,7 +377,7 @@ public class ArticleMainService{
 		return false;
 	}
 
-	public void approveArticleMain(Long articleMainId, Long channelId, Integer review, String reason) {
+	public void approveArticleMain(String userName, Long articleMainId, Long channelId, Integer review, String reason) {
 		ArticleMain articleMain = null;
 		Article article = null;
 		Assert.notNull(articleMainId);
@@ -419,6 +424,8 @@ public class ArticleMainService{
 			articleMainDao.save(articleMain);
 			
 			operateTrackService.addOperateTrack(articleMainId, currentStatus, caption, reason);
+			
+			pushApiService.pushTodo(userName, findBeApprovalArticleMain(userName));
 		}
 	}
 
@@ -477,7 +484,7 @@ public class ArticleMainService{
 		}
 	}
 
-	public void breakArticleMain(List<Long> articleMainIds, Long channelId) throws BaseException {
+	public void breakArticleMain(String userName, List<Long> articleMainIds, Long channelId) throws BaseException {
 		for (Long articleMainId : articleMainIds){
 			ArticleMain articleMain = articleMainDao.findOne(articleMainId);
 			Assert.notNull(articleMain);
@@ -490,6 +497,8 @@ public class ArticleMainService{
 				article.setStatus(Status.REEDIT);
 				articleMain.setArticle(article);
 				articleMainDao.save(articleMain);
+				
+				pushApiService.pushTodo(userName, findBeApprovalArticleMain(userName));
 //			}else{
 //				throw new BaseException("","只有在审核中断、发布版、已发布版状态下才能退回");
 			}
@@ -651,25 +660,29 @@ public class ArticleMainService{
 		article.setContents(contents);
 	}
 
-	public Map<Channel, Long> findBeApprovalArticleMain(String userName) {
-		Map<Channel, Long> result = new HashMap<Channel, Long>();
-		
+	public List<Map<String, Object>> findBeApprovalArticleMain(String userName) {
 		List<String> groupNames = new ArrayList<String>();
 		User user = accountService.findUserByLoginName(userName);
 		if (user != null){
 			groupNames = user.getRoleNames();
 		}
 		
+		List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
 		Map<Long, Long> map = articleMainDao.findBeApprovalArticleMain(userName, groupNames);
 		if (!map.isEmpty()){
 			Set<Long> keySets = map.keySet();
 			for (Long key : keySets){
 				Channel channel = channelDao.findOne(key);
 				Long count = map.get(key);
-				result.put(channel, count);
+				
+				Map<String, Object> toDoMap = new HashMap<String, Object>();
+				toDoMap.put("id", channel.getId());
+	            toDoMap.put("name", channel.getName());
+	            toDoMap.put("count", count);
+	            dataList.add(toDoMap);
 			}
 		}
-		return result;
+		return dataList;
 	}
 
 	public Map<Integer, Long> findCreateArticleFcfChart(Integer year, Long siteId) {
@@ -772,5 +785,9 @@ public class ArticleMainService{
 		}else{
 			return null;
 		}
+	}
+	
+	public Article findArticle(Long articleId){
+		return articleDao.findOne(articleId);
 	}
 }

@@ -21,7 +21,7 @@ import javax.persistence.UniqueConstraint;
  * @author 吴智俊
  */
 @Entity
-@Table(name = "acl_sid", uniqueConstraints = {@UniqueConstraint(columnNames = {"sid", "principal"})})
+@Table(name = "acl_sid", uniqueConstraints = {@UniqueConstraint(name = "uk_sid_principal", columnNames = {"sid", "principal"})})
 @SequenceGenerator(name = "seq_acl_sid", sequenceName = "seq_acl_sid_id", allocationSize = 1)
 public class AclSid implements Serializable {
 

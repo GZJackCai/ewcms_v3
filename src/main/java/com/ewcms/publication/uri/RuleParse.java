@@ -57,7 +57,7 @@ public class RuleParse implements RuleParseable {
         for (String token : tokens) {
             logger.debug("Token with ${{}", token);
             if (!StringUtils.contains(token, "}")) {
-                logger.warn("\"{}\" is not closed", token);
+                logger.debug("\"{}\" is not closed", token);
                 continue;
             }
             String value = StringUtils.split(token, VARIABLE_END)[0];

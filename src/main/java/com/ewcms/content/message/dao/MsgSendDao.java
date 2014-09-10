@@ -2,12 +2,8 @@ package com.ewcms.content.message.dao;
 
 import java.util.List;
 
-import javax.persistence.QueryHint;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.QueryHints;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import com.ewcms.content.message.model.MsgSend;
@@ -24,6 +20,14 @@ public interface MsgSendDao extends PagingAndSortingRepository<MsgSend, Long>, J
 	
 	MsgSend findByIdAndMsgReceiveUsersUserNameAndType(Long id, String userName, Type type);
 	
-	@QueryHints(value = {@QueryHint(name = "name", value="value")}, forCounting = false)
-	Page<MsgSend> findByType(Type type, Pageable pageable);
+	/**
+	 * 查询所有公告栏信息
+	 * 
+	 * @param type Type.NOTICES
+	 * @return 
+	 */
+	List<MsgSend> findByTypeOrderBySendTimeDesc(Type type);
+	
+	@Query("Select s From MsgSend s Left Join s.msgReceiveUsers r Where r.userName=?1 Order By s.sendTime Desc")
+	List<MsgSend> findByTypeAndReceiveUserNameOrderBySendTimeDesc(Type type, String userName);
 }

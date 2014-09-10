@@ -17,10 +17,10 @@
 				receiveUrl : '${ctx}/content/message/receive/index'
 			});
 		});
-		  function showRecord(id){
+		function showRecord(id){
 			
-		  }
-		  function refreshTipMessage(){
+		}
+		function refreshTipMessage(){
 			  $.ajax({
 				  type:'post',
 				  datatype:'json',

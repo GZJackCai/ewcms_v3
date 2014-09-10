@@ -128,7 +128,11 @@ public class AclService {
 	}
 	
 	public List<AclEntry> findByPermission(String loginName, List<String> roleNames){
-		return aclEntryDao.findByPermission(loginName, roleNames);
+		if (!roleNames.isEmpty()){
+			return aclEntryDao.findByPermission(loginName, roleNames);
+		}else{
+			return aclEntryDao.findByPermission(loginName);
+		}
 	}
 	
 	public List<AclEntry> findByMask(Long idEntityId, String loginName, List<String> roleNames){

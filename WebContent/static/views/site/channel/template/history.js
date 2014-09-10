@@ -45,6 +45,10 @@ HistoryTemplate.prototype.init = function(options){
     	});
 	});
 	
+	$('#td-cancel').bind('click', function(){
+		parent.$('#pop-window').window('close');
+	});
+	
 	$("#tb-query").bind('click', function(){
     	$.ewcms.query({
     		src:options.queryUrl

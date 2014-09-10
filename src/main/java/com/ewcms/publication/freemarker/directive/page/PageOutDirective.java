@@ -13,10 +13,10 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ewcms.util.EmptyUtil;
 import com.ewcms.publication.freemarker.FreemarkerUtil;
 import com.ewcms.publication.freemarker.GlobalVariable;
 import com.ewcms.publication.freemarker.directive.PropertyDirective;
-import com.ewcms.util.EmptyUtil;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
@@ -27,7 +27,7 @@ import freemarker.template.TemplateModelException;
 /**
  * 显示页数属性标签
  * 
- * @author wangwei
+ * @author  <a href="hhywangwei@gmail.com">王伟</a>
  */
 public class PageOutDirective extends PropertyDirective {
 

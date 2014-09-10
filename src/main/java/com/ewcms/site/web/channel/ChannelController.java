@@ -308,9 +308,9 @@ public class ChannelController {
 	String forceRelease(@RequestParam(value = "channelId") Long channelId, @RequestParam(value = "children") Integer children) {
 		try {
 			if (children.intValue() == 1)
-				channelService.forceRelease(channelId, true);
+				channelService.forceRelease(EwcmsContextUtil.getCurrentSiteId(), channelId, true);
 			else
-				channelService.forceRelease(channelId, false);
+				channelService.forceRelease(EwcmsContextUtil.getCurrentSiteId(), channelId, false);
 			return "强制发布正在后台运行中...";
 		} catch (Exception e) {
 			return "强制发布失败";

@@ -17,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ewcms.publication.PublishException;
 import com.ewcms.publication.uri.UriRuleable;
 
 /**
@@ -45,25 +44,21 @@ public class FileOperator implements ResourceOperatorable{
     @Override
     public String write(InputStream source,UriRuleable uriRule,String suffix) throws IOException {
                 
-        try {
-            String uri = uriRule.getUri();
-            if(suffix != null && !suffix.equals("")){
-                uri = uri + "." + suffix;
-            }
-            OutputStream target = FileUtils.openOutputStream(getLocalFile(uri));
-            byte[] buff = new byte[1024 * 10];
-            while(source.read(buff) > 0){
-                target.write(buff);
-            }
-            target.flush();
-            target.close();
-            source.close();
-            
-            return uri;
-        } catch (PublishException e) {
-            logger.error("Resource uri is error :{}",e);
-            throw new IOException(e);
-        }
+        //String uri = uriRule.getUri();
+		String uri = uriRule.getPatter();
+		if(suffix != null && !suffix.equals("")){
+		    uri = uri + "." + suffix;
+		}
+		OutputStream target = FileUtils.openOutputStream(getLocalFile(uri));
+		byte[] buff = new byte[1024 * 10];
+		while(source.read(buff) > 0){
+		    target.write(buff);
+		}
+		target.flush();
+		target.close();
+		source.close();
+		
+		return uri;
     }
     
     @Override

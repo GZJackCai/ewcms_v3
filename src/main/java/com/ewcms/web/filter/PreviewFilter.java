@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ewcms.content.document.model.Article;
-import com.ewcms.publication.service.ArticlePublishService;
+import com.ewcms.content.document.service.ArticleMainService;
 import com.ewcms.site.model.Channel;
 import com.ewcms.site.model.Template;
 import com.ewcms.site.service.ChannelService;
@@ -43,12 +43,10 @@ public class PreviewFilter implements Filter {
     
     @Autowired
     private ChannelService channelService;
-    
     @Autowired
     private TemplateService templateService;
-    
     @Autowired
-    private ArticlePublishService articlePublishService ;
+    private ArticleMainService articleMainService ;
     
     @Override
     public void destroy() {
@@ -82,7 +80,7 @@ public class PreviewFilter implements Filter {
         StringBuilder builder = new StringBuilder();
         
         if(templateId == null){
-            Article article = articlePublishService.getArticle(articleId);
+            Article article = articleMainService.findArticle(articleId);
             if(article == null){
                 return null;
             }

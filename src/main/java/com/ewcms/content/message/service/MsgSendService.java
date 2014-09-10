@@ -6,15 +6,15 @@
 
 package com.ewcms.content.message.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.ewcms.content.message.dao.MsgContentDao;
@@ -26,6 +26,7 @@ import com.ewcms.content.message.model.MsgReceiveUser;
 import com.ewcms.content.message.model.MsgSend;
 import com.ewcms.content.message.model.MsgSend.Type;
 import com.ewcms.content.message.model.MsgStatus;
+import com.ewcms.content.message.push.PushApiService;
 import com.ewcms.security.dao.UserDao;
 import com.ewcms.util.EwcmsContextUtil;
 import com.ewcms.web.QueryParameter;
@@ -36,7 +37,7 @@ import com.ewcms.web.query.SearchMain;
  * @author wu_zhijun
  * 
  */
-@Component
+@Service
 public class MsgSendService {
 
 	@Autowired
@@ -47,8 +48,14 @@ public class MsgSendService {
 	private MsgContentDao msgContentDao;
 	@Autowired
 	private UserDao userDao;
+	@Autowired
+	private PushApiService pushApiService;
+	@Autowired
+	private MsgReceiveService msgReceiveService;
 
-	public Long addMsgSend(MsgSend msgSend, String content, List<String> userNames) {
+	private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	
+	public Long addMsgSend(MsgSend msgSend, String content, List<String> ReceiveUserNames) {
 		msgSend.setUserName(EwcmsContextUtil.getLoginName());
 		msgSend.setStatus(MsgStatus.FAVORITE);
 		MsgContent msgContent = new MsgContent();
@@ -59,33 +66,42 @@ public class MsgSendService {
 		msgSend.setMsgContents(msgContents);
 		
 		if (msgSend.getType() == Type.GENERAL){
+			List<String> receiveUserNames = new ArrayList<String>();
+			
 			List<MsgReceiveUser> msgReceiveUsers = new ArrayList<MsgReceiveUser>();
 			MsgReceiveUser msgReceiveUser;
-			for (String userName : userNames){
-				if (userName.equals(msgSend.getUserName())) continue;
+			for (String receiveUserName : ReceiveUserNames){
+				if (receiveUserName.equals(msgSend.getUserName())) continue;
 				msgReceiveUser = new MsgReceiveUser();
-				msgReceiveUser.setUserName(userName);
-				msgReceiveUser.setRealName(userDao.findByLoginName(userName).getRealName());
+				msgReceiveUser.setUserName(receiveUserName);
+				msgReceiveUser.setRealName(userDao.findByLoginName(receiveUserName).getRealName());
 				msgReceiveUsers.add(msgReceiveUser);
+				receiveUserNames.add(receiveUserName);
 			}
 			msgSend.setMsgReceiveUsers(msgReceiveUsers);
+			msgSendDao.save(msgSend);
 		}else if (msgSend.getType() == Type.NOTICE){
 			msgSend.setMsgReceiveUsers(null);
+			msgSendDao.save(msgSend);
+			
+			pushApiService.pushNewNotice(findTopRowNoticesOrSubscription(Type.NOTICE, 10));
 		}else if (msgSend.getType() == Type.SUBSCRIPTION){
 			msgSend.setMsgReceiveUsers(null);
+			msgSendDao.save(msgSend);
+			
+			pushApiService.pushNewSubscription(findTopRowNoticesOrSubscription(Type.SUBSCRIPTION, 10));
 		}
-		
-		msgSendDao.save(msgSend);
-		
 		if (msgSend.getType() == Type.GENERAL){
-			for (String userName : userNames){
-				if (userName.equals(msgSend.getUserName())) continue;
+			for (String receiveUserName : ReceiveUserNames){
+				if (receiveUserName.equals(msgSend.getUserName())) continue;
 				MsgReceive msgReceive = new MsgReceive();
-				msgReceive.setUserName(userName);
+				msgReceive.setUserName(receiveUserName);
 				msgReceive.setSendUserName(EwcmsContextUtil.getLoginName());
 				msgReceive.setStatus(MsgStatus.FAVORITE);
 				msgReceive.setMsgContent(msgContent);
 				msgReceiveDao.save(msgReceive);
+				
+				pushApiService.pushUnreadMessage(receiveUserName, msgReceiveService.findUnReadMessageCountByUserName(receiveUserName));;
 			}		
 		}
 		
@@ -96,9 +112,29 @@ public class MsgSendService {
 		return null;
 	}
 
-	public void delMsgSend(Long msgSendId) {
-		msgSendDao.delete(msgSendId);
+	public void delMsgSend(List<Long> msgSendIds) {
+		Boolean isNotice = false;
+		Boolean isSubscription = false;
+		
+		for (Long msgSendId : msgSendIds){
+			MsgSend msgSend = findMsgSend(msgSendId);
+			if (msgSend.getType() == Type.NOTICE){
+				isNotice = true;
+			}else if (msgSend.getType() == Type.SUBSCRIPTION){
+				isSubscription = true;
+			}
+			msgSendDao.delete(msgSend);
+		}
+		
+		if (isNotice){
+			pushApiService.pushNewNotice(findTopRowNoticesOrSubscription(Type.NOTICE, 10));
+		}
+
+		if (isSubscription){
+			pushApiService.pushNewSubscription(findTopRowNoticesOrSubscription(Type.SUBSCRIPTION, 10));
+		}
 	}
+	
 
 	public MsgSend findMsgSend(Long msgSendId) {
 		return msgSendDao.findOne(msgSendId);
@@ -141,33 +177,67 @@ public class MsgSendService {
 	public void delSubscription(Long msgContentId) {
 		msgContentDao.delete(msgContentId);
 	}
+	
+	public List<Map<String, Object>> findTopRowNoticesOrSubscription(Type type, Integer row) {
+		QueryParameter queryParameter = new QueryParameter();
+		queryParameter.setRows(row);
+		
+		Map<String, Object> parameters = queryParameter.getParameters();
+		parameters.put("EQ_type", type);
+		queryParameter.setParameters(parameters);
+		
+		Map<String, Direction> sorts = queryParameter.getSorts();
+		sorts.put("sendTime",  Direction.DESC);
+		sorts.put("id", Direction.DESC);
+		queryParameter.setSorts(sorts);
 
-//	@Override
-//	public List<MsgSend> findMsgSendByGeneral(Integer row) {
-//		return msgSendDAO.findMsgSendByType(Type.GENERAL, row);
+		Map<String, Object> seachMap = SearchMain.search(queryParameter, "IN_id", Long.class, msgSendDao, MsgSend.class);
+		
+		@SuppressWarnings("unchecked")
+		List<MsgSend> msgSends = (List<MsgSend>) seachMap.get("rows");
+		
+		List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
+		for (MsgSend msgSend : msgSends){
+			Map<String, Object> map = new HashMap<String, Object>();
+            map.put("id", msgSend.getId());
+            map.put("title", msgSend.getTitle());
+            map.put("date", simpleDateFormat.format(msgSend.getSendTime()));
+            map.put("sendUserName", msgSend.getUserName());
+            dataList.add(map);
+		}
+		return dataList;
+	}
+	
+//	public List<Map<String, Object>> findTopRowGeneral(String userName, Integer row){
+//		QueryParameter queryParameter = new QueryParameter();
+//		queryParameter.setRows(row);
+//		
+//		Map<String, Object> parameters = queryParameter.getParameters();
+//		parameters.put("EQ_type", Type.GENERAL);
+//		parameters.put("EQ_msgReceiveUsers.userName", userName);
+//		queryParameter.setParameters(parameters);
+//		
+//		Map<String, Direction> sorts = queryParameter.getSorts();
+//		sorts.put("sendTime",  Direction.DESC);
+//		sorts.put("id", Direction.DESC);
+//		queryParameter.setSorts(sorts);
+//
+//		Map<String, Object> seachMap = SearchMain.search(queryParameter, "IN_id", Long.class, msgSendDao, MsgSend.class);
+//		
+//		@SuppressWarnings("unchecked")
+//		List<MsgSend> msgSends = (List<MsgSend>) seachMap.get("rows");
+//		
+//		List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
+//		for (MsgSend msgSend : msgSends){
+//			Map<String, Object> map = new HashMap<String, Object>();
+//            map.put("id", msgSend.getId());
+//            map.put("title", msgSend.getTitle());
+//            map.put("date", simpleDateFormat.format(msgSend.getSendTime()));
+//            map.put("sendUserName", msgSend.getUserName());
+//            dataList.add(map);
+//		}
+//		return dataList;
 //	}
-
-	public List<MsgSend> findMsgSendByNotice(Integer row) {
-		List<MsgSend> notices = new ArrayList<MsgSend>();
-		Page<MsgSend> noticeMessages = msgSendDao.findByType(Type.NOTICE, new PageRequest(1, row));
-		if (noticeMessages == null || noticeMessages.getContent().isEmpty()) return notices;
-		for (MsgSend msgSend : noticeMessages){
-			msgSend.setMsgReceiveUsers(null);
-			notices.add(msgSend);
-		}
-		return notices;
-	}
-
-	public List<MsgSend> findMsgSendBySubscription(Integer row) {
-		List<MsgSend> subscriptions = new ArrayList<MsgSend>();
-		Page<MsgSend> subscriptionMessages = msgSendDao.findByType(Type.SUBSCRIPTION, new PageRequest(1, row));
-		if (subscriptionMessages == null || subscriptionMessages.getContent().isEmpty()) return subscriptions;
-		for (MsgSend msgSend : subscriptionMessages){
-			msgSend.setMsgReceiveUsers(null);
-			subscriptions.add(msgSend);
-		}
-		return subscriptions;
-	}
 
 	public String subscribeMsg(Long msgSendId) {
 		MsgSend msgSend = msgSendDao.findOne(msgSendId);

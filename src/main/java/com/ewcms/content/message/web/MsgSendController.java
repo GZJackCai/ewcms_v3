@@ -53,9 +53,7 @@ public class MsgSendController {
 	
 	@RequestMapping(value = "/delete")
 	public String delete(@RequestParam(value = "selections") List<Long> selections){
-		for (Long id : selections){
-			msgSendService.delMsgSend(id);
-		}
+		msgSendService.delMsgSend(selections);
 		return "redirect:/content/message/send/index";
 	}
 

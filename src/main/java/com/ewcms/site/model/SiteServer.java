@@ -13,16 +13,11 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
-import com.ewcms.publication.deploy.DeployOperatorFactory;
-import com.ewcms.publication.deploy.DeployOperatorable;
 
 /**
  * <ul>
@@ -43,25 +38,6 @@ public class SiteServer implements Serializable {
 
 	private static final long serialVersionUID = -1138195790814414334L;
 
-	public enum OutputType {
-
-		LOCAL("本地"), SFTP("sftp"), FTP("ftp"), FTPS("ftps");//SMB("windows共享");
-
-		private String description;
-
-		private OutputType(String description) {
-			this.description = description;
-		}
-
-		public String getDescription() {
-			return description;
-		}
-
-		 public DeployOperatorable deployOperator(SiteServer server){
-			 return DeployOperatorFactory.factory(server);
-		 }
-	}
-
 	@Id
 	@GeneratedValue(generator = "seq_site_siteserver", strategy = GenerationType.SEQUENCE)
 	private Long id;
@@ -75,17 +51,6 @@ public class SiteServer implements Serializable {
 	private String userName;
 	@Column(length = 20)
 	private String password;
-	@Column(length = 15)
-	@Enumerated(EnumType.STRING)
-	private OutputType outputType;
-
-	public OutputType getOutputType() {
-		return outputType;
-	}
-
-	public void setOutputType(OutputType outputType) {
-		this.outputType = outputType;
-	}
 
 	public Long getId() {
 		return id;

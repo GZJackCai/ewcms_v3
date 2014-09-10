@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
+<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -16,6 +17,7 @@
         <script type="text/javascript" src="${ctx}/static/views/home.js"></script>
         <script type="text/javascript" src="${ctx}/static/fcf/js/FusionCharts.js"></script>
         <script type="text/javascript" src="${ctx}/static/views/ewcms.pubsub.js"></script>
+        <script type="text/javascript" src="${ctx}/static/views/polling.js"></script>
         <script type="text/javascript">
             var _home = new home();
             $(function(){
@@ -32,6 +34,13 @@
                     visitTreeUrl : '${ctx}/visit/tree',
                     visitUrl : '${ctx}/visit'
                 });
+            	
+            	var currentDate = new Date();
+            	showPublishArticleChart(currentDate.getFullYear());
+            	showCreateArticleChart(currentDate.getFullYear());
+            	showPublishPersonChart(currentDate.getFullYear());
+            	
+        		var poll = new Poll('<shiro:principal property="loginName"/>');
             });
         </script>
     </head>
@@ -97,7 +106,7 @@
       </div>
       <div region="center" border="true" style="overflow:auto;">
         <div id="center" class="easyui-layout" fit="true" style="display:none;">  
-          <div id="west" region="west" split="false" title="子菜单项" style="width:165px;padding:1px;overflow:auto;">
+          <div id="west" region="west" split="false" title="子菜单项" style="width:130px;padding:1px;overflow:auto;">
 	        <div id="menusub-content" title="内容管理" style="overflow:auto;display:none;">
               <div class="nav-item">
                 <a href="javascript:$.ewcms.openTab({id:'#tab-content', title:'内容编辑',src:'content/document/article/tree'})">
@@ -133,6 +142,12 @@
                 <a href="javascript:$.ewcms.openTab({id:'#tab-content', title:'个人消息',src:'content/message/index'})">
                   <img src="${ctx}/static/image/message.png" style="border:0"/><br/>
                   <span>个人消息</span>
+                </a>
+              </div>
+              <div class="nav-item">
+                <a href="javascript:$.ewcms.openTab({id:'#tab-content', title:'Comet',src:'chat/index'})">
+                  <img src="${ctx}/static/image/message.png" style="border:0"/><br/>
+                  <span>Comet</span>
                 </a>
               </div>
 	        </div>
@@ -357,24 +372,23 @@
 	        	    <div class="panel-header">
 	        		  <div class="panel-title">新增文章数</div>
 	        		  <div class="panel-tool">
-					    <s:select id="yearCreate" list="years" name="yearCreate" onchange="selectYearCreate(this);"/>
+					    <form:select id="createArticleYear" path="yearMap" onchange="showCreateArticleChart($('#createArticleYear').val());">
+					    	<form:options items="${yearMap}"/>
+					    </form:select>
+					    <a href="javascript:void(0)" class="icon-reload" onclick="showCreateArticleChart($('#createArticleYear').val())"></a>
 					  </div>
 	        		</div>
 	        		<div style="height: 200px; padding: 5px;" closable="true" collapsible="false" class="portal-p panel-body">
 	        		  <div id="chartDiv" align="center">新增文章数</div>
 					  <script type="text/javascript">
-						function selectYearCreate(select){
-						  $('#yearCreate').val(select.value);
-						  showCreateChart();
-						}
-						function showCreateChart(){
-						  $.post("${ctx}/createArticle", {yearCreate : $('#yearCreate').val()}, function(result) {
-						    var myChart = new FusionCharts("${ctx}/fcf/swf/Column3D.swf?ChartNoDataText=无数据显示", "myChartId", "400", "200");
+						function showCreateArticleChart(value){
+						  $.post("${ctx}/fcf/createArticle/" + value, {}, function(result) {
+						    var myChart = new FusionCharts("${ctx}/static/fcf/swf/Column3D.swf?ChartNoDataText=无数据显示", "myChartId", "400", "200");
 						    myChart.setDataXML(result);      
   						    myChart.render("chartDiv");
 	                      });  
 						}
-						showCreateChart();
+						//showCreateArticleChart($('#createArticleYear').val());
 					  </script>
 				    </div>
 				  </div>
@@ -387,24 +401,22 @@
 	        	    <div class="panel-header">
 	        		  <div class="panel-title">发布文章数</div>
 	        		  <div class="panel-tool">
-					    <s:select id="yearRelease" list="years" name="yearRelease" onchange="selectYearRelease(this);"/>
+					    <form:select id="publishArticleYear" path="yearMap" onchange="showPublishArticleChart($('#publishArticleYear').val())">
+					    	<form:options items="${yearMap}"/>
+					    </form:select>
+					    <a href="javascript:void(0)" class="icon-reload" onclick="showPublishArticleChart($('#publishArticleYear').val())"></a>
 					  </div>
 	        		</div>
 	        		<div style="height: 200px; padding: 5px;" closable="true" collapsible="false" class="portal-p panel-body">
 	        		  <div id="lineDiv" align="center">发布文章数</div>
 					  <script type="text/javascript">
-						function selectYearRelease(select){
-						  $('#yearRelease').val(select.value);
-						  showReleaseChart();
-						}
-						function showReleaseChart(){
-						  $.post("${ctx}/releaseArticle", {yearRelease : $('#yearRelease').val()}, function(result) {
-						    var myChart = new FusionCharts("${ctx}/fcf/swf/Line.swf?ChartNoDataText=无数据显示", "myChartId", "400", "200");
+						function showPublishArticleChart(value){
+						  $.post("${ctx}/fcf/publishArticle/" + value, {}, function(result) {
+						    var myChart = new FusionCharts("${ctx}/static/fcf/swf/Line.swf?ChartNoDataText=无数据显示", "myChartId", "400", "200");
 						    myChart.setDataXML(result);      
 						    myChart.render("lineDiv");
 						  });  
 						}
-						showReleaseChart();
 					  </script>
 				    </div>
 				  </div>
@@ -417,24 +429,22 @@
 	        		<div class="panel-header">
 	        		  <div class="panel-title">发布文章人员</div>
 	        		  <div class="panel-tool">
-						<s:select id="yearPerson" list="years" name="yearPerson" onchange="selectYearPerson(this);"/>
+						<form:select id="publishPersonYear" path="yearMap" onchange="showPublishPersonChart($('#publishPersonYear').val())">
+					    	<form:options items="${yearMap}"/>
+					    </form:select>
+					    <a href="javascript:void(0)" class="icon-reload" onclick="showPublishPersonChart($('#publishPersonYear').val())"></a>
 					  </div>
 	        		</div>
 	        		<div style="height: 200px; padding: 5px;" closable="true" collapsible="false" class="portal-p panel-body">
 	        		  <div id="pieDiv" align="center">发布文章人员</div>
 					  <script type="text/javascript">
-						function selectYearPerson(select){
-						  $('#yearPerson').val(select.value);
-						  showPersonChart();
-						}
-						function showPersonChart(){
-						  $.post("${ctx}/releaseArticlePerson", {yearPerson : $('#yearPerson').val()}, function(result) {
-							var myChart = new FusionCharts("${ctx}/fcf/swf/Pie3D.swf?ChartNoDataText=无数据显示", "myChartId", "400", "200");
+						function showPublishPersonChart(value){
+						  $.post("${ctx}/fcf/publishPerson/" + value, {}, function(result) {
+							var myChart = new FusionCharts("${ctx}/static/fcf/swf/Pie3D.swf?ChartNoDataText=无数据显示", "myChartId", "400", "200");
 							myChart.setDataXML(result);
 							myChart.render("pieDiv");
 						  });  
 						}
-						showPersonChart();
 					  </script>
 				    </div>
 				  </div>
@@ -447,9 +457,12 @@
 	        	  <div class="panel" style="margin-bottom:2px;">
 	        		<div class="panel-header">
 	        		  <div class="panel-title">待办事栏</div>
-	        		  <div class="panel-tool"><a href="javascript:void(0);" onclick="" style="text-decoration:none;"></a></div>
+	        		  <div class="panel-tool">
+	        		  	<a href="javascript:void(0);" onclick="" style="text-decoration:none;"></a>
+	        		  	<a href="javascript:void(0)" class="icon-reload" onclick=""></a>
+	        		  </div>
 	        		</div>
-	        		<div id="other" style="height: 160px; padding: 5px;" closable="true" collapsible="false" id="other" class="portal-p panel-body"></div>
+	        		<div id="todo" style="height: 170px; padding: 5px;" closable="true" collapsible="false" id="other" class="portal-p panel-body"></div>
 				  </div>
         		</div>
         	  </td>
@@ -459,9 +472,12 @@
 	        	  <div class="panel" style="margin-bottom:2px;">
 	        		<div class="panel-header">
 	        		  <div class="panel-title">公告栏</div>
-	        		  <div class="panel-tool"><a href="javascript:void(0);" onclick="javascript:_home.addTab('公告栏信息','message/more/index?type=NOTICE');return false;" style="text-decoration:none;display:inline;">更多...</a></div>
+	        		  <div class="panel-tool">
+	        		  	<a href="javascript:void(0);" onclick="javascript:_home.addTab('公告栏信息','message/more/index?type=NOTICE');return false;" style="text-decoration:none;display:inline;">更多...</a>
+	        		  	<a href="javascript:void(0)" class="icon-reload" onclick=""></a>
+	        		  </div>
 	        		</div>
-	        		<div style="height: 160px; padding: 5px;" closable="true" collapsible="false" title="" id="notice" class="portal-p panel-body"></div>
+	        		<div style="height: 170px; padding: 5px;" closable="true" collapsible="false" title="" id="notice" class="portal-p panel-body"></div>
 				  </div>
         		</div>
         	  </td>
@@ -471,9 +487,12 @@
 	        	  <div class="panel" style="margin-bottom:2px;">
 	        		<div class="panel-header">
 	        		  <div class="panel-title">订阅栏</div>
-	        		  <div class="panel-tool"><a href="javascript:void(0);" onclick="javascript:_home.addTab('订阅栏信息','message/more/index?type=SUBSCRIPTION');return false;" style="text-decoration:none;display:inline;">更多...</a></div>
+	        		  <div class="panel-tool">
+	        		  	<a href="javascript:void(0);" onclick="javascript:_home.addTab('订阅栏信息','message/more/index?type=SUBSCRIPTION');return false;" style="text-decoration:none;display:inline;">更多...</a>
+	        		  	<a href="javascript:void(0)" class="icon-reload" onclick=""></a>
+	        		  </div>
 	        		</div>
-	        		<div style="height: 160px; padding: 5px;" closable="true" collapsible="false" id="subscription" class="portal-p panel-body"></div>
+	        		<div style="height: 170px; padding: 5px;" closable="true" collapsible="false" id="subscription" class="portal-p panel-body"></div>
    				  </div>
         		</div>
         	  </td>

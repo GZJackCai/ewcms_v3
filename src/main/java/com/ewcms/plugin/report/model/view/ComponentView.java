@@ -12,6 +12,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -29,6 +31,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "plugin_report_view")
+@Inheritance(strategy = InheritanceType.JOINED)
 @SequenceGenerator(name = "seq_plugin_report_view", sequenceName = "seq_plugin_report_view_id", allocationSize = 1)
 public class ComponentView implements Serializable {
 

@@ -153,11 +153,11 @@ public class ArticleMainController {
 	 * @return Boolean
 	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
-	@RequestMapping(value = "/approve/{channelId}")
-	public @ResponseBody Boolean approve(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections){
+	@RequestMapping(value = "/approve/{username}_{channelId}")
+	public @ResponseBody Boolean approve(@PathVariable(value = "username")String username, @PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections){
 		Boolean result = false;
 		try {
-			articleMainService.submitReviewArticleMain(selections, channelId);
+			articleMainService.submitReviewArticleMain(username, selections, channelId);
 			result = true;
 		} catch (Exception e) {
 		}
@@ -215,11 +215,11 @@ public class ArticleMainController {
 	}
 	
 	@ChannelAcl(acl = { AclEnum.VERIFY_ARTICLE }, position = 0)
-	@RequestMapping(value = "/approveArticle/{channelId}")
-	public @ResponseBody Boolean approveArticle(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections") List<Long> selections, @RequestParam(value = "review") Integer review, @RequestParam(value = "reason", required = false) String reason){
+	@RequestMapping(value = "/approveArticle/{username}_{channelId}")
+	public @ResponseBody Boolean approveArticle(@PathVariable(value = "username")String username, @PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections") List<Long> selections, @RequestParam(value = "review") Integer review, @RequestParam(value = "reason", required = false) String reason){
 		Boolean result = false;
 		try{
-			articleMainService.approveArticleMain(selections.get(0), channelId, review, reason);
+			articleMainService.approveArticleMain(username, selections.get(0), channelId, review, reason);
 			result = true;
 		}catch(Exception e){
 		}
@@ -262,11 +262,11 @@ public class ArticleMainController {
 	}
 	
 	@ChannelAcl(acl = { AclEnum.PUBLISH_ARTICLE }, position = 0)
-	@RequestMapping(value = "/breakArticle/{channelId}")
-	public String breakArticle(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections, RedirectAttributes redirectAttributes){
+	@RequestMapping(value = "/break/{username}_{channelId}")
+	public String breakArticle(@PathVariable(value = "username")String username, @PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections, RedirectAttributes redirectAttributes){
 		String message = "文章退回到重新编辑状态";
 		try{
-			articleMainService.breakArticleMain(selections, channelId);
+			articleMainService.breakArticleMain(username, selections, channelId);
 			message += SUCCESS;
 		}catch(Exception e){
 			message += FAILURE;

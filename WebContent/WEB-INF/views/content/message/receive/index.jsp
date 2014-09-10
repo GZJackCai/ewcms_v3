@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -14,9 +15,9 @@
 		$(function(){
 			_msgReceiveIndex.init({
 				queryUrl : '${ctx}/content/message/receive/query',
-				deleteUrl : '${ctx}/content/message/receive/delete',
-				markReadUrl : '${ctx}/content/message/receive/markread',
-				unReadUrl : '${ctx}/content/message/receive/unread',
+				deleteUrl : '${ctx}/content/message/receive/delete/<shiro:principal property="loginName"/>',
+				markReadUrl : '${ctx}/content/message/receive/markread/<shiro:principal property="loginName"/>',
+				unReadUrl : '${ctx}/content/message/receive/unread/<shiro:principal property="loginName"/>',
 				detailUrl : '${ctx}/content/message/detail/index'
 			});
 		});

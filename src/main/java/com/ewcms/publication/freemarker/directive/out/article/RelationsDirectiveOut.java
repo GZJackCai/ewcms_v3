@@ -6,7 +6,6 @@
 
 package com.ewcms.publication.freemarker.directive.out.article;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import com.ewcms.content.document.model.Article;
-import com.ewcms.content.document.model.Relation;
+import com.ewcms.publication.dao.ArticlePublishDaoable;
 import com.ewcms.publication.freemarker.directive.out.HtmlDirectiveOut;
+import com.ewcms.publication.module.ArticleInfo;
 import com.ewcms.util.EmptyUtil;
 
 import freemarker.core.Environment;
@@ -29,23 +28,26 @@ import freemarker.template.TemplateException;
  */
 public class RelationsDirectiveOut extends HtmlDirectiveOut {
     private static final Logger logger = LoggerFactory.getLogger(RelationsDirectiveOut.class);
+    
+    private final ArticlePublishDaoable articlePublishDao;
+    
+    public RelationsDirectiveOut(ArticlePublishDaoable articlePublishDao){
+    	this.articlePublishDao = articlePublishDao;
+    }
    
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Object loopValue(Object value, Environment env, Map params)throws TemplateException {
         Assert.notNull(value);
-        List<Article> articles = new ArrayList<Article>();
-        for(Relation r : (List<Relation>)value){
-             articles.add(r.getArticle());
-        }
+        List<ArticleInfo> articles =getRelation((List<Long>)value);
         return articles;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public String constructOut(Object value, Environment env, Map params)throws TemplateException {
         Assert.notNull(value);
-        List<Relation> list = (List<Relation>)value;
+        List<Long> list = (List<Long>)value;
         if(EmptyUtil.isCollectionEmpty(list)){
             logger.debug("Relateds is empty");
             return null;
@@ -59,8 +61,8 @@ public class RelationsDirectiveOut extends HtmlDirectiveOut {
         String s = getStyleValue(params);
         if(EmptyUtil.isNotNull(s)){builder.append(" style=\"").append(s).append("\"");}
         builder.append(">");
-        for(Relation r : list){
-            Article article = r.getArticle();
+        List<ArticleInfo> articles = this.getRelation(list);
+        for(ArticleInfo article : articles){
             builder.append("<li>");
             builder.append("<a href=\"").append(article.getUrl()).append("\" title=\"").append(article.getTitle()).append("\" target=\"_blank\">");
             builder.append(article.getTitle());
@@ -71,6 +73,8 @@ public class RelationsDirectiveOut extends HtmlDirectiveOut {
         
         return builder.toString();
     }
-    
-    
+   
+    private List<ArticleInfo> getRelation(List<Long> ids){
+    	return articlePublishDao.findPublish(ids);
+    }
 }

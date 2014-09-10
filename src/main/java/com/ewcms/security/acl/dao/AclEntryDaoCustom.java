@@ -25,6 +25,9 @@ public interface AclEntryDaoCustom {
 	@Query("select e from AclEntry e left join e.aclSid s where s.sid=?1 or s.sid in(?2)")
 	List<AclEntry> findByPermission(String loginName, List<String> roleNames);
 	
+	@Query("select e from AclEntry e left join e.aclSid s where s.sid=?1")
+	List<AclEntry> findByPermission(String loginName);
+	
 	@Query("select e from AclEntry e left join e.aclIdEntity i left join e.aclSid s where i.objectId=?1 and (s.sid=?2 or s.sid in (?3))")
 	List<AclEntry> findByMask(Long idEntityId, String loginName, List<String> roleNames);
 	

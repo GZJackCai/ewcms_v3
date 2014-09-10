@@ -13,27 +13,30 @@ import com.ewcms.publication.PublishException;
 /**
  * 空的生成规则
  * 
- * @author wangwei
+ * @author <a href="hhywangwei@gmail.com">王伟</a>
  */
 public class NullUriRule implements UriRuleable {
 
     @Override
-    public void setParameters(Map<String, Object> parameters) {
-        
+    public void setInitParameters(Map<String, Object> parameters) {
+        //none instance
     }
 
     @Override
-    public void putParameter(String parameter, Object value) {
-        
+    public void putInitParameter(String parameter, Object value) {
+        //none instance
     }
 
     @Override
-    public String getUri() throws PublishException {
-        return "";
+    public String uri(Map<String,Object> parameters) throws PublishException {
+        //none instance
+    	return null;
     }
 
     @Override
     public String getPatter() {
-        return "";
+    	//none instance
+        return null;
     }
+
 }

@@ -8,8 +8,8 @@
   <head>
 	<title>模板资源管理</title>	
 	<%@ include file="../../../taglibs.jsp" %>
-	<script type="text/javascript" src="${ctx}/static/views/site/template/index.js"></script>
-	<script>
+	<script type="text/javascript" src="${ctx}/static/views/site/template/source/index.js"></script>
+	<script type="text/javascript">
 		var _templateSourceIndex = new TemplateSourceIndex('#tt2');
 		$(function(){
 			_templateSourceIndex.init({

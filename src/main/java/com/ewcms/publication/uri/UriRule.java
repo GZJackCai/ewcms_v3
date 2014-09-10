@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -26,31 +25,31 @@ import com.ewcms.publication.freemarker.GlobalVariable;
 /**
  * 实现统一资源地址规则实现
  * 
- * @author wangwei
+ * @author <a href="hhywangwei@gmail.com">王伟</a>
  */
 public class UriRule implements UriRuleable{
-
     private static final Logger logger = LoggerFactory.getLogger(UriRule.class);
     
     private static final DateFormat DEFAULT_DATA_FORMAT =new SimpleDateFormat("yyyy-MM-dd");
     private static final DecimalFormat DEFAULT_NUMBER_FORMAT = new DecimalFormat("#");
     private static final Map<String,String> ALIAS_PARAMETERS = initAliasParameters();
+    private static final String URL_SPACE = "/";
     
     private final RuleParseable ruleParse ;
-    private Map<String,Object> parameters = initParameters();
+    private Map<String,Object> initParameters = initParameters();
     
     public UriRule(RuleParseable ruleParse){
         this.ruleParse = ruleParse;
     }
     
     @Override
-    public void setParameters(Map<String,Object> ps){
-        parameters.putAll(ps);
+    public void setInitParameters(Map<String,Object> ps){
+        initParameters.putAll(ps);
     }
         
     @Override
-    public void putParameter(String parameter,Object value){
-        parameters.put(parameter, value);
+    public void putInitParameter(String parameter,Object value){
+        initParameters.put(parameter, value);
     }
     
     @Override
@@ -59,13 +58,17 @@ public class UriRule implements UriRuleable{
     }
     
     @Override
-    public String getUri()throws PublishException {
+    public String uri(Map<String,Object> parameters)throws PublishException {
         Assert.notNull(parameters);
 
         Map<String,String> variables = ruleParse.getVariables();
         if(variables.isEmpty()){
             return ruleParse.getPatter();
         }
+        
+        Map<String,Object> params = new HashMap<String,Object>();
+        params.putAll(parameters);
+        params.putAll(initParameters);
         
         String uri = ruleParse.getPatter();
         for(String name : variables.keySet()){
@@ -74,12 +77,11 @@ public class UriRule implements UriRuleable{
                 (format == null ?
                         String.format("${%s}", name): 
                         String.format("${%s?%s}", name,format));
-            Object value = getVariableValue(name,parameters);
+            Object value = getVariableValue(name,params);
             String formatValue = formatValue(value,format);
             uri = StringUtils.replace(uri, exp, formatValue);
         }
-        uri = uri.replace("\\", "/").replace("//", "/");
-        return FilenameUtils.normalize(uri);
+        return URL_SPACE + StringUtils.join(StringUtils.split(uri,URL_SPACE),URL_SPACE);
     }
     
     /**
@@ -96,7 +98,7 @@ public class UriRule implements UriRuleable{
      * 得到变量的值
      * 
      * @param variable 变量名称
-     * @param parameters 参数集合
+     * @param initParameters 参数集合
      * @return 变量值
      * @throws PublishException
      */
@@ -162,25 +164,25 @@ public class UriRule implements UriRuleable{
     private static Map<String,String> initAliasParameters(){
         Map<String,String> map = new HashMap<String,String>();
         
-        map.put("a", GlobalVariable.ARTICLE.toString());
-        map.put("c", GlobalVariable.CHANNEL.toString());
-        map.put("s", GlobalVariable.SITE.toString());
-        map.put("p", GlobalVariable.PAGE_NUMBER.toString());
+        map.put("a", GlobalVariable.ARTICLE.getVariable());
+        map.put("c", GlobalVariable.CHANNEL.getVariable());
+        map.put("s", GlobalVariable.SITE.getVariable());
+        map.put("p", GlobalVariable.PAGE_NUMBER.getVariable());
         
-        map.put("article", GlobalVariable.ARTICLE.toString());
-        map.put("channel", GlobalVariable.CHANNEL.toString());
-        map.put("site", GlobalVariable.SITE.toString());
-        map.put("page", GlobalVariable.PAGE_NUMBER.toString());
+        map.put("article", GlobalVariable.ARTICLE.getVariable());
+        map.put("channel", GlobalVariable.CHANNEL.getVariable());
+        map.put("site", GlobalVariable.SITE.getVariable());
+        map.put("page", GlobalVariable.PAGE_NUMBER.getVariable());
         
-        map.put("文章", GlobalVariable.ARTICLE.toString());
-        map.put("频道", GlobalVariable.CHANNEL.toString());
-        map.put("站点", GlobalVariable.SITE.toString());
-        map.put("页数", GlobalVariable.PAGE_NUMBER.toString());
+        map.put("文章", GlobalVariable.ARTICLE.getVariable());
+        map.put("频道", GlobalVariable.CHANNEL.getVariable());
+        map.put("站点", GlobalVariable.SITE.getVariable());
+        map.put("页数", GlobalVariable.PAGE_NUMBER.getVariable());
         
-        map.put(GlobalVariable.ARTICLE.toString(), GlobalVariable.ARTICLE.toString());
-        map.put(GlobalVariable.CHANNEL.toString(), GlobalVariable.CHANNEL.toString());
-        map.put(GlobalVariable.SITE.toString(), GlobalVariable.SITE.toString());
-        map.put(GlobalVariable.PAGE_NUMBER.toString(), GlobalVariable.PAGE_NUMBER.toString());
+        map.put(GlobalVariable.ARTICLE.getVariable(), GlobalVariable.ARTICLE.getVariable());
+        map.put(GlobalVariable.CHANNEL.getVariable(), GlobalVariable.CHANNEL.getVariable());
+        map.put(GlobalVariable.SITE.getVariable(), GlobalVariable.SITE.getVariable());
+        map.put(GlobalVariable.PAGE_NUMBER.getVariable(), GlobalVariable.PAGE_NUMBER.getVariable());
         
         map.put("now", "now");
         map.put("today", "now");

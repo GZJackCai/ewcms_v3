@@ -50,7 +50,7 @@ public class OperateTrackService {
 	}
 
 	public List<OperateTrack> findOperateTrackByArticleMainId(Long articleMainId) {
-		return operateTrackDao.findOperateTrackByArticleMainId(articleMainId);
+		return operateTrackDao.findByArticleMainIdOrderByIdDesc(articleMainId);
 	}
 
 	public OperateTrack findOperateTrackById(Long operateTrackId) {
@@ -58,7 +58,7 @@ public class OperateTrackService {
 	}
 
 	public void delOperateTrack(Long articleMainId) {
-		List<OperateTrack> operateTracks = operateTrackDao.findOperateTrackByArticleMainId(articleMainId);
+		List<OperateTrack> operateTracks = operateTrackDao.findByArticleMainIdOrderByIdDesc(articleMainId);
 		operateTrackDao.delete(operateTracks);
 	}
 	

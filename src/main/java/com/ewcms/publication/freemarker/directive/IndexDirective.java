@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
+import com.ewcms.util.EmptyUtil;
 import com.ewcms.publication.freemarker.FreemarkerUtil;
 import com.ewcms.publication.freemarker.GlobalVariable;
-import com.ewcms.util.EmptyUtil;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
@@ -51,7 +51,7 @@ public class IndexDirective implements TemplateDirectiveModel {
      * @throws TemplateException
      */
     private Integer getIndexValue(Environment env)throws TemplateException{
-        Integer index = FreemarkerUtil.getInteger(env, GlobalVariable.INDEX.toString());
+        Integer index = FreemarkerUtil.getInteger(env, GlobalVariable.INDEX.getVariable());
         return index;
     }
 }

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -21,17 +22,18 @@
     			treeUrl : '${ctx}/site/channel/tree',
     			operateTrackUrl : '${ctx}/content/document/operatetrack/index',
     			effectiveUrl : '${ctx}/content/document/article/reviewEffective/${channelId}',
-    			previewUrl : '${ctx}/template/preview?channelId=${channelId}',
+    			//previewUrl : '${ctx}/template/preview?channelId=${channelId}',
+    			previewUrl : '${ctx}/preview/article/1/${channelId}/',
     			topUrl : '${ctx}/content/document/article/top/${channelId}',
     			shareUrl : '${ctx}/content/document/article/share/${channelId}',
     			sortUrl : '${ctx}/content/document/article/sort/${channelId}',
     			isSortUrl : '${ctx}/content/document/article/isSort/${channelId}',
     			clearSortUrl : '${ctx}/content/document/article/clearSort/${channelId}',
-    			approveUrl : '${ctx}/content/document/article/approve/${channelId}',
-    			approveArticleUrl : '${ctx}/content/document/article/approveArticle/${channelId}',
+    			approveUrl : '${ctx}/content/document/article/approve/<shiro:principal property="loginName"/>_${channelId}',
+    			approveArticleUrl : '${ctx}/content/document/article/approveArticle/<shiro:principal property="loginName"/>_${channelId}',
     			publishUrl : '${ctx}/content/document/article/pubblish/${channelId}',
     			associateUrl : '${ctx}/content/document/article/associateRelease/${channelId}',
-    			breakUrl : '${ctx}/content/document/article/break/${channelId}',
+    			breakUrl : '${ctx}/content/document/article/break/<shiro:principal property="loginName"/>_${channelId}',
     			moveArticleUrl : '${ctx}/content/document/article/move/${channelId}',
     			copyArticleUrl : '${ctx}/content/document/article/copy/${channelId}',
     			reviewArticleUrl : '${ctx}/content/document/article/reviewArticle/${channelId}'

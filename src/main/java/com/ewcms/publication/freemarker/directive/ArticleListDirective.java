@@ -7,7 +7,6 @@
 package com.ewcms.publication.freemarker.directive;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,18 +14,17 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ewcms.content.document.model.Article;
+import com.ewcms.util.EmptyUtil;
+import com.ewcms.publication.dao.ArticlePublishDaoable;
+import com.ewcms.publication.dao.ChannelPublishDaoable;
 import com.ewcms.publication.freemarker.FreemarkerUtil;
 import com.ewcms.publication.freemarker.GlobalVariable;
-import com.ewcms.publication.service.ArticlePublishService;
-import com.ewcms.publication.service.ChannelPublishService;
-import com.ewcms.site.model.Channel;
-import com.ewcms.site.model.Site;
-import com.ewcms.util.EmptyUtil;
+import com.ewcms.publication.module.ArticleInfo;
+import com.ewcms.publication.module.Channel;
+import com.ewcms.publication.module.Site;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
-import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -38,10 +36,9 @@ import freemarker.template.TemplateModelException;
  * 
  * @author wangwei
  */
-public class ArticleListDirective implements TemplateDirectiveModel {
+public class ArticleListDirective extends ForeachDirective {
     private static final Logger logger = LoggerFactory.getLogger(ArticleListDirective.class);
     
-    private static final Integer DEFAULT_ROW = 20;
     private static final Integer DEFAULT_PAGE_NUMBER = 0;
     private static final Boolean DEFAULT_ABSOLUTE = Boolean.FALSE;
     
@@ -50,95 +47,75 @@ public class ArticleListDirective implements TemplateDirectiveModel {
     private static final String NAME_PARAM_NAME = "name";
     private static final String TOP_PARAM_NAME = "top";
     private static final String ABSOLUTE_PARAM_NAME = "absolute";
-    private static final String CHILD_PARAM_NAME="child";
+    
+    private final ArticlePublishDaoable articlePublishDao;
+    private final ChannelPublishDaoable channelPublishDao;
     
     private String channelParam = CHANNEL_PARAM_NAME;
     private String rowParam = ROW_PARAM_NAME;
     private String nameParam = NAME_PARAM_NAME;
     private String topParam = TOP_PARAM_NAME;
     private String absoluteParam = ABSOLUTE_PARAM_NAME;
-    private String childParam = CHILD_PARAM_NAME;
-
-    private ArticlePublishService articlePublishService;
-    private ChannelPublishService channelPublishService;
     
-    public ArticleListDirective(ChannelPublishService channelPublishService,ArticlePublishService articlePublishService){
-        this.articlePublishService  = articlePublishService;
-        this.channelPublishService = channelPublishService;
+    public ArticleListDirective(ChannelPublishDaoable channelPublishDao,ArticlePublishDaoable articlePublishDao){
+        this.articlePublishDao  = articlePublishDao;
+        this.channelPublishDao = channelPublishDao;
     }
     
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body) throws TemplateException, IOException {
-    	boolean child = getChildValue(params);
-    	
-    	Long siteId = getSiteIdValue(env);
-
-        Channel channel = getChannel(env, params, siteId);
+	@Override
+	@SuppressWarnings("rawtypes")
+	protected List<Object> getValues(Environment env, Map params)throws TemplateException {
+        Channel channel = getChannel(env, params);
         Channel currentChannel = getCurrentChannel(env);
-        if(channel == null){
-            channel = currentChannel;
+        channel = channel == null ? currentChannel : channel;
+        boolean current = channel.equals(currentChannel);
+        
+        List<ArticleInfo> articles = null;
+        if(channel == null || current){
+        	articles = getArticleListValue(params);
+        }
+        if(articles == null ){
+        	articles = findArticles(env,params,channel,current);
         }
         
-        boolean debug = FreemarkerUtil.isDebug(env);
-        if (!debug && !channel.getPublicenable()) {
-            logger.debug("Channel's id is {},it is not release.", channel.getId());
-            return;
-        }
-
+        List<Object> l =  new ArrayList<Object>();
+        l.addAll(articles);
+        
+        return l;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	private List<ArticleInfo> findArticles(Environment env, Map params,Channel channel,boolean isCurrentChannel)throws TemplateException{
+		
         Integer row = getRowValue(params,channel,env);
-        Integer pageNumber = getPageNumberValue(env ,channel.equals(currentChannel) ,getAbsoluteValue(params));
+        Integer page = getPageValue(env ,isCurrentChannel ,getAbsoluteValue(params));
         Boolean top = getTopValue(params);
 
-        List<Article> articles = new ArrayList<Article>();
-        if (child){
-        	articles = articlePublishService.findChildChannelArticleReleasePage(channel.getId(), pageNumber, row, top);
-        }else{
-        	articles = articlePublishService.findArticleReleasePage(channel.getId(), pageNumber, row,top);
-        }
+	    return  articlePublishDao.findPublish(channel.getId(), page, row,top);
+	}
+	
+	@Override
+	@SuppressWarnings("rawtypes")
+	protected void setVariable(Environment env, Map params, Object value)throws TemplateException {
+		 String name = getNameValue(params);	
+		 FreemarkerUtil.setVariable(env, name, value);
+	}
 
-        if(EmptyUtil.isArrayNotEmpty(loopVars)){
-            loopVars[0] = env.getObjectWrapper().wrap(articles);
-            if(EmptyUtil.isNull(body)){
-                logger.warn("Body is null");
-            }else{
-                body.render(env.getOut());    
-            }
-        }else if (EmptyUtil.isNotNull(body)) {
-            String name = getNameValue(params);
-            Writer writer = env.getOut();
-            int start = pageNumber * row;
-            for (int i = 0; i < articles.size(); i++) {
-                Article article = articles.get(i);
-                FreemarkerUtil.setVariable(env, name, article);
-                FreemarkerUtil.setVariable(env, GlobalVariable.INDEX.toString(), Integer.valueOf(start+i+1));
-                body.render(writer);
-                FreemarkerUtil.removeVariable(env, GlobalVariable.INDEX.toString());
-                FreemarkerUtil.removeVariable(env, name);
-            }
-            writer.flush();
-        } else {
-            logger.warn("Body and loopVars are all null");
-        }
-    }
-
-    /**
-     * 得到当前站点编号
-     * 
-     * @param env 
-     *          Freemarker环境
-     * @return
-     * @throws TemplateException
-     */
-    private Long getSiteIdValue(final Environment env) throws TemplateException {
-        Site site = (Site) FreemarkerUtil.getBean(env, GlobalVariable.SITE.toString());
-        if(EmptyUtil.isNull(site)){
-            logger.error("Site is null in freemarker variable");
-            throw new TemplateModelException("Site is null in freemarker variable");
-        }
-        logger.debug("Site is {}",site);
-        return site.getId();
-    }
+	@Override
+	@SuppressWarnings("rawtypes")
+	protected void removeVariable(Environment env, Map params)throws TemplateException {
+		String name = getNameValue(params);	
+		FreemarkerUtil.removeVariable(env, name);		
+	}
+	
+	@Override
+	@SuppressWarnings("rawtypes")
+	protected void executeNoneBody(Environment env, Map params,
+			TemplateModel[] loopVars, TemplateDirectiveBody body)throws TemplateException, IOException {
+		
+		//TODO 添加默认显示格式
+		logger.warn("Body and loopVars are all null");
+	}
     
     /**
      * 值得到频道
@@ -147,25 +124,22 @@ public class ArticleListDirective implements TemplateDirectiveModel {
      *          Freemarker环境
      * @param params
      *          标签参数集合
-     * @param siteId 
-     *          站点编号
-     * @param name
-     *          标签属性名
      * @return
      * @throws TemplateException
      */
     @SuppressWarnings("rawtypes")
-    private Channel getChannel(Environment env,Map params,Long siteId)throws TemplateException{
+    private Channel getChannel(Environment env,Map params)throws TemplateException{
         final String name = channelParam;
         
         Channel channel =null;
         Long id = FreemarkerUtil.getLong(params, name);
+        Site site = getCurrentSite(env);
         if (EmptyUtil.isNotNull(id)) {
             logger.debug("Channel's id is {}",id);
-            channel = channelPublishService.getChannel(siteId,id);
+            channel = channelPublishDao.findPublishOne(site.getId(),id);
             if(channel == null){
                 logger.error("Channel's id is {},it is not exist.",id);
-                throw new TemplateModelException("Channel id is "+id+",it is not exist");
+                throw new TemplateModelException("Channel id is "+ id +",it is not exist");
             }
             return channel;
         }
@@ -178,8 +152,7 @@ public class ArticleListDirective implements TemplateDirectiveModel {
                 logger.debug("Channel is {}",channel.toString());
                 return channel;
             }
-            value = UriFormat.formatChannelPath(value);
-            channel = channelPublishService.getChannelByUrlOrPath(siteId, value);
+            channel = channelPublishDao.findPublishByUri(site.getId(), value);
             if(channel == null){
                 logger.error("Channel's path or variable is {},it is not exist.",value);
                 throw new TemplateModelException("Channel's path or variable is "+value+",it is not exist");
@@ -187,26 +160,11 @@ public class ArticleListDirective implements TemplateDirectiveModel {
             return channel;
         }
         
+        channel = getCurrentChannel(env);
+        
         return channel;
     }
    
-    /**
-     * 得到当前频道
-     *
-     * @param env Environment
-     * @return
-     * @throws TemplateModelException
-     */
-    private Channel getCurrentChannel(final Environment env) throws TemplateException {
-        String value = GlobalVariable.CHANNEL.toString();
-        Channel channel = (Channel) FreemarkerUtil.getBean(env, value);
-        if (channel == null) {
-            logger.error("Default channel is null");
-            throw new TemplateModelException("Default channel is null");
-        }
-        return channel;
-    }
-    
     /**
      * 得到显示行数
      *
@@ -218,21 +176,11 @@ public class ArticleListDirective implements TemplateDirectiveModel {
     @SuppressWarnings("rawtypes")
     private Integer getRowValue(Map params,Channel channel,Environment env) throws TemplateException {
         Integer row = FreemarkerUtil.getInteger(params, rowParam);
-        if(row != null){
-            if(row > 0){
-                return row;
-            }else{
-                logger.error("Row must than 0,but row is {}",row);
-                throw new TemplateModelException("Row must than 0");
-            }
+        row = (row == null || row < 0) ? 0 : row; 
+        if(row == 0){
+        	row = channel.getListSize();
         }
-        
-        Channel current = (Channel) FreemarkerUtil.getBean(env, GlobalVariable.CHANNEL.toString());
-        if(channel.equals(current)){
-            return channel.getListSize();
-        }else{
-            return DEFAULT_ROW;
-        }
+        return row; 
     }
 
     /**
@@ -244,9 +192,15 @@ public class ArticleListDirective implements TemplateDirectiveModel {
      * @throws TemplateException
      */
     @SuppressWarnings("rawtypes")
-    private String getNameValue(final Map params) throws TemplateException {
-        String value = FreemarkerUtil.getString(params, nameParam);
-        return value == null ? GlobalVariable.ARTICLE.toString() : value;
+    protected String getNameValue(Map params) throws TemplateException {
+    	 String value = FreemarkerUtil.getString(params, nameParam);
+         return value == null ? GlobalVariable.ARTICLE.toString() : value;
+    }
+     
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    private List<ArticleInfo> getArticleListValue(final Map params) throws TemplateException {
+        List value =FreemarkerUtil.getSequence(params, GlobalVariable.ARTICLE_LIST.getVariable());
+        return (List<ArticleInfo>)value;
     }
 
     /**
@@ -280,12 +234,7 @@ public class ArticleListDirective implements TemplateDirectiveModel {
         Boolean value = FreemarkerUtil.getBoolean(params, absoluteParam);
         return value == null ? DEFAULT_ABSOLUTE : value;
     }
-    
-    @SuppressWarnings("rawtypes")
-    private boolean getChildValue(Map params) throws TemplateException {
-        Boolean value = FreemarkerUtil.getBoolean(params, childParam);
-        return value == null ? false : value;
-    }
+
     /**
      * 得到显示页面数
      *
@@ -298,13 +247,19 @@ public class ArticleListDirective implements TemplateDirectiveModel {
      * @return
      * @throws TemplateException
      */
-    private Integer getPageNumberValue(Environment env,boolean current,boolean absolute) throws TemplateException {
+    private Integer getPageValue(Environment env,boolean current,boolean absolute) throws TemplateException {
         if(!current || absolute){
             return DEFAULT_PAGE_NUMBER;
         }
-        Integer number = FreemarkerUtil.getInteger(env, GlobalVariable.PAGE_NUMBER.toString());
+        Integer number = FreemarkerUtil.getInteger(env, GlobalVariable.PAGE_NUMBER.getVariable());
         logger.debug("Page is {}",number);
         return number == null ? DEFAULT_PAGE_NUMBER : number;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    @Override
+	protected boolean getCacheValue(Map params) throws TemplateException {
+    	return false;
     }
     
     /**
@@ -350,14 +305,5 @@ public class ArticleListDirective implements TemplateDirectiveModel {
      */
     public void setAbsoluteParam(String absoluteParam) {
         this.absoluteParam = absoluteParam;
-    }
-    
-    /**
-     * 设置标签是否是子频道参数名
-     * 
-     * @param paramName 参数名称
-     */
-    public void setChildParam(String childParam) {
-        this.childParam = childParam;
     }
 }

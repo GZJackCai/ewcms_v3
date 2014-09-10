@@ -6,17 +6,17 @@
 
 package com.ewcms.publication.freemarker.directive.page;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.util.Assert;
-
-import com.ewcms.publication.PublishException;
 import com.ewcms.publication.freemarker.FreemarkerUtil;
 import com.ewcms.publication.freemarker.GlobalVariable;
+import com.ewcms.publication.freemarker.directive.BaseDirective;
+import com.ewcms.publication.module.Article;
 import com.ewcms.publication.uri.UriRuleable;
 
 import freemarker.core.Environment;
-import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModelException;
 
@@ -25,10 +25,10 @@ import freemarker.template.TemplateModelException;
  * <br>
  * 主要为标签得到通用参数值如：页数、总页数。
  * 
- * @author wangwei
+ * @author  <a href="hhywangwei@gmail.com">王伟</a>
  *
  */
-public abstract class SkipBaseDirective implements TemplateDirectiveModel {
+public abstract class SkipBaseDirective extends BaseDirective {
 
     /**
      * 得到当前页数
@@ -76,51 +76,34 @@ public abstract class SkipBaseDirective implements TemplateDirectiveModel {
        StringBuilder builder = new StringBuilder();
        for(PageOut page : pages){
            if(page.isActive()){
-               builder.append("<a href='").append(page.getUrl()).append("'>")
-                         .append(page.getLabel())
-                         .append("</a>")
-                         .append("&nbsp;");
+               builder.append("<a href='").
+                       append(page.getUrl()).append("'>").
+                       append(page.getLabel()).
+                       append("</a>").
+                       append("&nbsp;");
            }else{
-               builder.append(page.getLabel()).append("&nbsp;");
+               builder.append(page.getLabel()).
+                       append("&nbsp;");
            }
        }
        return builder.toString();
     }
     
-    static class GeneratorUrl{
-        
-        private UriRuleable rule;
-        private Integer currentPage;
-        
-        GeneratorUrl(UriRuleable rule,Integer currentPage){
-            Assert.notNull(rule);
-            this.rule = rule;
-            this.currentPage = currentPage;
-        }
-        
-        /**
-         * 得到链接地址
-         * 
-         * @param rule 
-         *         uri生成规则
-         * @param page
-         *         页数
-         * @return
-         * @throws TemplateException
-         */
-        public String getUriValue(Integer page) throws TemplateException {
-            try{
-                setPage(page);
-                String uri =  rule.getUri(); 
-                setPage(currentPage);
-                return uri;
-            }catch(PublishException e){
-                throw new TemplateModelException("Generator uri error:{}",e);
-            }
-        }
-        
-        private void setPage(Integer page){
-            rule.putParameter(GlobalVariable.PAGE_NUMBER.toString(), page);
-        }
+    protected Map<String,Object> getUriParams(Environment env) throws TemplateException{
+    	Map<String,Object> params = new HashMap<String,Object>();
+    	
+    	params.put(GlobalVariable.SITE.getVariable(), getCurrentSite(env));
+    	params.put(GlobalVariable.CHANNEL.getVariable(), getCurrentChannel(env));
+    	Article a =(Article)FreemarkerUtil.getBean(env, GlobalVariable.ARTICLE.getVariable());
+    	if(a != null){
+    		params.put(GlobalVariable.ARTICLE.getVariable(), FreemarkerUtil.getBean(env, GlobalVariable.ARTICLE.getVariable()));	
+    	}
+    	return params;
+    }
+    
+    @SuppressWarnings("rawtypes")
+    @Override
+	protected boolean getCacheValue(Map params) throws TemplateException {
+    	return false;
     }
 }

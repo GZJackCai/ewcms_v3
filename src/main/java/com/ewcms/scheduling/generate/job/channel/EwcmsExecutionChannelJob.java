@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ewcms.site.model.Channel;
 import com.ewcms.publication.PublishException;
-import com.ewcms.publication.SchedulePublishFac;
+import com.ewcms.publication.PublishServiceable;
 import com.ewcms.scheduling.generate.job.BaseEwcmsExecutionJob;
 import com.ewcms.scheduling.generate.job.channel.model.EwcmsJobChannel;
 
@@ -25,7 +25,7 @@ public class EwcmsExecutionChannelJob extends BaseEwcmsExecutionJob {
     private static final Logger logger = LoggerFactory.getLogger(EwcmsExecutionChannelJob.class);
     
     public static final String JOB_CHANNEL_FAC = "ewcmsJobChannelFac";
-    public static final String SCHEDULE_PUBLISH_FAC = "schedulePublishFac";
+    public static final String SCHEDULE_PUBLISH_FAC = "publishService";
 
     private EwcmsJobChannel ewcmsJobChannel;
     
@@ -39,7 +39,7 @@ public class EwcmsExecutionChannelJob extends BaseEwcmsExecutionJob {
 	            
 				logger.info("定时发布 {} 频道开始...", channelName);
 				try{
-					getSchedulePublishFac().publishChannel(channel.getId(), subChannel);
+					getPublishService().pubChannel(channel.getSite().getId(), channel.getId(), subChannel, false);
 				}catch (PublishException e){
 					logger.error("定时发布 {} 频道发布异常", channelName);
 				}
@@ -52,8 +52,8 @@ public class EwcmsExecutionChannelJob extends BaseEwcmsExecutionJob {
         ewcmsJobChannel = null;
     }
 
-    private SchedulePublishFac getSchedulePublishFac(){
-    	return (SchedulePublishFac) applicationContext.getBean(SCHEDULE_PUBLISH_FAC);
+    private PublishServiceable getPublishService(){
+    	return (PublishServiceable) applicationContext.getBean(SCHEDULE_PUBLISH_FAC);
     }
     
     private EwcmsJobChannelFacable getEwcmsJobChannelFac() {

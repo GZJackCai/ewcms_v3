@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.ewcms.publication.deploy.DeployOperatorable;
+import com.ewcms.publication.deploy.operator.FileOperatorable;
 import com.ewcms.site.model.Organ;
 import com.ewcms.site.model.Site;
 import com.ewcms.site.model.SiteServer;
@@ -30,6 +30,8 @@ public class SiteController {
 	private OrganService organService;
 	@Autowired
 	private SiteService siteService;
+	@Autowired
+	private FileOperatorable localFileOperator;
 	
 	@RequiresPermissions("site:server")
 	@RequestMapping(value = "/serverSite/{siteId}")
@@ -151,13 +153,12 @@ public class SiteController {
 	public @ResponseBody String siteServerTest(@ModelAttribute(value = "site") Site site) {
 		try {
 			SiteServer siteServer = site.getSiteServer();
-			DeployOperatorable output = siteServer.getOutputType().deployOperator(siteServer);
 			if(siteServer.getPassword() == null || siteServer.getPassword().length() == 0){
 				if(siteServer.getId() != null){
 					siteServer.setPassword(siteService.getSite(site.getId()).getSiteServer().getPassword());
 				}
 			}
-			output.test();
+			localFileOperator.test(site.getSiteServer().getPath());
 			return "连接发布服务器成功";
 		} catch (Exception e) {
 			String errorMSG = "连接异常";

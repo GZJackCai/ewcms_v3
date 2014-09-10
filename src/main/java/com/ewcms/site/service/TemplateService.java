@@ -2,7 +2,6 @@ package com.ewcms.site.service;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -27,7 +26,6 @@ import com.ewcms.content.history.History;
 import com.ewcms.content.history.model.HistoryModel;
 import com.ewcms.content.history.service.HistoryModelService;
 import com.ewcms.content.history.util.HistoryUtil;
-import com.ewcms.publication.PublishException;
 import com.ewcms.publication.preview.PreviewServiceable;
 import com.ewcms.site.dao.ChannelDao;
 import com.ewcms.site.dao.TemplateDao;
@@ -76,9 +74,6 @@ public class TemplateService {
 	public Long updTemplate(Template template){
 		templateDao.save(template);	
 		updPubPath(template);
-		
-		verify(template.getId());
-		
 		return template.getId();
 	}
 	
@@ -445,20 +440,13 @@ public class TemplateService {
 		channelDao.save(channel);
 	}
 	
+	@Transactional(readOnly = false)
 	public Boolean verify(Long templateId){
-		Boolean result = false;
-		
 		Template template = templateDao.findOne(templateId);
-		if (template.getType() == null) return result;
-		try{
-			previewService.viewTemplate(new ByteArrayOutputStream(), templateId, true);
-			result = true;
-		}catch (PublishException e){
-		}
-		
-		template.setIsVerify(result);
-		templateDao.save(template);
-		return result;
+		if (template.getType() == null) return false;
+		return previewService.verifyTemplate(template.getSite().getId(), template.getChannelId(), template.getId());
+//		template.setIsVerify(result);
+//		templateDao.save(template);
 	}
 	
 	private void updAppChannel(Long channelId){
@@ -546,5 +534,4 @@ public class TemplateService {
 		Map<String, Object> result = historyModelService.searchTemplate(params, templateId);
     	return HistoryUtil.resolve(result);
 	}
-
 }

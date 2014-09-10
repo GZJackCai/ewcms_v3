@@ -27,8 +27,8 @@ public class MsgDetailController {
 	@Autowired
 	private MsgSendService msgSendService;
 
-	@RequestMapping(value = "/index/{id}_{type}")
-	public String index(@PathVariable(value = "id") Long id, @PathVariable(value = "type") String type, Model model){
+	@RequestMapping(value = "/index/{username}_{id}_{type}")
+	public String index(@PathVariable(value = "username")String username, @PathVariable(value = "id") Long id, @PathVariable(value = "type") String type, Model model){
 		if (type.toLowerCase().equals("notice")){
 			MsgSend msgSend = msgSendService.findMsgSend(id);
 			model.addAttribute("title", msgSend.getTitle());
@@ -48,7 +48,7 @@ public class MsgDetailController {
 			model.addAttribute("title", msgReceive.getMsgContent().getTitle());
 			model.addAttribute("detail", msgReceive.getMsgContent().getDetail());
 			model.addAttribute("results", null);
-			msgRecieveService.readMsgReceive(id);
+			msgRecieveService.readMsgReceive(username, id);
 		}
 		return "content/message/detail/index";
 	}

@@ -7,7 +7,7 @@
 package com.ewcms.web.filter.render;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.PrintWriter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.ewcms.publication.PublishException;
 import com.ewcms.publication.preview.PreviewServiceable;
+import com.ewcms.util.EwcmsContextUtil;
 
 /**
  * 返回指定预览页面
@@ -33,10 +34,10 @@ public class PreviewRender implements Renderable{
     private static final String PAGE_NUMBER_PARAM = "page";
     private static final String MOCK_PARAM = "mock";
     
-    private PreviewServiceable preview;
+    private PreviewServiceable previewService;
     
-    public PreviewRender(PreviewServiceable preview){
-        this.preview = preview;
+    public PreviewRender(PreviewServiceable previewService){
+        this.previewService = previewService;
     }
     
     private Long getChannelId(HttpServletRequest request){
@@ -85,34 +86,35 @@ public class PreviewRender implements Renderable{
      * @param e
      * @throws 
      */
-    private void renderError(OutputStream stream,Exception e)throws IOException{
-        stream.write(e.getMessage().getBytes());
-        stream.flush();
+    private void renderError(PrintWriter printWriter, Exception e)throws IOException{
+    	printWriter.write(e.getMessage());
+    	printWriter.flush();
     }
     
-    @Override
+   @Override
     public boolean render(HttpServletRequest request,HttpServletResponse response) throws IOException {
        
         if(skip(request,response)){
             return false;
         }
         
-        OutputStream stream = response.getOutputStream();
+        Long siteId = EwcmsContextUtil.getCurrentSiteId();
+        Long channelId = getChannelId(request);
         Long templateId = getTemplateId(request);
+        PrintWriter printWriter = response.getWriter();
         try{
             if(templateId != null){
                 Boolean mock = isMock(request);
-                preview.viewTemplate(stream, templateId, mock);
+                previewService.viewTemplate(printWriter, siteId, channelId, templateId, mock); 
             }else{
-            	Long channelId = getChannelId(request);
                 Long articleId = getArticleId(request);
                 Integer pageNumber = getPageNumber(request);
-                preview.viewArticle(stream, channelId, articleId, pageNumber);
+                previewService.viewArticle(printWriter, siteId, channelId, articleId, pageNumber);
             }
             return true;
         }catch(PublishException e){
             logger.warn("Preview is error: {}", e.toString());
-            renderError(stream,e);
+            renderError(printWriter, e);
             return false;
         }
     }

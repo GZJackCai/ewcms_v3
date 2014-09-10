@@ -125,7 +125,7 @@ public class MsgSend implements Serializable {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-
+	
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
 	public Date getSendTime() {
 		return sendTime;

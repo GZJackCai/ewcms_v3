@@ -6,9 +6,9 @@
 
 package com.ewcms.publication.freemarker.directive.page;
 
+import com.ewcms.util.EmptyUtil;
 import com.ewcms.publication.freemarker.FreemarkerUtil;
 import com.ewcms.publication.freemarker.GlobalVariable;
-import com.ewcms.util.EmptyUtil;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateException;
@@ -20,7 +20,7 @@ import freemarker.template.TemplateModelException;
  * 
  * 得到当前页数和总页数
  * 
- * @author wangwei
+ * @author  <a href="hhywangwei@gmail.com">王伟</a>
  */
 public class PageUtil {
     

@@ -6,190 +6,301 @@
 
 package com.ewcms.publication;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import com.ewcms.publication.service.ArticlePublishService;
-import com.ewcms.publication.service.ChannelPublishService;
-import com.ewcms.publication.service.ResourcePublishService;
-import com.ewcms.publication.service.SitePublishService;
-import com.ewcms.publication.service.TemplatePublishService;
-import com.ewcms.publication.service.TemplateSourcePublishService;
-import com.ewcms.publication.task.TaskException;
-import com.ewcms.publication.task.TaskRegistryable;
+import com.ewcms.publication.dao.ArticlePublishDaoable;
+import com.ewcms.publication.dao.ChannelPublishDaoable;
+import com.ewcms.publication.dao.PublishDaoable;
+import com.ewcms.publication.dao.ResourcePublishDaoable;
+import com.ewcms.publication.dao.SitePublishDaoable;
+import com.ewcms.publication.dao.TemplatePublishDaoable;
+import com.ewcms.publication.dao.TemplateSourcePublishDaoable;
+import com.ewcms.publication.module.Channel;
+import com.ewcms.publication.module.Site;
+import com.ewcms.publication.module.Template;
+import com.ewcms.publication.module.Template.TemplateType;
+import com.ewcms.publication.publish.PublishRunnerable;
+import com.ewcms.publication.publish.SimplePublishRunner;
 import com.ewcms.publication.task.Taskable;
-import com.ewcms.publication.task.impl.ChannelTask;
-import com.ewcms.publication.task.impl.DetailTask;
-import com.ewcms.publication.task.impl.ResourceTask;
-import com.ewcms.publication.task.impl.SiteTask;
-import com.ewcms.publication.task.impl.TemplateSourceTask;
-import com.ewcms.publication.task.impl.TemplateTask;
-import com.ewcms.site.model.Channel;
-import com.ewcms.site.model.Site;
-import com.ewcms.site.model.Template;
-import com.ewcms.site.model.Template.TemplateType;
+import com.ewcms.publication.task.generator.ChannelTask;
+import com.ewcms.publication.task.generator.DetailChannelTask;
+import com.ewcms.publication.task.generator.DetailTask;
+import com.ewcms.publication.task.generator.GenTaskBase;
+import com.ewcms.publication.task.generator.HomeTask;
+import com.ewcms.publication.task.generator.ListTask;
+import com.ewcms.publication.task.generator.SiteTask;
+import com.ewcms.publication.task.resource.ResourceSiteTask;
+import com.ewcms.publication.task.resource.TemplateSourceSiteTask;
+import com.ewcms.publication.task.resource.TemplateSourceTask;
+import com.ewcms.publication.uri.UriRuleable;
+import com.ewcms.publication.uri.UriRules;
 
 import freemarker.template.Configuration;
 
 /**
  * 实现发布服务
  * 
- * @author wangwei
+ * @author <a href="hhywangwei@gmail.com">王伟</a>
  */
-@Component
-public class PublishService {
+@Service
+public class PublishService implements PublishServiceable, InitializingBean, DisposableBean {
+    private static final Logger logger = LoggerFactory.getLogger(PublishService.class);
+    
+    @Autowired
+    private ChannelPublishDaoable channelPublishDao;
+    @Autowired
+    private ArticlePublishDaoable articlePublishDao;
+    @Autowired
+    private TemplatePublishDaoable templatePublishDao;
+    @Autowired
+    private SitePublishDaoable sitePublishDao;
+    @Autowired
+    private PublishDaoable publishDao;
+    @Autowired
+    private Configuration cfg;
+    @Autowired
+    private ResourcePublishDaoable resourcePublishDao;
+    @Autowired
+    private TemplateSourcePublishDaoable templateSourcePublishDao;
+    
+    private String tempRoot;
+    private PublishRunnerable pubRunner;
+    
+	@Override
+	public void pubTemplateSource(Long siteId, List<Long> ids)throws PublishException {
+		Site site = sitePublishDao.findOne(siteId);
+		Taskable task = new TemplateSourceTask(site, tempRoot, ids, templateSourcePublishDao);
+		
+		task.regTask(pubRunner);
+	}
 
-	private static final Logger logger = LoggerFactory.getLogger(PublishService.class);
+	@Override
+	public void pubTemplateSource(Long siteId, boolean again)throws PublishException {
+		Site site = sitePublishDao.findOne(siteId);
+		Taskable task = new TemplateSourceSiteTask(site, tempRoot, again, templateSourcePublishDao);
+		
+		task.regTask(pubRunner);
+	}
 
-	private ChannelPublishService channelPublishService;
-	private ArticlePublishService articlePublishService;
-	private TemplatePublishService templatePublishService;
-	private SitePublishService sitePublishService;
-	private ResourcePublishService resourcePublishService;
-	private TemplateSourcePublishService templatePublishSourceService;
-	private Configuration cfg;
-	private TaskRegistryable taskRegistry;
+	@Override
+	public void pubResource(Long siteId, List<Long> ids)throws PublishException {
+		Site site = sitePublishDao.findOne(siteId);
+        Taskable task = new TemplateSourceTask(site, tempRoot, ids, templateSourcePublishDao);
+		
+		task.regTask(pubRunner);
+	}
 
-	/**
-	 * 得到站点对象 </br> 站点不存在抛出异常
-	 * 
-	 * @param siteId
-	 *            站点编号
-	 * @return
-	 * @throws PublishException
-	 */
-	private Site getSite(Long siteId) throws PublishException {
-		Site site = sitePublishService.getSite(siteId);
-		if (site == null) {
-			logger.error("Site id is {},but site is null", siteId);
-			throw new PublishException("Sit is null");
+	@Override
+	public void pubResource(Long siteId, boolean again)throws PublishException {
+		Site site = sitePublishDao.findOne(siteId);
+		Taskable task = new ResourceSiteTask(site, again, resourcePublishDao);
+		
+		task.regTask(pubRunner);
+	}
+
+	@Override
+	public void pubTemplate(Long siteId ,Long channelId, Long templateId, boolean again)throws PublishException {
+		Site site = sitePublishDao.findOne(siteId);
+		Channel channel = channelPublishDao.findPublishOne(siteId, channelId);
+		Template template = templatePublishDao.findOne(channelId, templateId);
+		Taskable task = newTemplateTask(site,channel,template,again);
+		
+		task.regTask(pubRunner);
+	}
+	
+	private Taskable newTemplateTask(Site site, Channel channel, Template template, boolean again)throws PublishException{
+		
+		String templatePath = template.getUniquePath();
+		
+		GenTaskBase task = null;
+		if(template.getType() == TemplateType.LIST){
+			task = new ListTask(site, channel, cfg, tempRoot, templatePath, resourcePublishDao, templateSourcePublishDao, articlePublishDao);
 		}
-		return site;
-	}
-
-	public void publishTemplateSource(Long siteId, Long[] publishIds, String username) throws PublishException {
-		Site site = getSite(siteId);
-		Taskable task = new TemplateSourceTask.Builder(templatePublishSourceService, site).setPublishIds(publishIds).setUsername(username).setAgain(true).build();
-		taskRegistry.registerNewTask(site, task);
-	}
-
-	public void publishTemplateSourceBySite(Long siteId, boolean again, String username) throws PublishException {
-		Site site = getSite(siteId);
-		Taskable task = new TemplateSourceTask.Builder(templatePublishSourceService, site).setAgain(again).setUsername(username).build();
-		taskRegistry.registerNewTask(site, task);
-	}
-
-	public void publishResource(Long siteId, Long[] publishIds, String username) throws PublishException {
-		Site site = getSite(siteId);
-		Taskable task = new ResourceTask.Builder(resourcePublishService, site).setAgain(true).setPublishIds(publishIds).setUsername(username).build();
-		taskRegistry.registerNewTask(site, task);
-	}
-
-	public void publishResourceBySite(Long siteId, boolean again, String username) throws PublishException {
-		Site site = getSite(siteId);
-		Taskable task = new ResourceTask.Builder(resourcePublishService, site).setAgain(again).setUsername(username).build();
-		taskRegistry.registerNewTask(site, task);
-	}
-
-	public void publishTemplate(Long templateId, boolean again, String username) throws PublishException {
-		Template template = templatePublishService.getTemplate(templateId);
-		if (template == null) {
-			logger.error("Template id is {},but templet is null", templateId);
-			throw new PublishException("Template is null");
+		if(template.getType() == TemplateType.DETAIL){
+			task = new DetailChannelTask(site,channel,cfg,tempRoot,again,templatePath,resourcePublishDao,templateSourcePublishDao,articlePublishDao);
 		}
-		Site site = template.getSite();
-		Channel channel = channelPublishService.getChannel(template.getChannelId());
-		Taskable task = new TemplateTask.Builder(cfg, templatePublishSourceService, resourcePublishService, articlePublishService, templatePublishService, site, channel, template)
-				.setAgain(again).setUsername(username).build();
-		taskRegistry.registerNewTask(site, task);
-	}
-
-	private Channel getChannel(Long channelId) throws PublishException {
-		Channel channel = channelPublishService.getChannel(channelId);
-		if (channel == null) {
-			logger.error("Channel id is {},Channel is null", channelId);
-			throw new PublishException("Channel is null");
+		if(template.getType() == TemplateType.HOME || template.getType() == TemplateType.OTHER){
+			task = new HomeTask(site,channel,cfg,tempRoot,templatePath,resourcePublishDao,templateSourcePublishDao);
 		}
-		return channel;
+
+		if(task == null){
+			throw new PublishException(template.getType().name() + " template type not exist");
+		}
+		
+		UriRuleable uriRule = StringUtils.isBlank(template.getUriPattern()) ? 
+				null : UriRules.newUriRuleBy(template.getUriPattern());
+		task.setUriRule(uriRule);
+		
+		return task;
 	}
 
-	public void publishChannel(Long channelId, boolean chidren, boolean again, String username) throws PublishException {
-		Channel channel = getChannel(channelId);
-		Site site = channel.getSite();
-		Taskable task = new ChannelTask.Builder(cfg, templatePublishService, templatePublishSourceService, resourcePublishService, articlePublishService, channelPublishService, site, channel)
-				.setPublishChildren(chidren).setAgain(again).setUsername(username).build();
-		taskRegistry.registerNewTask(site, task);
-	}
-
-	public void publishSite(Long siteId, boolean again, String username) throws PublishException {
+	@Override
+	public void pubChannel(Long siteId, Long channelId, boolean pubChild, boolean again) throws PublishException {
+		
 		Site site = getSite(siteId);
-		Taskable task = new SiteTask.Builder(cfg, templatePublishService, templatePublishSourceService, resourcePublishService, articlePublishService, channelPublishService, site)
-				.setUsername(username).setAgain(again).build();
-		taskRegistry.registerNewTask(site, task);
+		Channel channel = getChannel(siteId, channelId);
+		Taskable task = new ChannelTask(site, channel, cfg, tempRoot, again, pubChild,
+				resourcePublishDao, templateSourcePublishDao, channelPublishDao, templatePublishDao, articlePublishDao);
+		
+		task.regTask(pubRunner);
 	}
 
-	public void publishArticle(Long channelId, Long[] publishIds, String username) throws PublishException {
-		Channel channel = getChannel(channelId);
-		Site site = channel.getSite();
-		List<Template> templates = templatePublishService.getTemplatesInChannel(channelId);
-		for (Template template : templates) {
-			if (template.getType() != TemplateType.DETAIL) {
+	@Override
+	public void pubSite(Long siteId, boolean again)throws PublishException {
+		
+		Site site = getSite(siteId);
+		Taskable task = new SiteTask(site, cfg, tempRoot, again, resourcePublishDao, templateSourcePublishDao, channelPublishDao, templatePublishDao, articlePublishDao);
+		
+		task.regTask(pubRunner);
+	}
+
+	@Override
+	public void pubArticle(Long siteId, Long channelId, List<Long> ids) throws PublishException {
+		Site site = getSite(siteId);
+		Channel channel = getChannel(siteId, channelId);
+		List<Template> templates = templatePublishDao.findInChannel(channelId);
+		for(Template t : templates){
+			if(t.getType() != TemplateType.DETAIL){
 				continue;
 			}
-			Taskable task = new DetailTask.Builder(cfg, templatePublishSourceService, resourcePublishService, articlePublishService, site, channel, template).setUsername(username)
-					.setAgain(true).setPublishIds(publishIds).build();
-			taskRegistry.registerNewTask(site, task);
+			
+			Taskable task = new DetailTask(site, channel, cfg, tempRoot, t.getUniquePath(),
+					ids, resourcePublishDao, templateSourcePublishDao, articlePublishDao);
+			task.regTask(pubRunner);
 		}
 	}
+	
 
-	public void removePublish(Long siteId, String id, String username) throws PublishException {
-		try {
-			taskRegistry.removeTask(siteId, id, username);
-		} catch (TaskException e) {
-			throw new PublishException(e);
+	@Override
+	public void closeTask(Long siteId, String id)throws PublishException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<Taskable> getSiteTask(Long siteId) {
+		return null;
+	}
+	
+    /**
+     * 得到站点对象
+     * </br>
+     * 站点不存在抛出异常
+     * 
+     * @param siteId 站点编号
+     * @return
+     * @throws PublishException
+     */
+    private Site getSite(Long siteId)throws PublishException{
+        Site site = sitePublishDao.findOne(siteId);
+        if(site == null){
+            logger.error("Site id's {},but site not exist.",siteId);
+            throw new PublishException("sit is null");
+        }
+        return site;
+    }
+    
+    /**
+     * 得到频道
+     * 
+     * @param siteId    站点编号
+     * @param channelId 频道编号
+     * @return
+     * @throws PublishException
+     */
+    private Channel getChannel(Long siteId, Long channelId)throws PublishException{
+    	Channel channel = channelPublishDao.findPublishOne(siteId, channelId);
+    	if(channel == null){
+    		logger.error("Site id's {} and channel id's {}", siteId, channelId);
+    		throw new PublishException("channel is null");
+    	}
+    	return channel;
+    }
+    
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		
+		if(tempRoot == null){
+			tempRoot = System.getProperty("java.io.tmpdir");
+		}
+		tempRoot = FilenameUtils.normalize(tempRoot);
+		try{
+			testTempRoot(tempRoot);	
+		}catch(IOException e){
+			throw new IOException(tempRoot + " not write please check.", e);
+		}
+		
+		
+		if(pubRunner == null){
+			pubRunner = new SimplePublishRunner(publishDao);
+		}
+		pubRunner.start();
+	}
+	
+	private void testTempRoot(String tempRoot)throws IOException{
+		File temp = new File(tempRoot);
+		
+		if(!temp.exists()){
+			temp.mkdirs();
+		}else{
+			File test = new File(tempRoot + File.separator + String.format("%d-test.txt", System.currentTimeMillis()));
+			FileUtils.writeStringToFile(test, "HELLO EWCMS");
+			FileUtils.deleteQuietly(test);	
 		}
 	}
-
-	public void closeSitePublish(Long siteId) {
-		taskRegistry.closeSite(siteId);
+	
+	@Override
+	public void destroy() throws Exception {
+		if(pubRunner != null){
+			pubRunner.shutdown();
+		}
+	}
+	
+	public void setChannelPublishDao(ChannelPublishDaoable channelPublishDao) {
+		this.channelPublishDao = channelPublishDao;
 	}
 
-	public List<Taskable> getSitePublishTasks(Long siteId) {
-		return taskRegistry.getSiteTasks(siteId);
+	public void setArticlePublishDao(ArticlePublishDaoable articlePublishDao) {
+		this.articlePublishDao = articlePublishDao;
 	}
 
-	public void setArticlePublishService(ArticlePublishService articlePublishService) {
-		this.articlePublishService = articlePublishService;
+	public void setTemplatePublishDao(TemplatePublishDaoable templatePublishDao) {
+		this.templatePublishDao = templatePublishDao;
 	}
 
-	public void setChannelPublishService(ChannelPublishService channelPublishService) {
-		this.channelPublishService = channelPublishService;
+	public void setSitePublishDao(SitePublishDaoable sitePublishDao) {
+		this.sitePublishDao = sitePublishDao;
 	}
 
-	public void setTemplatePublishService(TemplatePublishService templatePublishService) {
-		this.templatePublishService = templatePublishService;
+	public void setResourcePublishDao(ResourcePublishDaoable resourcePublishDao) {
+		this.resourcePublishDao = resourcePublishDao;
 	}
 
-	public void setSitePublishService(SitePublishService sitePublishService) {
-		this.sitePublishService = sitePublishService;
+	public void setTemplateSourcePublishDao(TemplateSourcePublishDaoable templateSourcePublishDao) {
+		this.templateSourcePublishDao = templateSourcePublishDao;
 	}
 
-	public void setResourcePublishService(ResourcePublishService resourcePublishService) {
-		this.resourcePublishService = resourcePublishService;
+	public void setConfiguration(Configuration cfg){
+        this.cfg = cfg;
+    }
+	
+	public void setPublishRunner(PublishRunnerable runner){
+		this.pubRunner = runner;
 	}
-
-	public void setTemplateSourcePublishService(TemplateSourcePublishService templateSourcePublishService) {
-		this.templatePublishSourceService = templateSourcePublishService;
-	}
-
-	public void setTaskRegistry(TaskRegistryable taskRegistry) {
-		this.taskRegistry = taskRegistry;
-	}
-
-	public void setConfiguration(Configuration cfg) {
-		this.cfg = cfg;
+	
+	public void setTempRoot(String tempRoot){
+		this.tempRoot = tempRoot;
 	}
 }

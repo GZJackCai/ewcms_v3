@@ -32,13 +32,11 @@ import freemarker.template.TemplateSequenceModel;
  * 
  * 实现了得到Freemarker标签参数和其变量的值。
  * 
- * @author wangwei
+ * @author <a href="hhywangwei@gmail.com">王伟</a>
  */
 public class FreemarkerUtil {
     private static final Logger logger = LoggerFactory.getLogger(FreemarkerUtil.class);
-    
     private static BeansWrapper wrapper = SimpleObjectWrapper.getDefaultInstance();
-    
     private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     
     /**
@@ -314,7 +312,7 @@ public class FreemarkerUtil {
             return null;
         }
     }
-
+    
     /**
      * 得到参数的字符值
      * 

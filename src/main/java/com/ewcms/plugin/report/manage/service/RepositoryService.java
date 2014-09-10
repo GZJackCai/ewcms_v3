@@ -78,8 +78,7 @@ public class RepositoryService{
 				bufferStream = new BufferedOutputStream(fileStream);
 				bufferStream.write(bytes);
 				
-				//TODO 生成资源未实现
-				//resourceService.upload(site, file, outputFile, resourceType);
+				resourceService.upload(site, file, outputFile, resourceType);
 				
 				repository.setPublishDate(new Date(Calendar.getInstance().getTime().getTime()));
 				repositoryDao.save(repository);

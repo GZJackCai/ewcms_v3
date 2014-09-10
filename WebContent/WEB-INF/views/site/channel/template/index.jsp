@@ -21,7 +21,7 @@
 				importTplUrl : '${ctx}/site/channel/template/import?channelId=${channelId}',
 				appChildUrl : '${ctx}/site/channel/appChild?channelId=${channelId}',
 				forceUrl : '${ctx}/site/channel/forceRelease?channelId=${channelId}',
-				previewUrl : '${ctx}/channel/template/preview',
+				previewUrl : '${ctx}/preview/template/1/${channelId}',
 				editContentUrl : '${ctx}/site/channel/template/editContent',
 				historyUrl : '${ctx}/site/channel/template/history/index',
 				verifyUrl : '${ctx}/site/channel/template/verify'

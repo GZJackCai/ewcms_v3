@@ -218,6 +218,12 @@ public class TemplateController {
 			vo.setTemplateEntity(tplEntityVo);
 			templateService.updTemplate(vo);
 			message += "成功";
+			Boolean verify = templateService.verify(template.getId());
+			if (verify){
+				message +="，模板校验通过";
+			}else{
+				message +="，模板校验不通过";
+			}
 		} catch (Exception e) {
 			message = "失败";
 		}

@@ -16,14 +16,15 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ewcms.util.EmptyUtil;
+import com.ewcms.publication.dao.ChannelPublishDaoable;
 import com.ewcms.publication.freemarker.FreemarkerUtil;
 import com.ewcms.publication.freemarker.GlobalVariable;
-import com.ewcms.site.model.Channel;
-import com.ewcms.util.EmptyUtil;
+import com.ewcms.publication.module.Channel;
+import com.ewcms.publication.module.Site;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
-import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -33,7 +34,7 @@ import freemarker.template.TemplateModelException;
  * 
  * @author wangwei
  */
-public class PositionDirective implements TemplateDirectiveModel {
+public class PositionDirective extends BaseDirective {
     
     private final static Logger logger = LoggerFactory.getLogger(PositionDirective.class);
 
@@ -45,56 +46,64 @@ public class PositionDirective implements TemplateDirectiveModel {
     private String valueParam = VALUE_PARAM_NAME;
     private String nameParam = NAME_PARAM_NAME;
     private String markParam = MARK_PARAM_NAME;
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public void execute(Environment env, Map params, TemplateModel[] loopVars,
-            TemplateDirectiveBody body) throws TemplateException, IOException {
-
-        List<Channel> levels = getChannelLevels(getChannel(env,params));
-
-        if (EmptyUtil.isArrayNotEmpty(loopVars)) {
-            loopVars[0] = env.getObjectWrapper().wrap(levels);
-            if (EmptyUtil.isNull(body)) {
-                logger.warn("Position body is null");
-            } else {
-                body.render(env.getOut());
-            }
-        } else if (EmptyUtil.isNotNull(body)) {
-            Writer writer = env.getOut();
-            String name = getNameValue(params);
-            String mark = getMarkValue(params);
-            for (Iterator<Channel> iterator = levels.iterator(); iterator.hasNext();) {
-                Channel channel = iterator.next();
-                FreemarkerUtil.setVariable(env, name, channel);
-                body.render(writer);
-                if (iterator.hasNext()) {
-                    writer.write(mark);
-                }
-                writer.flush();
-                FreemarkerUtil.removeVariable(env, name);
-            }
-        } else {
-            StringBuilder builder = new StringBuilder();
-            String mark = getMarkValue(params);
-            for (Iterator<Channel> iterator = levels.iterator(); iterator.hasNext();) {
-                Channel channel = iterator.next();
-                if (channel.getAbsUrl() == null || channel.getAbsUrl().trim().length() == 0){
-                	builder.append("<a href=\"/").append("\">");
-                }else{
-                	builder.append("<a href=\"").append(channel.getAbsUrl()).append("\">");
-                }
-                builder.append(channel.getName());
-                builder.append("</a>");
-                if (iterator.hasNext()) {
-                    builder.append(mark);
-                }
-            }
-            Writer writer = env.getOut();
-            writer.write(builder.toString());
-            writer.flush();
-        }
+    
+    private final ChannelPublishDaoable channelPublishDao;
+    
+    public PositionDirective(ChannelPublishDaoable channelPublishDao){
+    	this.channelPublishDao = channelPublishDao;
     }
+    
+    @SuppressWarnings("rawtypes")
+	@Override
+	protected TemplateModel[] getLoopVars(Environment env, Map params)throws TemplateException {
+    	List<Channel> levels = getChannelLevels(env, params);
+    	return new TemplateModel[]{env.getObjectWrapper().wrap(levels)};
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected void executeBody(Environment env, Map params,TemplateModel[] loopVars, TemplateDirectiveBody body, Writer writer)
+			throws TemplateException, IOException {
+    	List<Channel> levels = getChannelLevels(env, params);
+        String name = getNameValue(params);
+        String mark = getMarkValue(params);
+        for (Iterator<Channel> iterator = levels.iterator(); iterator.hasNext();) {
+            Channel c = iterator.next();
+            FreemarkerUtil.setVariable(env, name, c);
+            body.render(writer);
+            if (iterator.hasNext()) {
+                writer.write(mark);
+            }
+            writer.flush();
+            FreemarkerUtil.removeVariable(env, name);
+        }
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected void executeNoneBody(Environment env, Map params,	TemplateModel[] loopVars, TemplateDirectiveBody body)
+			throws TemplateException, IOException {
+		
+		List<Channel> levels = getChannelLevels(env, params);
+		StringBuilder builder = new StringBuilder();
+        String mark = getMarkValue(params);
+        for (Iterator<Channel> iterator = levels.iterator(); iterator.hasNext();) {
+            Channel channel = iterator.next();
+            if (channel.getAbsUrl() == null || channel.getAbsUrl().trim().length() == 0){
+            	builder.append("<a href=\"/").append("\">");
+            }else{
+            	builder.append("<a href=\"").append(channel.getAbsUrl()).append("\">");
+            }
+            builder.append(channel.getName());
+            builder.append("</a>");
+            if (iterator.hasNext()) {
+                builder.append(mark);
+            }
+        }
+        Writer writer = env.getOut();
+        writer.write(builder.toString());
+        writer.flush();
+	}
 
     /**
      * 得到当前频道
@@ -141,14 +150,23 @@ public class PositionDirective implements TemplateDirectiveModel {
      *            当前频道
      * @return
      */
-    private List<Channel> getChannelLevels(final Channel channel) {
+    @SuppressWarnings("rawtypes")
+	private List<Channel> getChannelLevels(Environment env, Map params) throws TemplateException {
+    	Site site = getCurrentSite(env);
+    	Channel channel = getChannel(env, params);
+    	
         List<Channel> levels = new ArrayList<Channel>();
-        for (Channel c = channel; EmptyUtil.isNotNull(c); c = c.getParent()) {   
-        	if (c.getAbsUrl() == null || c.getAbsUrl().trim().length() == 0){
-        		c.setAbsUrl("/");
+        levels.add(channel);
+        Long parentId = channel.getParentId();
+        for(int i = 0 ; i < 100 ; i++){
+        	if(parentId != null){
+        		Channel p = channelPublishDao.findPublishOne(site.getId(), parentId);
+        		if(p == null) break;
+            	levels.add(0, p);
+            	parentId = p.getParentId();
         	}
-            levels.add(0, c);
         }
+        
         return levels;
     }
 
@@ -187,6 +205,16 @@ public class PositionDirective implements TemplateDirectiveModel {
         }
         return value;
     }
+    
+    @SuppressWarnings("rawtypes")
+	@Override
+   	protected String cacheKey(Environment env, Map params)throws TemplateException{
+    	String taskId = getTaskId(env);
+		Site site = getCurrentSite(env);
+		Channel channel = getChannel(env, params);
+   		return String.format("fm-position-directive-%s-%d-%d", 
+   				taskId,site.getId(),channel.getId());
+   	}
 
     /**
      * 设置设置频道值参数名

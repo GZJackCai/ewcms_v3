@@ -7,6 +7,7 @@
 package com.ewcms.content.resource.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -108,6 +109,13 @@ public class ResourceService {
         return success ? thumbUri : uri;
     }
     
+    private String imageCompression(Site site,String uri,String path){
+        String thumbUri = getThumbUri(uri);
+        String imagePath = Resource.resourcePath(site, thumbUri);
+        boolean success = ImageUtil.compression(path, imagePath, 128, 128);
+        return success ? thumbUri : uri;
+    }
+
     /**
      * 得到文件后缀名
      * 
@@ -156,6 +164,26 @@ public class ResourceService {
         resource.setSite(site);
         if (type == Resource.Type.IMAGE) {
             resource.setThumbUri(imageCompression(site,uri,myUpload));
+        }
+        resourceDao.save(resource);
+
+        return resource;
+    }
+    
+    public Resource upload(Site site, File file, String path, Type type) throws IOException{
+        ResourceOperatorable operator = new FileOperator(site.getResourceDir());
+        String name = getFilename(path);
+        String uri = operator.write(new FileInputStream(file), UriRules.newResource(getResourceContext()),getSuffix(name));
+        Resource resource = new Resource();
+        resource.setUri(uri);
+        resource.setSize(file.length());
+        resource.setName(name);
+        resource.setDescription(name);
+        resource.setType(type);
+        resource.setStatus(Status.NORMAL);
+        resource.setSite(site);
+        if (type == Resource.Type.IMAGE) {
+            resource.setThumbUri(imageCompression(site,uri,file.getPath()));
         }
         resourceDao.save(resource);
 

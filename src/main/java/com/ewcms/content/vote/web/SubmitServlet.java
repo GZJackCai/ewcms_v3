@@ -47,7 +47,6 @@ public class SubmitServlet extends HttpServlet {
         doPost(req, resp);
     }
 
-    @SuppressWarnings("unchecked")
 	@Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
     	ServletOutputStream out = null;

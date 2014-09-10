@@ -71,8 +71,8 @@ public class UriRules {
      * @return
      */
     private static UriRuleable initResourceParameters(UriRuleable rule,String context){
-        rule.putParameter("context", context);
-        rule.putParameter("n",RandomStringUtils.randomNumeric(32));
+        rule.putInitParameter("context", context);
+        rule.putInitParameter("n",RandomStringUtils.randomNumeric(32));
         return rule;
     }
     

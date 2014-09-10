@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -45,28 +46,26 @@ public class MsgReceiveController {
 		return msgReceiveService.search(params);
 	}
 	
-	@RequestMapping(value = "/delete")
-	public String delete(@RequestParam(value = "selections") List<Long> selections){
-		for (Long id : selections){
-			msgReceiveService.delMsgReceive(id);
-		}
+	@RequestMapping(value = "/delete/{username}")
+	public String delete(@PathVariable(value = "username")String username, @RequestParam(value = "selections") List<Long> selections){
+		msgReceiveService.delMsgReceive(username, selections);
 		return "redirect:/content/message/receive/index";
 	}
 	
-	@RequestMapping(value = "/markread")
-	public @ResponseBody Boolean markRead(@RequestParam(value = "selections") List<Long> selections, @RequestParam(value = "read") Boolean read){
+	@RequestMapping(value = "/markread/{username}")
+	public @ResponseBody Boolean markRead(@PathVariable(value = "username")String username, @RequestParam(value = "selections") List<Long> selections, @RequestParam(value = "read") Boolean read){
 		Boolean result = false;
 		try{
-			msgReceiveService.markReadMsgReceive(selections.get(0), read);
+			msgReceiveService.markReadMsgReceive(username, selections.get(0), read);
 			result = true;
 		}catch(Exception e){
 		}
 		return result;
 	}
 	
-	@RequestMapping(value = "/unread")
-	public @ResponseBody List<MsgReceive> unRead(){
-		List<MsgReceive> msgReceives = msgReceiveService.findMsgReceiveByUnRead();
+	@RequestMapping(value = "/unread/{username}")
+	public @ResponseBody List<MsgReceive> unRead(@PathVariable(value = "username")String username){
+		List<MsgReceive> msgReceives = msgReceiveService.findMsgReceiveByUnRead(username);
 		if (EmptyUtil.isCollectionNotEmpty(msgReceives)){
 			return msgReceives;
 		}else{

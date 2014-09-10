@@ -19,8 +19,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ewcms.content.resource.model.Resource;
 import com.ewcms.content.resource.service.ResourceService;
 import com.ewcms.publication.PublishException;
-import com.ewcms.publication.WebPublishFac;
+import com.ewcms.publication.PublishServiceable;
 import com.ewcms.util.ConvertUtil;
+import com.ewcms.util.EwcmsContextUtil;
 import com.ewcms.web.QueryParameter;
 import com.ewcms.web.util.JSONUtil;
 
@@ -33,7 +34,7 @@ public class ResourceController {
 	@Autowired
 	private ResourceService resourceService;
 	@Autowired
-	private WebPublishFac webPublishFac;
+	private PublishServiceable publishService;
 
 	@RequestMapping(value = "/index")
 	public String index() {
@@ -58,7 +59,7 @@ public class ResourceController {
 	String publish(@PathVariable(value = "type") String type, @RequestParam(required = false) List<Long> selections) {
 		String message = "资源发布";
 		try {
-			webPublishFac.publishResources(selections.toArray(new Long[0]));
+			publishService.pubResource(EwcmsContextUtil.getCurrentSiteId(), selections);
 			message += "成功";
 		} catch (PublishException e) {
 			message = "失败";

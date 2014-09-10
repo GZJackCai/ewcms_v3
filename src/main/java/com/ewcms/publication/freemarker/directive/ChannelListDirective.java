@@ -7,7 +7,6 @@
 package com.ewcms.publication.freemarker.directive;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,16 +14,15 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ewcms.util.EmptyUtil;
+import com.ewcms.publication.dao.ChannelPublishDaoable;
 import com.ewcms.publication.freemarker.FreemarkerUtil;
 import com.ewcms.publication.freemarker.GlobalVariable;
-import com.ewcms.publication.service.ChannelPublishService;
-import com.ewcms.site.model.Channel;
-import com.ewcms.site.model.Site;
-import com.ewcms.util.EmptyUtil;
+import com.ewcms.publication.module.Channel;
+import com.ewcms.publication.module.Site;
 
 import freemarker.core.Environment;
 import freemarker.template.TemplateDirectiveBody;
-import freemarker.template.TemplateDirectiveModel;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
@@ -36,7 +34,8 @@ import freemarker.template.TemplateModelException;
  * 
  * @author wangwei
  */
-public class ChannelListDirective implements TemplateDirectiveModel {
+public class ChannelListDirective extends ForeachDirective {
+	
     private static final Logger logger = LoggerFactory.getLogger(ChannelListDirective.class);
     
     private static final int DEFAULT_ROW = -1;
@@ -53,66 +52,50 @@ public class ChannelListDirective implements TemplateDirectiveModel {
     private String childParam = CHILD_PARAM_NAME;
     private String parentParam = PARENT_PARAM_NAME;
     
-    private ChannelPublishService channelPublishService;
+    private ChannelPublishDaoable channelPublishDao;
     
-    public ChannelListDirective(ChannelPublishService channelPublishService){
-        this.channelPublishService = channelPublishService;
+    public ChannelListDirective(ChannelPublishDaoable channelPublishDao){
+        this.channelPublishDao = channelPublishDao;
     }
     
-    @SuppressWarnings("rawtypes")
     @Override
-    public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body) throws TemplateException, IOException {
-            boolean child = getChildValue(params);
-            boolean parent = getParentValue(params);
-            int row = getRowValue(params);
-            Long siteId = getSiteIdValue(env);
-            
-            List<Channel> channels = getChannelList(env, params, siteId, parent, child);
-            
-            row = (row == DEFAULT_ROW) ? channels.size() : row;
-            if(row < channels.size()){
-                channels = channels.subList(0, row);
-            }
-            
-            if (EmptyUtil.isArrayNotEmpty(loopVars)) {
-                loopVars[0] = env.getObjectWrapper().wrap(channels);
-                if(EmptyUtil.isNull(body)){
-                    logger.warn("Body is null");
-                }else{
-                    body.render(env.getOut());    
-                }
-            } else {
-                String name = getNameValue(params);
-                Writer writer = env.getOut();
-                for (int i = 0 ; i < channels.size(); i++) {
-                    Channel channel = channels.get(i);
-                    FreemarkerUtil.setVariable(env, name, channel);
-                    FreemarkerUtil.setVariable(env, GlobalVariable.INDEX.toString(), i + 1);
-                    body.render(writer);
-                    FreemarkerUtil.removeVariable(env, GlobalVariable.INDEX.toString());
-                    FreemarkerUtil.removeVariable(env, name);
-                }
-                writer.flush();
-            }
-    }
+    @SuppressWarnings("rawtypes")
+	protected List<Object> getValues(Environment env, Map params)throws TemplateException {
+    	 boolean child = getChildValue(params);
+         boolean parent = getParentValue(params);
+         int row = getRowValue(params);
+         Long siteId = this.getCurrentSite(env).getId();
+         
+         List<Channel> channels = getChannelList(env, params, siteId, parent, child);
+         if(row != DEFAULT_ROW && row < channels.size()){
+        	 channels = channels.subList(0, row);
+         }
+         List<Object> l = new ArrayList<Object>();
+         l.addAll(channels);
+         
+         return l;
+	}
 
-    /**
-     * 得到当前站点
-     *
-     * @param env Environment
-     * @return
-     * @throws TemplateException
-     */
-    private Long getSiteIdValue(Environment env) throws TemplateException {
-        String current = GlobalVariable.SITE.toString();
-        Site site = (Site) FreemarkerUtil.getBean(env, current);
-        if(EmptyUtil.isNull(site)){
-            logger.error("Site is null in freemarker variable");
-            throw new TemplateModelException("Site is null in freemarker variable");
-        }
-        logger.debug("Site is {}",site);
-        return site.getId();
-    }
+	@Override
+	@SuppressWarnings("rawtypes")
+	protected void setVariable(Environment env, Map params, Object value)throws TemplateException {
+		String name = getNameValue(params);
+		FreemarkerUtil.setVariable(env, name, value);
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	protected void removeVariable(Environment env, Map params)throws TemplateException {
+		String name = getNameValue(params);
+		FreemarkerUtil.removeVariable(env, name);
+	}
+
+	@Override
+	@SuppressWarnings("rawtypes")
+	protected void executeNoneBody(Environment env, Map params,TemplateModel[] loopVars, TemplateDirectiveBody body)throws TemplateException, IOException {
+		//TODO 添加默认显示
+		logger.warn("Body is null");
+	}
     
     /**
      * 得到显示频道集合
@@ -175,38 +158,32 @@ public class ChannelListDirective implements TemplateDirectiveModel {
      */
     List<Channel> loadingChannel(Long siteId, Long channelId, boolean parent, boolean child, boolean debug)throws TemplateException{
         
-        Channel channel = channelPublishService.getChannel(siteId,channelId);
+        Channel channel = channelPublishDao.findPublishOne(siteId,channelId);
         if (EmptyUtil.isNull(channel)) {
             logger.error("Channel's id is {},it's not exist in site's({}).",channelId,siteId);
             throw new TemplateModelException("Channl's id is " + channelId + ",it's not exist.");
         }
         
-        if(!debug && !channel.getPublicenable()){
-            return new ArrayList<Channel>();
-        }
-        
         List<Channel> list = new ArrayList<Channel>();
         if(child){
         	if (parent){
-        		Channel parentChannel = channelPublishService.getChannelParent(channelId);
+        		Channel parentChannel = channelPublishDao.findPublishParent(siteId,channelId);
         		if (parentChannel != null) channelId = parentChannel.getId();
         	}
         	
-            List<Channel> children = channelPublishService.getChannelChildren(channelId);
+            List<Channel> children = channelPublishDao.findPublishChildren(siteId,channelId);
             if(debug){
                 list.addAll(children);
             }else{
                 for(Channel c: children){
-                    if(c.getPublicenable()){
                         list.add(c);
-                    }
                 }
             }
         }else{
         	if (parent){
-        		list.add(channelPublishService.getChannelParent(channelId));
+        		list.add(channelPublishDao.findPublishParent(siteId,channelId));
         	}else{
-        		list.add(channelPublishService.getChannel(siteId,channelId));
+        		list.add(channelPublishDao.findPublishOne(siteId,channelId));
         	}
         }
         
@@ -235,7 +212,7 @@ public class ChannelListDirective implements TemplateDirectiveModel {
             return loadingChannel(siteId, channel.getId(), parent, child, debug);
         }
         String path = UriFormat.formatChannelPath(value);
-        channel = channelPublishService.getChannelByUrlOrPath(siteId, path);
+        channel = channelPublishDao.findPublishByUri(siteId, path);
         if(EmptyUtil.isNotNull(channel)){
             logger.debug("Channel is {}",channel.toString());
             return loadingChannel(siteId, channel.getId(), parent, child, debug);
@@ -296,7 +273,23 @@ public class ChannelListDirective implements TemplateDirectiveModel {
     	Boolean value = FreemarkerUtil.getBoolean(params, parentParam);
     	return value == null ? false : value;
     }
-     
+    
+    @SuppressWarnings("rawtypes")
+	@Override
+	protected String cacheKey(Environment env, Map params)throws TemplateException{
+    	String taskId = getTaskId(env);
+		Site site = getCurrentSite(env);
+		List<Object> channels = getValues(env, params);
+		StringBuilder builder = new StringBuilder(200);
+		builder.append("[");
+		for(Object c : channels){
+			 builder.append(((Channel)c).getId()).append(",");
+		}
+		builder.append("]");
+		return String.format("fm-channel-list-directive-%s-%d-%s", 
+				taskId, site.getId(), builder.toString());
+	}
+    
     /**
      * 设置标签频道参数名
      * 
@@ -329,8 +322,8 @@ public class ChannelListDirective implements TemplateDirectiveModel {
      * 
      * @param paramName 参数名称
      */
-    public void setChildParam(String childParam) {
-        this.childParam = childParam;
+    public void setChildParam(String paramName) {
+        this.childParam = paramName;
     }
     
     /**
@@ -338,7 +331,7 @@ public class ChannelListDirective implements TemplateDirectiveModel {
      * 
      * @param paramName 参数名称
      */
-    public void setParentParam(String parentParam){
-    	this.parentParam = parentParam;
+    public void setParentParam(String paramName){
+    	this.parentParam = paramName;
     }
 }

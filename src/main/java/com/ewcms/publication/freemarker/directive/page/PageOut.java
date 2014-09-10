@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * 页面显示对象
  *
- * @author wangwei
+ * @author  <a href="hhywangwei@gmail.com">王伟</a>
  */
 public class PageOut {
 
@@ -54,7 +54,7 @@ public class PageOut {
     }
 
     public String getUrl() {
-        return url.replace("\\", "/").replace("//", "/");
+        return url.replace("\\", "/");
     }
     
     public Boolean isActive(){

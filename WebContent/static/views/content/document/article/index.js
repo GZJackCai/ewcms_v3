@@ -128,7 +128,8 @@ ArticleIndex.prototype.init = function(options){
     		$.messager.alert('提示', '只能选择一个预览', 'info');
     		return;
     	}
-    	window.open(options.previewUrl + '&articleId=' + rows[0].article.id,'popup','width=1280,height=700,resizable=yes,toolbar=no,directories=no,location=no,menubar=no,status=no,scrollbars=yes,left=' + (window.screen.width - 1280)/ 2 + ',top=' + (window.screen.height - 700) / 2);	
+    	//window.open(options.previewUrl + '&articleId=' + rows[0].article.id,'popup','width=1280,height=700,resizable=yes,toolbar=no,directories=no,location=no,menubar=no,status=no,scrollbars=yes,left=' + (window.screen.width - 1280)/ 2 + ',top=' + (window.screen.height - 700) / 2);
+    	window.open(options.previewUrl + rows[0].article.id + '/1','popup','width=1280,height=700,resizable=yes,toolbar=no,directories=no,location=no,menubar=no,status=no,scrollbars=yes,left=' + (window.screen.width - 1280)/ 2 + ',top=' + (window.screen.height - 700) / 2);
     });
     
     $('#menu-operate-add').bind('click', function(){
