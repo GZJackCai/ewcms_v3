@@ -28,9 +28,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.plugin.externalds.model.BaseDs;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 图表
@@ -471,7 +470,7 @@ public class ChartReport implements Serializable {
         this.remarks = remarks;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public Set<Parameter> getParameters() {
         return parameters;
     }
@@ -480,12 +479,12 @@ public class ChartReport implements Serializable {
         this.parameters = parameters;
     }
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getCreateDate() {
 		return createDate;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getUpdateDate() {
 		return updateDate;
 	}

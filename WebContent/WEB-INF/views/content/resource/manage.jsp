@@ -1,41 +1,36 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>资源管理实现</title>
-	<%@ include file="../../taglibs.jsp" %>
-    <script type="text/javascript" src="${ctx}/static/views/content/resource/manage.js"></script>
-    <script type="text/javascript">
-    	var _m = new manage('${ctx}','${type}');
-        $(function(){
-	        _m.init({
-            	queryUrl:'${ctx}/content/resource/query',
-                resourceUrl:'${ctx}/content/resource/resource',
-                thumbUrl:'${ctx}/content/resource/thumb/index',
-                publishUrl:'${ctx}/content/resource/manage/publish/${type}',
-                removeUrl:'${ctx}/content/resource/manage/delete/${type}'
-            });
-        });
-    </script>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
     <table id="tt" toolbar="#tb"></table>
     <div id="tb" style="padding:5px;height:auto;display:none;">
       <div style="margin-bottom:5px">
-        <a href="#" id="toolbar-upload" class="easyui-linkbutton" iconCls="icon-upload" plain="true">上传</a>
-        <a href="#" id="toolbar-publish" class="easyui-linkbutton" iconCls="icon-publish" plain="true">发布</a>
-        <a href="#" id="toolbar-remove" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
+        <a href="javascript:void(0);" id="toolbar-upload" class="easyui-linkbutton" iconCls="icon-upload" plain="true">上传</a>
+        <a href="javascript:void(0);" id="toolbar-publish" class="easyui-linkbutton" iconCls="icon-publish" plain="true">发布</a>
+        <a href="javascript:void(0);" id="toolbar-remove" class="easyui-linkbutton" iconCls="icon-remove" plain="true">删除</a>
       </div>
       <div style="padding-left:5px;">
         <form id="queryform" style="padding: 0;margin: 0;">
-                  资源名称: <input type="text" name="LIKE_name" style="width:80px"/>&nbsp;
-                  描述: <input type="text" name="LIKE_description" style="width:120px"/>&nbsp;
-                  创建日期: <input type="text" id="createTime" name="GTED_createTime" class="easyui-datebox" style="width:120px"/>至<input type="text" id="createTime" name="LTED_createTime" class="easyui-datebox" style="width:120px"/>&nbsp; 
-          <a href="#" id="toolbar-query" class="easyui-linkbutton" iconCls="icon-search">查询</a>
-          <a href="#" id="toolbar-clear" class="easyui-linkbutton" data-options="iconCls:'icon-clear'" onclick="javascript:$('#createTime').datebox('setValue','');document.forms[0].reset();">清除</a>
+          <table class="formtable" width="100%">
+            <tr>
+              <td width="6%">资源名称： </td>
+              <td width="19%"><input type="text" name="LIKE_name" style="width:120px"/></td>
+              <td width="6%">描述： </td>
+              <td width="19%"><input type="text" name="LIKE_description" style="width:120px"/></td>
+              <td width="6%">创建日期：</td>
+              <td width="19%"><input type="text" id="createTime" name="GTED_createTime" class="easyui-datebox" style="width:100px"/>至<input type="text" id="createTime" name="LTED_createTime" class="easyui-datebox" style="width:100px"/></td> 
+              <td width="25%" colspan="2">
+                <a href="javascript:void(0);" id="toolbar-query" class="easyui-linkbutton" iconCls="icon-search">查询</a>
+                <a href="javascript:void(0);" id="toolbar-clear" class="easyui-linkbutton" data-options="iconCls:'icon-clear'" onclick="javascript:$('#createTime').datebox('setValue','');document.forms[0].reset();">清除</a>
+              </td>
+            </tr>
+          </table>
         </form>
       </div>
     </div>
@@ -81,5 +76,19 @@
         </div>
       </div>
     </div>
+    <%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+    <script type="text/javascript" src="${ctx}/static/views/content/resource/manage.js"></script>
+    <script type="text/javascript">
+    	var _m = new manage('${type}');
+        $(function(){
+	        _m.init({
+            	queryUrl:'${ctx}/content/resource/query',
+                resourceUrl:'${ctx}/content/resource/resource',
+                thumbUrl:'${ctx}/content/resource/thumb/index',
+                publishUrl:'${ctx}/content/resource/manage/publish/${type}',
+                removeUrl:'${ctx}/content/resource/manage/delete/${type}'
+            });
+        });
+    </script>
   </body>
 </html>

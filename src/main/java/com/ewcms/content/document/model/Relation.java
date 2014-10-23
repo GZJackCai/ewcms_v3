@@ -11,19 +11,17 @@ import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Index;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 相关文章
@@ -37,7 +35,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author 吴智俊
  */
 @Entity
-@Table(name = "content_relation")
+@Table(name = "content_relation",
+       indexes = {@Index(name = "idx_relation_aticle_id", columnList = "relation_article_id")
+                 }
+)
 @SequenceGenerator(name = "seq_content_relation", sequenceName = "seq_content_relation_id", allocationSize = 1)
 public class Relation implements Serializable {
 
@@ -49,9 +50,8 @@ public class Relation implements Serializable {
 	private Long id;
 	@Column(name = "sort")
 	private Integer sort;
-	@OneToOne(cascade={CascadeType.PERSIST,CascadeType.MERGE}, fetch = FetchType.EAGER, targetEntity = Article.class)
+	@OneToOne(cascade={CascadeType.PERSIST,CascadeType.MERGE}, targetEntity = Article.class)
 	@JoinColumn(name="relation_article_id")
-	@Index(name = "idx_relation_article_id")
 	private Article relationArticle;
 	@ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false)
 	@JoinColumn(name = "article_id")
@@ -81,7 +81,7 @@ public class Relation implements Serializable {
 		this.relationArticle = relationArticle;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public Article getArticle() {
 		return article;
 	}

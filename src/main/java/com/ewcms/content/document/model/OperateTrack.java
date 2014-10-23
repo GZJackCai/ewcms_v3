@@ -15,15 +15,15 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.Index;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 文章操作记录
@@ -42,7 +42,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  * 
  */
 @Entity
-@Table(name = "content_operate_track")
+@Table(name = "content_operate_track",
+       indexes = {@Index(name = "idx_operatetrack_articlemain_id", columnList = "articlemain_id")
+		         }
+)
 @SequenceGenerator(name = "seq_content_operate_track", sequenceName = "seq_content_operate_track_id", allocationSize = 1)
 public class OperateTrack implements Serializable {
 
@@ -53,18 +56,16 @@ public class OperateTrack implements Serializable {
 	@Column(name = "id")
 	private Long id;
 	@Column(name = "articlemain_id")
-	@Index(name = "idx_track_articlemain_id")
 	private Long articleMainId;
 	@Column(name = "username")
-	@Index(name = "idx_track_username")
 	private String userName;
 	@Column(name = "userrealname")
 	private String userRealName;
 	@Column(name= "statusdesc")
 	private String statusDesc;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "operatetime")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date operateTime;
 	@Column(name = "description", columnDefinition = "text")
 	private String description;
@@ -115,7 +116,7 @@ public class OperateTrack implements Serializable {
 		this.statusDesc = statusDesc;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getOperateTime() {
 		return operateTime;
 	}

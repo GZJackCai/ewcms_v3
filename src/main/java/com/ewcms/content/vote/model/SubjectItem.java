@@ -21,7 +21,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 问卷调查主题明细
@@ -142,7 +142,7 @@ public class SubjectItem implements Serializable {
 		this.voteNumber = voteNumber;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public Subject getSubject() {
 		return subject;
 	}

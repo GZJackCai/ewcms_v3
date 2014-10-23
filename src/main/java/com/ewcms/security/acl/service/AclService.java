@@ -128,14 +128,16 @@ public class AclService {
 	}
 	
 	public List<AclEntry> findByPermission(String loginName, List<String> roleNames){
-		if (!roleNames.isEmpty()){
-			return aclEntryDao.findByPermission(loginName, roleNames);
-		}else{
-			return aclEntryDao.findByPermission(loginName);
+		if (roleNames.isEmpty()){
+			roleNames.add("");
 		}
+		return aclEntryDao.findByPermission(loginName, roleNames);
 	}
 	
 	public List<AclEntry> findByMask(Long idEntityId, String loginName, List<String> roleNames){
+		if (roleNames.isEmpty()){
+			roleNames.add("");
+		}
 		return aclEntryDao.findByMask(idEntityId, loginName, roleNames);
 	}
 	
@@ -163,6 +165,10 @@ public class AclService {
 	
 	@Transactional(readOnly = false)
 	public Integer findByMaxMask(Long idEntityId, String className, String loginName, List<String> roleNames){
+		if (roleNames.isEmpty()){
+			roleNames.add("");
+		}
 		return aclEntryDao.findByMaxMask(idEntityId, className, loginName, roleNames);
+		
 	}
 }

@@ -1,5 +1,4 @@
 var ARTICLETOOLBAR_ALL_TYPE = "FontFamily,FontSize,FontColor,Bold,Italic,UnderLine".split(",");
-//var ARTICLETOOLBAR_ALL_ATTR = "fontFamily,fontSize,color,fontWeight,fontStyle,textDecoration".split(",");
 var ARTICLETOOLBAR_ALL_CSSATTR = "font-family,font-size,color,font-weight,font-style,text-decoration".split(",");
 
 var ArticleToolbar = function(id, appendEle, option){
@@ -52,8 +51,8 @@ ArticleToolbar.prototype.addFontColor = function(){
 	this.Html.push("<td><input type='hidden' id='" + this.ID + "_FontColor' name='" + this.ID + "_FontColor'/><div title='字体颜色' id='" + this.ID + "_FontColor_Div'");
 	this.Html.push(" onclick='ArticleToolbar.onClick(this);ArticleToolbar.showColorSelector(this)' onmouseover='ArticleToolbar.onMouseOver(this)' onmouseout='ArticleToolbar.onMouseOut(this)'>");
 	this.Html.push("<table cellspacing='0' cellpadding='0'><tbody><tr>");
-	this.Html.push("<td style='height:17px;'><img src='../../../../../static/image/article/toolbar/spacer.gif' style='background-position: 0px -704px; background-image: url(../../../../../static/image/article/toolbar/fck_strip.gif);overflow: hidden;width: 14px;height: 14px;margin: 0px;'></td>");
-	this.Html.push("<td style='height:17px;'><img height='3' width='5' src='../../../../../static/image/article/toolbar/toolbar.buttonarrow.gif'></td>");
+	this.Html.push("<td style='height:17px;'><img src='" + ctx + "/static/image/article/toolbar/spacer.gif' style='background-position: 0px -704px; background-image: url(" + ctx + "/static/image/article/toolbar/fck_strip.gif);overflow: hidden;width: 14px;height: 14px;margin: 0px;'></td>");
+	this.Html.push("<td style='height:17px;'><img height='3' width='5' src='" + ctx + "/static/image/article/toolbar/toolbar.buttonarrow.gif'></td>");
 	this.Html.push("</tr></tbody></table>");
 	this.Html.push("</div></td>");
 };
@@ -61,21 +60,21 @@ ArticleToolbar.prototype.addFontColor = function(){
 ArticleToolbar.prototype.addBold = function(){
 	this.Html.push("<td><input type='hidden' id='" + this.ID + "_Bold' name='" + this.ID + "_Bold'/><div id='" + this.ID + "_Bold_Div' title='加粗'");
 	this.Html.push(" onclick=\"ArticleToolbar.onClick(this);ArticleToolbar.setBold('" + this.ID + "')\" onmouseover='ArticleToolbar.onMouseOver(this)' onmouseout='ArticleToolbar.onMouseOut(this)'>");
-	this.Html.push("<img src='../../../../../static/image/article/toolbar/spacer.gif' style='background-position: 0px -304px; background-image: url(../../../../../static/image/article/toolbar/fck_strip.gif);overflow: hidden;width: 14px;height: 14px;margin: 1px;'>");
+	this.Html.push("<img src='" + ctx + "/static/image/article/toolbar/spacer.gif' style='background-position: 0px -304px; background-image: url(" + ctx + "/static/image/article/toolbar/fck_strip.gif);overflow: hidden;width: 14px;height: 14px;margin: 1px;'>");
 	this.Html.push("</div></td>");
 };
 
 ArticleToolbar.prototype.addItalic = function(){
 	this.Html.push("<td><input type='hidden' id='" + this.ID + "_Italic' name='" + this.ID + "_Italic'/><div id='" + this.ID + "_Italic_Div' title='斜体'");
 	this.Html.push(" onclick=\"ArticleToolbar.onClick(this);ArticleToolbar.setItalic('" + this.ID + "')\" onmouseover='ArticleToolbar.onMouseOver(this)' onmouseout='ArticleToolbar.onMouseOut(this)'>");
-	this.Html.push("<img src='../../../../../static/image/article/toolbar/spacer.gif' style='background-position: 0px -320px; background-image: url(../../../../../static/image/article/toolbar/fck_strip.gif);overflow: hidden;width: 14px;height: 14px;margin: 1px;'>");
+	this.Html.push("<img src='" + ctx + "/static/image/article/toolbar/spacer.gif' style='background-position: 0px -320px; background-image: url(" + ctx + "/static/image/article/toolbar/fck_strip.gif);overflow: hidden;width: 14px;height: 14px;margin: 1px;'>");
 	this.Html.push("</div></td>");
 };
 
 ArticleToolbar.prototype.addUnderLine = function(){
 	this.Html.push("<td><input type='hidden' id='" + this.ID + "_UnderLine' name='" + this.ID + "_UnderLine'/><div id='" + this.ID + "_UnderLine_Div' title='加下划线'");
 	this.Html.push(" onclick=\"ArticleToolbar.onClick(this);ArticleToolbar.setUnderLine('" + this.ID + "')\" onmouseover='ArticleToolbar.onMouseOver(this)' onmouseout='ArticleToolbar.onMouseOut(this)'>");
-	this.Html.push("<img src='../../../../../static/image/article/toolbar/spacer.gif' style='background-position: 0px -336px; background-image: url(../../../../../static/image/article/toolbar/fck_strip.gif);overflow: hidden;width: 14px;height: 14px;margin: 1px;'>");
+	this.Html.push("<img src='" + ctx + "/static/image/article/toolbar/spacer.gif' style='background-position: 0px -336px; background-image: url(" + ctx + "/static/image/article/toolbar/fck_strip.gif);overflow: hidden;width: 14px;height: 14px;margin: 1px;'>");
 	this.Html.push("</div></td>");
 };
 

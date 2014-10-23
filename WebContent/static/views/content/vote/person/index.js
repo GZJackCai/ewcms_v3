@@ -21,7 +21,7 @@ PersonIndex.prototype.init = function(options){
             {field:'item',title:'填写内容',width:60,
               	formatter:function(val,rec){
               		var url = options.showUrl + '_' + rec.id;
-               		return '<a href="#" onclick="PersonIndex.show(' + url + ');">内容</a>';
+               		return '<a href="javascript:void(0);" onclick="PersonIndex.show(' + url + ');">内容</a>';
                	}
             }
         ]]

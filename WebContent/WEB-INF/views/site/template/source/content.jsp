@@ -1,21 +1,16 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>模板资源编辑</title>
-	<%@ include file="../../../taglibs.jsp" %>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
     <link rel="stylesheet" type="text/css" href="${ctx}/static/codemirror/lib/codemirror.css"/>
-    <script type="text/javascript" src="${ctx}/static/codemirror/lib/codemirror.js"></script>
-    <script type="text/javascript" src="${ctx}/static/codemirror/mode/xml/xml.js"></script>
-    <script type="text/javascript" src="${ctx}/static/codemirror/mode/javascript/javascript.js"></script>
-    <script type="text/javascript" src="${ctx}/static/codemirror/mode/css/css.js"></script>
   </head>
   <body>	
 	<script type="text/javascript">
+	  $(function() {
 		var currentNode = parent.parent.$('#tt2').tree('getSelected');
 		if (currentNode){
 			var position = "";
@@ -34,13 +29,15 @@
 				position += text[i] + " >> ";
 			}
 			position += text[i];
-			document.write("<span style='color:red;'>当前位置：" + position + "</span>");
+			$('legend').html('<span style="color:red;">模板资源当前位置：' + position + '</span>');
 		}
+	  });
 	</script>
-	<%@ include file="../../../alertMessage.jsp" %>
+	<%@ include file="/WEB-INF/views/alertMessage.jsp" %>
 	<form:form action="${ctx}/site/template/source/saveContent" method="post" modelAttribute="templateSource" class="form-horizontal">
 	  <input type="hidden" id="id" name="id" value="${templateSource.id}"/>
       <fieldset>
+        <legend></legend>
 		<table class="formtable" >
 		  <tr>
 			<td style="padding:0px;"><textarea id="templateSourceContent" name="templateSourceContent" style="width:99%;height:280px;padding-right: 10px;">${templateSourceContent}</textarea></td>
@@ -56,6 +53,11 @@
 		</table>
 	  </fieldset>	
 	</form:form>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+    <script type="text/javascript" src="${ctx}/static/codemirror/lib/codemirror.js"></script>
+    <script type="text/javascript" src="${ctx}/static/codemirror/mode/xml/xml.js"></script>
+    <script type="text/javascript" src="${ctx}/static/codemirror/mode/javascript/javascript.js"></script>
+    <script type="text/javascript" src="${ctx}/static/codemirror/mode/css/css.js"></script>
 	<script type="text/javascript">
 		var fileName = parent.parent.$('#tt2').tree('getSelected').text;
 		var modeName = "xml";

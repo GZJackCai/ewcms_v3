@@ -58,8 +58,7 @@ operators = {
        }
 };
 
-var manage = function(context,type,opts){
-    this._context = context;
+var manage = function(type,opts){
     this._type = type;
 
     opts = opts || {};
@@ -82,7 +81,6 @@ var manage = function(context,type,opts){
 };
  
 manage.prototype.init = function(urls){
-    var context = this._context;
     var type = this._type;
     var opts = this._opts;
     
@@ -94,9 +92,10 @@ manage.prototype.init = function(urls){
         columns:[[
            {field:'ck',checkbox:true},
            {field:'thumbUri',title:'引导图',width:180,halign:'left',align:'center',
-        	   formatter:function(val,row){
+        	   formatter:function(val, row){
 	               if(row.type=='IMAGE'){
-	                   return '<img src="' + context + val +'" style="height:48px;"/>';    
+	            	   var src = ctx + val + '?_=' + Date.parse(new Date());
+	                   return '<img src="' + src + '" style="height:48px;"/>';    
 	               }else{
 	            	   return '无';
 	               }
@@ -153,7 +152,7 @@ manage.prototype.init = function(urls){
         onClick:function(item){
             var row = $(opts.datagridId).datagrid("getSelected");
             if(item.iconCls == 'icon-download'){
-                window.open(context + row.uri);
+                window.open(ctx + row.uri);
             }
             if(item.iconCls == 'icon-save'){
             	$.ewcms.openWindow({windowId:opts.resourceUpdateWindowId,width:600,height:400,title:"更新资源",src : urls.resourceUrl + "?type=" + type +"&multi=false&resourceId="+row.id});

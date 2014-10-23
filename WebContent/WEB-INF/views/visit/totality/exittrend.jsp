@@ -1,37 +1,11 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>时间趋势</title>	
-	<%@ include file="../../taglibs.jsp" %>
-	<script type="text/javascript" src="${ctx}/static/views/visit/dateutil.js"></script>
-	<script type="text/javascript" src="${ctx}/static/fcf/js/FusionCharts.js"></script>
-	<script type="text/javascript">
-	    var startDate = '${startDate}';
-	    var endDate = '${endDate}';
-		$(function() {
-		});
-		function showChart(){
-			var parameter = {};
-			parameter['startDate'] = startDate;
-			parameter['endDate'] = endDate;
-			parameter['url'] = '${url}';
-			parameter['labelCount'] = 8;
-			$.post('${ctx}/visit/totality/exit/trend/report', parameter, function(result) {
-		  		var myChart = new FusionCharts('${ctx}/static/fcf/swf/MSLine.swf?ChartNoDataText=无数据显示', 'myChartId', '640', '260','0','0');
-	      		myChart.setDataXML(result);      
-	      		myChart.render("divChart");
-	   		});
-		}
-		function view(){
-			startDate = $('#startDate').datebox('getValue');
-			endDate = $('#endDate').datebox('getValue');
-			showChart();
-		}
-	</script>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body class="easyui-layout">
 	<input type="hidden" id="url" name="url" value="${url}"/>
@@ -61,5 +35,31 @@
 		</tr>
 	  </table>
 	</div>
+    <%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript" src="${ctx}/static/views/visit/dateutil.js"></script>
+	<script type="text/javascript" src="${ctx}/static/fcf/js/FusionCharts.js"></script>
+	<script type="text/javascript">
+	    var startDate = '${startDate}';
+	    var endDate = '${endDate}';
+		$(function() {
+		});
+		function showChart(){
+			var parameter = {};
+			parameter['startDate'] = startDate;
+			parameter['endDate'] = endDate;
+			parameter['url'] = '${url}';
+			parameter['labelCount'] = 8;
+			$.post('${ctx}/visit/totality/exit/trend/report', parameter, function(result) {
+		  		var myChart = new FusionCharts('${ctx}/static/fcf/swf/MSLine.swf?ChartNoDataText=无数据显示', 'myChartId', '640', '260','0','0');
+	      		myChart.setDataXML(result);      
+	      		myChart.render("divChart");
+	   		});
+		}
+		function view(){
+			startDate = $('#startDate').datebox('getValue');
+			endDate = $('#endDate').datebox('getValue');
+			showChart();
+		}
+	</script>
   </body>
 </html>

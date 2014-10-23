@@ -23,7 +23,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 报表分类
@@ -86,7 +86,7 @@ public class CategoryReport implements Serializable {
         this.remarks = remarks;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public Set<TextReport> getTexts() {
         return texts;
     }
@@ -95,7 +95,7 @@ public class CategoryReport implements Serializable {
         this.texts = texts;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public Set<ChartReport> getCharts() {
         return charts;
     }

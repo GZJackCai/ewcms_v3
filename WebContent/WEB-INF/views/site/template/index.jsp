@@ -1,29 +1,11 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>模板管理</title>			
-	<%@ include file="../../taglibs.jsp" %>
-	<script type="text/javascript" src="${ctx}/static/views/site/template/index.js"></script>
-	<script type="text/javascript">
-		var _templateIndex = new TemplateIndex('#tt2');
-		$(function(){
-			_templateIndex.init({
-				treeUrl : '${ctx}/site/template/tree',
-				editUrl : '${ctx}/site/template/edit',
-				addTemplateUrl : '${ctx}/site/template/add',
-				addFolderUrl : '${ctx}/site/template/addFolder',
-				renameUrl : '${ctx}/site/template/rename',
-				deleteUrl : '${ctx}/site/template/delete',
-				moveUrl : '${ctx}/site/template/moveto',
-				importUrl : '${ctx}/site/template/import/',
-				exportUrl : '${ctx}/site/template/exportzip'
-			});
-		});
-	</script>		
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body class="easyui-layout">
 	<div region="west"  title='<label id="treeload-button" style="vertical-align: middle;cursor:pointer;"><img src="${ctx}/static/image/refresh.png" style="vertical-align: middle;">模板库</label>' split="true" style="width:190px;">		
@@ -43,6 +25,24 @@
 	  <div class="menu-sep"></div>
 	  <div id="import-button" data-options="iconCls:'icon-zip-import'" onclick="importTemplate();">导入</div>	
 	  <div id="export-button" data-options="iconCls:'icon-zip-export'" onclick="exportTemplate();">导出ZIP</div>
-	</div>	  	
+	</div>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript" src="${ctx}/static/views/site/template/index.js"></script>
+	<script type="text/javascript">
+		var _templateIndex = new TemplateIndex('#tt2');
+		$(function(){
+			_templateIndex.init({
+				treeUrl : '${ctx}/site/template/tree',
+				editUrl : '${ctx}/site/template/edit',
+				addTemplateUrl : '${ctx}/site/template/add',
+				addFolderUrl : '${ctx}/site/template/addFolder',
+				renameUrl : '${ctx}/site/template/rename',
+				deleteUrl : '${ctx}/site/template/delete',
+				moveUrl : '${ctx}/site/template/moveto',
+				importUrl : '${ctx}/site/template/import/',
+				exportUrl : '${ctx}/site/template/exportzip'
+			});
+		});
+	</script>  	
   </body>
 </html>

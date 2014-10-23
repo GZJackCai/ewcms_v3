@@ -1,58 +1,24 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
-    <title>文档编辑</title>	
-    <%@ include file="../../../taglibs.jsp"%>
-    <script type="text/javascript" src="${ctx}/static/easyui/ext/datagrid-detailview.js"></script>
-    <script type="text/javascript" src="${ctx}/static/views/content/document/article/index.js"></script>
-    <script type="text/javascript">
-    	var _articleIndex = new ArticleIndex('#tt','#tt3');
-    	$(function(){
-    		_articleIndex.init({
-    			queryUrl : '${ctx}/content/document/article/query/${channelId}',
-    			editUrl : '${ctx}/content/document/article/edit/${channelId}',
-    			deleteUrl : '${ctx}/content/document/article/delete/${channelId}',
-    			reasonUrl : '${ctx}/content/document/article/reason',
-    			treeUrl : '${ctx}/site/channel/tree',
-    			operateTrackUrl : '${ctx}/content/document/operatetrack/index',
-    			effectiveUrl : '${ctx}/content/document/article/reviewEffective/${channelId}',
-    			//previewUrl : '${ctx}/template/preview?channelId=${channelId}',
-    			previewUrl : '${ctx}/preview/article/1/${channelId}/',
-    			topUrl : '${ctx}/content/document/article/top/${channelId}',
-    			shareUrl : '${ctx}/content/document/article/share/${channelId}',
-    			sortUrl : '${ctx}/content/document/article/sort/${channelId}',
-    			isSortUrl : '${ctx}/content/document/article/isSort/${channelId}',
-    			clearSortUrl : '${ctx}/content/document/article/clearSort/${channelId}',
-    			approveUrl : '${ctx}/content/document/article/approve/<shiro:principal property="loginName"/>_${channelId}',
-    			approveArticleUrl : '${ctx}/content/document/article/approveArticle/<shiro:principal property="loginName"/>_${channelId}',
-    			publishUrl : '${ctx}/content/document/article/pubblish/${channelId}',
-    			associateUrl : '${ctx}/content/document/article/associateRelease/${channelId}',
-    			breakUrl : '${ctx}/content/document/article/break/<shiro:principal property="loginName"/>_${channelId}',
-    			moveArticleUrl : '${ctx}/content/document/article/move/${channelId}',
-    			copyArticleUrl : '${ctx}/content/document/article/copy/${channelId}',
-    			reviewArticleUrl : '${ctx}/content/document/article/reviewArticle/${channelId}'
-    		});
-    	});
-    </script>
+    <title>文档编辑</title>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body class="easyui-layout">
 	<div region="center" style="padding:2px;" border="false">
 	  <table id="tt" toolbar="#tb" fit="true"></table>
       <div id="tb" style="padding:2px;height:auto;">
         <div class="toolbar" style="margin-bottom:2px">
-		  <a id="menu-operate" href="#" class="easyui-menubutton" plain="true" iconCls="icon-article-preview" menu="#menu-operatesub">操作</a>
-		  <a id="menu-preview" href="#" class="easyui-linkbutton" plain="true" iconCls="icon-article-preview">预览</a>
- 		  <a id="menu-top" href="#" class="easyui-menubutton" plain="true" iconCls="icon-top" menu="#menu-topsub">置顶</a>
- 		  <a id="menu-share" href="#" class="easyui-menubutton" plain="true" iconCls="icon-share" menu="#menu-sharesub">共享</a>
- 		  <a id="menu-sort" href="#" class="easyui-menubutton" plain="true" iconCls="icon-sort" menu="#menu-sortsub">排序</a>
- 		  <a id="menu-approve" href="#" class="easyui-menubutton" plain="true" iconCls="icon-review" menu="#menu-approvesub">审核</a>
- 		  <a id="menu-publish" href="#" class="easyui-menubutton" plain="true" iconCls="icon-publish" menu="#menu-publishsub">发布</a>
+		  <a id="menu-operate" href="javascript:void(0);" class="easyui-menubutton" plain="true" iconCls="icon-article-preview" menu="#menu-operatesub">操作</a>
+		  <a id="menu-preview" href="javascript:void(0);" class="easyui-linkbutton" plain="true" iconCls="icon-article-preview">预览</a>
+ 		  <a id="menu-top" href="javascript:void(0);" class="easyui-menubutton" plain="true" iconCls="icon-top" menu="#menu-topsub">置顶</a>
+ 		  <a id="menu-share" href="javascript:void(0);" class="easyui-menubutton" plain="true" iconCls="icon-share" menu="#menu-sharesub">共享</a>
+ 		  <a id="menu-sort" href="javascript:void(0);" class="easyui-menubutton" plain="true" iconCls="icon-sort" menu="#menu-sortsub">排序</a>
+ 		  <a id="menu-approve" href="javascript:void(0);" class="easyui-menubutton" plain="true" iconCls="icon-review" menu="#menu-approvesub">审核</a>
+ 		  <a id="menu-publish" href="javascript:void(0);" class="easyui-menubutton" plain="true" iconCls="icon-publish" menu="#menu-publishsub">发布</a>
 		</div>
 		<div id="menu-operatesub" style="width:80px;">
             <div id="menu-operate-add" iconCls="icon-add">新增</div>
@@ -81,7 +47,7 @@
 	    </div>
 	    <div id="menu-publishsub" style="width:80px;">
 	    	<div id="menu-publish-independent" iconCls="icon-publishok">独立</div>
-	    	<div id="menu-publish-relevance" iconCls="icon-publishrec">关联</div>
+	    	<div id="menu-publish-associate" iconCls="icon-publishrec">关联</div>
 	    	<div id="menu-publish-sep1" class="menu-sep"></div>
 	    	<div id="menu-publish-back" iconCls="icon-breakarticle">退回</div>
 	    </div>
@@ -89,24 +55,24 @@
           <form id="queryform" style="padding:0;margin: 0;">
             <table class="formtable" width="100%">
               <tr>
-                <td width="5%">编号：</td>
-                <td width="20%"><input type="text" name="EQ_article.id" style="width:120px;"/></td>
-                <td width="5%">标题：</td>
-                <td width="20%"><input type="text" name="LIKE_article.title" style="width:120px;"/></td>
-                <td width="5%">状态：</td>
-                <td width="20%"><form:select id="status" name="EQ_article.status" path="statusMap">
+                <td width="6%">文章编号：</td>
+                <td width="19%"><input type="text" name="EQ_article.id" style="width:120px;"/></td>
+                <td width="6%">文章标题：</td>
+                <td width="19%"><input type="text" name="LIKE_article.title" style="width:120px;"/></td>
+                <td width="6%">文章状态：</td>
+                <td width="19%"><form:select id="status" name="EQ_article.status" path="statusMap">
 					  <form:option value="" label="-----请选择-----"/>
 					  <form:options items="${statusMap}" itemLabel="description"/>
 					</form:select>
 				</td>
 				<td width="25%" colspan="2">
-				  <a href="#" id="toolbar-arrows" style="text-decoration:none">更多...</a>
-                  <a id="tb-query" href="#" class="easyui-linkbutton" >查询</a>
-                  <a id="tb-clear" href="#" class="easyui-linkbutton">清除</a>
+                  <a id="tb-query" href="javascript:void(0);" class="easyui-linkbutton" data-options="iconCls:'icon-search'">查询</a>
+                  <a id="tb-clear" href="javascript:document.forms[0].reset();" class="easyui-linkbutton" data-options="iconCls:'icon-clear'">清除</a>
+                  <a id="tb-more" href="javascript:void(0);" class="easyui-linkbutton"><span id="showHideLabel">更多...</span></a>
                 </td>
               </tr>
               <tr>
-              	<td>类型：</td>
+              	<td>文章类型：</td>
               	<td><form:select id="genre" name="EQ_article.genre" path="genreMap">
 					  <form:option value="" label="-----请选择-----"/>
 					  <form:options items="${genreMap}" itemLabel="description"/>
@@ -115,9 +81,9 @@
               	<td>创建者：</td>
               	<td><input type="text" name="LIKE_article.created" style="width:120px;"/></td>
               	<td>发布时间：</td>
-              	<td><input type="text" id="publishedStart" name="GTED_article.published" class="easyui-datebox" style="width:120px"/>&nbsp;至&nbsp;<input type="text" id="publishedEnd" name="LTED_article.published" class="easyui-datebox" style="width:120px"/></td>
-              	<td width="5%">修改时间：</td>
-              	<td width="20%"><input type="text" id="modifiedStart" name="GTED_article.modified" class="easyui-datebox" style="width:120px"/>&nbsp;至&nbsp;<input type="text" id="modifiedEnd" name="LTED_article.modified" class="easyui-datebox" style="width:120px"/></td>
+              	<td><input type="text" id="publishedStart" name="GTED_article.published" class="easyui-datebox" style="width:100px"/>&nbsp;至&nbsp;<input type="text" id="publishedEnd" name="LTED_article.published" class="easyui-datebox" style="width:100px"/></td>
+              	<td width="6%">修改时间：</td>
+              	<td width="19%"><input type="text" id="modifiedStart" name="GTED_article.modified" class="easyui-datebox" style="width:100px"/>&nbsp;至&nbsp;<input type="text" id="modifiedEnd" name="LTED_article.modified" class="easyui-datebox" style="width:100px"/></td>
               </tr>
             </table>
           </form>
@@ -184,5 +150,36 @@
         </div>
       </div>
     </div>
+    <%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+    <script type="text/javascript" src="${ctx}/static/easyui/ext/datagrid-detailview.js"></script>
+    <script type="text/javascript" src="${ctx}/static/views/content/document/article/index.js"></script>
+    <script type="text/javascript">
+    	var _articleIndex = new ArticleIndex('#tt','#tt3');
+    	$(function(){
+    		_articleIndex.init({
+    			queryUrl : '${ctx}/content/document/article/query/${channelId}',
+    			editUrl : '${ctx}/content/document/article/edit/${channelId}',
+    			deleteUrl : '${ctx}/content/document/article/delete/${channelId}',
+    			reasonUrl : '${ctx}/content/document/article/reason',
+    			treeUrl : '${ctx}/site/channel/tree',
+    			operateTrackUrl : '${ctx}/content/document/operatetrack/index',
+    			effectiveUrl : '${ctx}/content/document/article/reviewEffective/${channelId}',
+    			previewUrl : '${ctx}/preview/article/${siteId}/${channelId}/',
+    			topUrl : '${ctx}/content/document/article/top/${channelId}',
+    			shareUrl : '${ctx}/content/document/article/share/${channelId}',
+    			sortUrl : '${ctx}/content/document/article/sort/${channelId}',
+    			isSortUrl : '${ctx}/content/document/article/isSort/${channelId}',
+    			clearSortUrl : '${ctx}/content/document/article/clearSort/${channelId}',
+    			approveUrl : '${ctx}/content/document/article/approve/<shiro:principal property="loginName"/>_${channelId}',
+    			approveArticleUrl : '${ctx}/content/document/article/approveArticle/<shiro:principal property="loginName"/>_${channelId}',
+    			publishUrl : '${ctx}/content/document/article/pubblish/${channelId}',
+    			associateUrl : '${ctx}/content/document/article/associateRelease/${channelId}',
+    			breakUrl : '${ctx}/content/document/article/break/<shiro:principal property="loginName"/>_${channelId}',
+    			moveArticleUrl : '${ctx}/content/document/article/move/${channelId}',
+    			copyArticleUrl : '${ctx}/content/document/article/copy/${channelId}',
+    			reviewArticleUrl : '${ctx}/content/document/article/reviewArticle/${channelId}'
+    		});
+    	});
+    </script>
   </body>
 </html>

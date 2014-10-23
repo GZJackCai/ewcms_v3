@@ -55,7 +55,7 @@
 				};
 				var opts = $.extend({}, defaults, options); 
 			    if(!opts.content){
-			    	opts.content = '<iframe src="' + opts.src + '" width=100% height=100% frameborder=0/>'; 
+			    	opts.content = '<iframe src="' + opts.src + '" width="100%" height="100%" frameborder="0"/>'; 
 			    }
 			    if(!hasElementFor(opts.id)){
 			    	return ;

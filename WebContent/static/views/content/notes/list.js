@@ -64,17 +64,18 @@ NotesList.prototype.init = function(options){
 	});	
 	    
 	$('#tb-close').bind('click', function(){
-		parent.$('#notes-window').window('close');
+		parent.$('#edit-window').window('close');
 	});  
 	
 	$("form table tr").next("tr").hide(); 
     
-    $('#toolbar-arrows').bind('click', function(){
+	$('#tb-more').bind('click', function(){
+       	var showHideLabel_value = $('#showHideLabel').text();
     	$('form table tr').next('tr').toggle();
-    	if ($(this).html() == '收缩...'){
-    		$(this).html('更多...');
+     	if (showHideLabel_value == '收缩'){
+     		$('#showHideLabel').text('更多...');
     	}else{
-    		$(this).html('收缩...');
+    		$('#showHideLabel').text('收缩');
     	}
     	$(dataGrid).datagrid('resize');
     });

@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -337,7 +338,7 @@ public class MemorandaService {
 		memorandaDao.save(memoranda);
 	}
 
-	public List<Memoranda> getMemorandaFireTime(String userName, Date clientTime){
+	public List<Map<String, Object>> getMemorandaFireTime(String userName, Date clientTime){
 		Calendar c_before = Calendar.getInstance();
 		Calendar c_after = Calendar.getInstance();
 		
@@ -353,7 +354,7 @@ public class MemorandaService {
 		List<Memoranda> memorandaMsg = new ArrayList<Memoranda>();
 		
 		List<Memoranda> memorandas = memorandaDao.findMemorandaByWarn(userName);
-		if (memorandas == null || memorandas.isEmpty()) return new ArrayList<Memoranda>();
+		if (memorandas == null || memorandas.isEmpty()) return new ArrayList<Map<String, Object>>();
 		for (Memoranda memoranda : memorandas){
 			Date fireTime = memoranda.getFireTime();
 			if (fireTime == null){
@@ -370,7 +371,15 @@ public class MemorandaService {
 				updMemorandaNextFireTime(memoranda.getId());
 			}
 		}
-		return memorandaMsg;
+		List<Map<String, Object>> dataList = new ArrayList<Map<String, Object>>();
+		for (Memoranda memoranda : memorandas){
+			Map<String, Object> map = new HashMap<String, Object>();
+            map.put("id", memoranda.getId());
+            map.put("title", memoranda.getTitle());
+            map.put("content", memoranda.getContent());
+            dataList.add(map);
+		}
+		return dataList;
 	}
 	
 	private void updMemorandaNextFireTime(Long memorandaId){

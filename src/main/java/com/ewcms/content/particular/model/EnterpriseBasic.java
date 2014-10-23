@@ -26,8 +26,8 @@ import javax.persistence.TemporalType;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.site.model.Organ;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * 企业基本信息
@@ -142,7 +142,7 @@ public class EnterpriseBasic implements Serializable {
 		this.organ = organ;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getPublished() {
 		return published;
 	}
@@ -183,7 +183,7 @@ public class EnterpriseBasic implements Serializable {
 		this.frdb = frdb;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd")
 	public Date getClrq() {
 		return clrq;
 	}

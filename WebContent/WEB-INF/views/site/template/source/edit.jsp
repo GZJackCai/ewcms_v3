@@ -1,12 +1,33 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>模板资源编辑</title>
-	<%@ include file="../../../taglibs.jsp" %>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
+  </head>
+  <body>
+	<c:choose>
+	  <c:when test="${empty templateSource}">
+		模板资源管理可以对一个网站模板资源进行统一管理,可以按照文件目录对模板资源管理
+		<br/>
+		双击模板资源文件或左边弹出菜单编辑可以对模板资源内容进行编辑。								
+	  </c:when>
+	  <c:otherwise>	
+		<div class="easyui-tabs"  id="systemtab" border="false" fit="true">
+		  <div title="基本信息" style="padding: 5px;">
+			<iframe id="editinfoifr"  name="editinfoifr" class="editifr" scrolling="no"></iframe>				
+		  </div>
+		  <c:if test="${templateSource.fileType=='FILE'}">
+		  <div title="内容编辑" style="padding: 5px;">
+			<iframe id="editcontentifr"  name="editcontentifr" class="editifr" scrolling="no"></iframe>										
+		  </div>								
+		  </c:if>
+		</div>
+	  </c:otherwise>
+	</c:choose>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
 	<script type="text/javascript"> 
 		$(function(){
 			$('#systemtab').tabs({
@@ -33,27 +54,6 @@
 		function alertInfo(mesg){
 			$.messager.alert("",mesg);
 		}
-	</script> 					
-  </head>
-  <body>
-	<c:choose>
-	  <c:when test="${empty templateSource}">
-		模板资源管理可以对一个网站模板资源进行统一管理,可以按照文件目录对模板资源管理
-		<br/>
-		双击模板资源文件或左边弹出菜单编辑可以对模板资源内容进行编辑。								
-	  </c:when>
-	  <c:otherwise>	
-		<div class="easyui-tabs"  id="systemtab" border="false" fit="true">
-		  <div title="基本信息" style="padding: 5px;">
-			<iframe id="editinfoifr"  name="editinfoifr" class="editifr" scrolling="no"></iframe>				
-		  </div>
-		  <c:if test="${templateSource.fileType=='FILE'}">
-		  <div title="内容编辑" style="padding: 5px;">
-			<iframe id="editcontentifr"  name="editcontentifr" class="editifr" scrolling="no"></iframe>										
-		  </div>								
-		  </c:if>
-		</div>
-	  </c:otherwise>
-	</c:choose>			
+	</script>			
   </body>
 </html>

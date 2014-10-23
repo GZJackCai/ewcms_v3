@@ -8,13 +8,42 @@
 
 	<description>Shiro Configuration</description>
 
-	<aop:config proxy-target-class="true"/>
-
 	<!-- Shiro's main business-tier object for web-enabled applications -->
 	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
 		<property name="realm" ref="shiroDbRealm" />
 		<property name="cacheManager" ref="shiroEhcacheManager" />
+		<property name="rememberMeManager" ref="rememberMeManager"/>
 	</bean>
+	
+	<!---cookie-->
+    <!-- uid(session id) 生成策略 -->
+    <bean id="sessionIdGenerator" class="org.apache.shiro.session.mgt.eis.JavaUuidSessionIdGenerator"/>
+    <bean id="sessionIdCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg value="uid"/>
+        <!-- 如果是ip/localhost 此处domain为空（chrome不能设置） -->
+        <property name="domain" value=""/>
+        <property name="path" value="/"/>
+        <property name="httpOnly" value="true"/>
+        <property name="maxAge" value="1"/>
+    </bean>
+    <bean id="rememberMeCookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <constructor-arg value="rememberMe"/>
+        <!-- 如果是ip/localhost 此处domain为空（chrome不能设置） -->
+        <property name="domain" value=""/>
+        <property name="path" value="/"/>
+        <property name="httpOnly" value="true"/>
+        <!-- 默认 rememberMe cookie 60 * 60 * 24 * 30 （30天） -->
+        <property name="maxAge" value="2592000"/>
+    </bean>
+	
+	<!-- manager -->
+    <!-- Remembered vs Authenticated http://www.ituring.com.cn/article/287 -->
+    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <!-- rememberme cookie加密的密钥 建议每个项目都不一样 默认AES算法 密钥长度（128 256 512 位）-->
+        <property name="cipherKey"
+                  value="#{T(org.apache.shiro.codec.Base64).decode('4AvVhmFLUs0KTA3Kprsdag==')}"/>
+        <property name="cookie" ref="rememberMeCookie"/>
+    </bean>
 	
 	<!-- 用户授权信息Cache, 采用EhCache -->
 	<bean id="shiroEhcacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
@@ -48,8 +77,8 @@
 				/checkcode.jpg = anon
 				/static/** = anon
 				/favicon.ico = anon
-				/login = captcha
 				/logout = logout
+				/login = captcha,authc
 				/** = authc
 			</value>
 		</property>

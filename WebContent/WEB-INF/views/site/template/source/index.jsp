@@ -1,31 +1,11 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>模板资源管理</title>	
-	<%@ include file="../../../taglibs.jsp" %>
-	<script type="text/javascript" src="${ctx}/static/views/site/template/source/index.js"></script>
-	<script type="text/javascript">
-		var _templateSourceIndex = new TemplateSourceIndex('#tt2');
-		$(function(){
-			_templateSourceIndex.init({
-				treeUrl : '${ctx}/site/template/source/tree',
-				addUrl : '${ctx}/site/template/source/add',
-				addFolderUrl : '${ctx}/site/template/source/addFolder',
-				editUrl : '${ctx}/site/template/source/edit',
-				renameUrl : '${ctx}/site/template/source/rename',
-				deleteUrl : '${ctx}/site/template/source/del',
-				parseUrl : '${ctx}/site/template/source/moveto',
-				importUrl : '${ctx}/site/template/source/import/',
-				exportUrl : '${ctx}/site/template/source/exportzip',
-				publishUrl : '${ctx}/site/template/source/pubsource'
-			});
-		});
-	</script>		
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body class="easyui-layout">
 	<div region="west"  title='<label id="treeload-button" style="vertical-align: middle;cursor:pointer;"><img src="${ctx}/static/image/refresh.png" style="vertical-align: middle;">模板资源库</label>' split="true" style="width:190px;">		
@@ -49,5 +29,24 @@
 	  <div class="menu-sep"></div>
 	  <div id="publish-button" data-options="iconCls:'icon-table-pub'">发布资源</div>
 	</div>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript" src="${ctx}/static/views/site/template/source/index.js"></script>
+	<script type="text/javascript">
+		var _templateSourceIndex = new TemplateSourceIndex('#tt2');
+		$(function(){
+			_templateSourceIndex.init({
+				treeUrl : '${ctx}/site/template/source/tree',
+				addUrl : '${ctx}/site/template/source/add',
+				addFolderUrl : '${ctx}/site/template/source/addFolder',
+				editUrl : '${ctx}/site/template/source/edit',
+				renameUrl : '${ctx}/site/template/source/rename',
+				deleteUrl : '${ctx}/site/template/source/del',
+				parseUrl : '${ctx}/site/template/source/moveto',
+				importUrl : '${ctx}/site/template/source/import/',
+				exportUrl : '${ctx}/site/template/source/exportzip',
+				publishUrl : '${ctx}/site/template/source/pubsource'
+			});
+		});
+	</script>
   </body>
 </html>

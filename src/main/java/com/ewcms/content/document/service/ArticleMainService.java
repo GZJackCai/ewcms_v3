@@ -166,8 +166,8 @@ public class ArticleMainService{
 					Boolean isAdmin = false;
 					String roleNames = Collections3.convertToString(roleNameList, ",");
 					
-					if (roleNames.toUpperCase().indexOf("ROLE_ADMIN") > 0){
-						operateTrackService.addOperateTrack(articleMainId, article.getStatusDescription(), "管理员直接跳过流程进入发布版。", "");
+					if (roleNames.toUpperCase().indexOf("ROLE_ADMIN") >= 0){
+						operateTrackService.addOperateTrack(articleMainId, article.getStatusDescription(), "管理员直接跳过审核流程进入发布版。", "");
 							
 						article.setStatus(Status.PRERELEASE);
 						article.setReviewProcess(null);
@@ -350,7 +350,20 @@ public class ArticleMainService{
 		if (isNull(articleMain)) return false;
 		Article article = articleMain.getArticle();
 		if (isNull(article)) return false;
-		if (article.getStatus() == Status.REVIEW){
+		
+		List<String> roleNameList = EwcmsContextUtil.getRoleNames();
+		String roleNames = Collections3.convertToString(roleNameList, ",");
+		if (roleNames.toUpperCase().indexOf("ROLE_ADMIN") >= 0){
+			operateTrackService.addOperateTrack(articleMainId, article.getStatusDescription(), "管理员直接跳过审核流程进入发布版。", "");
+				
+			article.setStatus(Status.PRERELEASE);
+			article.setReviewProcess(null);
+			
+			articleMain.setArticle(article);
+			articleMainDao.save(articleMain);
+			
+			return true;
+		}else if (article.getStatus() == Status.REVIEW){
 			ReviewProcess rp = reviewProcessDao.findReviewProcessByIdAndChannel(article.getReviewProcess().getId(), channelId);
 			Set<ReviewUser> reviewUsers = rp.getReviewUsers();
 			Set<ReviewRole> reviewGroups = rp.getReviewRoles();

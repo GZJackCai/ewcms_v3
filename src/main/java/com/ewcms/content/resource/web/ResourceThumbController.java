@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ewcms.content.resource.model.Resource;
 import com.ewcms.content.resource.service.ResourceService;
-import com.ewcms.web.util.JSONUtil;
 
 /**
  * @author 吴智俊
@@ -32,11 +31,10 @@ public class ResourceThumbController {
 	}
 	
 	@RequestMapping(value = "/receive")
-	public @ResponseBody
-	String thumb(@RequestParam(value = "resourceId") Long resourceId, @RequestParam(value = "myUpload") MultipartFile myUpload) {
+	public @ResponseBody String thumb(@RequestParam(value = "resourceId") Long resourceId, @RequestParam(value = "myUpload") MultipartFile myUpload) {
 		try {
 			Resource resource = resourceService.updateThumb(resourceId, myUpload);
-			return JSONUtil.toJSON(resource);
+			return resource.getThumbUri();
 		} catch (IOException e) {
 			return null;
 		}

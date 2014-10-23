@@ -7,6 +7,7 @@
 package com.ewcms.site.model;
 
 import java.io.Serializable;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,10 +21,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PostUpdate;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Formula;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * <ul>
@@ -144,7 +146,7 @@ public class Channel implements Serializable {
 		this.internalSort = internalSort;
 	}
 
-	@JsonIgnore
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Channel getParent() {
 		return parent;
 	}
@@ -153,7 +155,7 @@ public class Channel implements Serializable {
 		this.parent = parent;
 	}
 
-	@JsonIgnore
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Site getSite() {
 		return site;
 	}

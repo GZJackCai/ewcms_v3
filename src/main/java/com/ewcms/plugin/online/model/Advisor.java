@@ -25,10 +25,8 @@ import javax.persistence.TemporalType;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.site.model.Organ;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 
 /**
  *
@@ -88,7 +86,7 @@ public class Advisor implements Serializable {
         this.content = content;
     }
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getDate() {
         return date;
     }
@@ -113,7 +111,7 @@ public class Advisor implements Serializable {
         this.ip = ip;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public Matter getMatter() {
         return matter;
     }
@@ -130,7 +128,7 @@ public class Advisor implements Serializable {
         this.name = name;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public Organ getOrgan() {
         return organ;
     }
@@ -147,7 +145,7 @@ public class Advisor implements Serializable {
         this.replay = replay;
     }
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getReplayDate() {
         return replayDate;
     }

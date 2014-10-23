@@ -1,21 +1,14 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>机构信息</title>	
-	<%@ include file="../../taglibs.jsp"%>
-	<script type="text/javascript">
-		function download(){
-			window.open('${ctx}/site/organ/download/${organ.id}');
-		}
-	</script>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
-    <%@ include file="../../alertMessage.jsp" %>
+    <%@ include file="/WEB-INF/views/alertMessage.jsp" %>
 	<form:form id="inputForm" action="${ctx}/site/organ/saveInfo" method="post" modelAttribute="organ" class="form-horizontal" enctype="multipart/form-data">
 	  <fieldset>
 		<table class="formtable">
@@ -80,6 +73,12 @@
 		</table>	
 	  </fieldset>
 	  <input type="hidden" id="organInfo_id" name="organInfo.id" value="${organ.organInfo.id}"/>
-	</form:form>						
+	</form:form>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript">
+		function download(){
+			window.open('${ctx}/site/organ/download/${organ.id}');
+		}
+	</script>						
   </body>
 </html>

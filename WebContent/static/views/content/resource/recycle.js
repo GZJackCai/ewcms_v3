@@ -42,9 +42,7 @@ operators = {
        }
 };
 
-var recycle = function(context,opts){
-    this._context = context;
-
+var recycle = function(opts){
     opts = opts || {};
     
     this._opts = {};
@@ -61,7 +59,6 @@ var recycle = function(context,opts){
 recycle.prototype.init = function(urls){
 	$("form table tr").next("tr").hide(); 
 	
-    var context = this._context;
     var opts = this._opts;
     
     $(opts.datagridId).datagrid({
@@ -74,7 +71,7 @@ recycle.prototype.init = function(urls){
            {field:'thumbUri',title:'引导图',width:180,halign:'left',align:'center',
         	   formatter:function(val,row){
         		   if(row.type=='IMAGE'){
-        			   return '<img src="' + context + val +'" style="height:48px;"/>';    
+        			   return '<img src="' + ctx + val +'" style="height:48px;"/>';    
         		   }else{
         			   return '无';
         		   }
@@ -130,7 +127,7 @@ recycle.prototype.init = function(urls){
         onClick:function(item){
             var row = $(opts.datagridId).datagrid("getSelected");
             if(item.iconCls == 'icon-download'){
-                window.open(context + row.uri);
+                window.open(ctx + row.uri);
             }
             if(item.iconCls == 'icon-resume'){
                 operators.revert(opts.datagridId,urls.revertUrl);
@@ -161,13 +158,14 @@ recycle.prototype.init = function(urls){
     	$.ewcms.query();
     });
     
-    $('#toolbar-arrows').bind('click', function(){
+    $('#tb-more').bind('click', function(){
+       	var showHideLabel_value = $('#showHideLabel').text();
     	$('form table tr').next('tr').toggle();
-    	if ($(this).html() == '收缩...'){
-    		$(this).html('更多...');
+     	if (showHideLabel_value == '收缩'){
+     		$('#showHideLabel').text('更多...');
     	}else{
-    		$(this).html('收缩...');
+    		$('#showHideLabel').text('收缩');
     	}
-    	$(opts.datagridId).datagrid('resize');
+    	$(dataGrid).datagrid('resize');
     });
 };

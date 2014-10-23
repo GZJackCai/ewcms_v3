@@ -1,26 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib uri="http://shiro.apache.org/tags" prefix="shiro"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>用户管理</title>	
-	<%@ include file="../../taglibs.jsp" %>
-	<script type="text/javascript" src="${ctx}/static/views/security/user/detail.js"></script>
-	<script type="text/javascript">
-		var _userDetail = new UserDetail();
-		$(function(){
-			_userDetail.init({
-				queryUrl : '${ctx}/security/userdetail/query?id=${id}',
-				roleQueryUrl : '${ctx}/security/role/query',
-				editUrl : '${ctx}/security/userdetail/editRoleAndPermission?id=${id}',
-				permissionUrl : '${ctx}/security/permission/query'
-			});
-		});
-	</script>		
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body class="easyui-layout">
 	<div region="center" style="padding:2px;" border="false">
@@ -39,8 +24,8 @@
           <form id="queryform"  style="padding: 0;margin: 0;">
                      名称：<input type="text" name="realName" style="width:80px"/>&nbsp;
                       邮箱：<input type="text" name="email" style="width:120px"/>&nbsp;
-            <a href="#" id="tb-query" class="easyui-linkbutton" iconCls="icon-search">查询</a>
-            <a href="#" id="tb-clear" class="easyui-linkbutton" data-options="iconCls:'icon-clear'" onclick="javascript:document.forms[0].reset();">清除</a>
+            <a href="javascript:void(0);" id="tb-query" class="easyui-linkbutton" iconCls="icon-search">查询</a>
+            <a href="javascript:void(0);" id="tb-clear" class="easyui-linkbutton" data-options="iconCls:'icon-clear'" onclick="javascript:document.forms[0].reset();">清除</a>
           </form>
         </div>
          -->
@@ -79,5 +64,18 @@
       </div>
     </div>
     <input type="hidden" id="id" name="id" value="${id}"/>
+    <%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript" src="${ctx}/static/views/security/user/detail.js"></script>
+	<script type="text/javascript">
+		var _userDetail = new UserDetail();
+		$(function(){
+			_userDetail.init({
+				queryUrl : '${ctx}/security/userdetail/query?id=${id}',
+				roleQueryUrl : '${ctx}/security/role/query',
+				editUrl : '${ctx}/security/userdetail/editRoleAndPermission?id=${id}',
+				permissionUrl : '${ctx}/security/permission/query'
+			});
+		});
+	</script>
   </body>
 </html>

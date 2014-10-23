@@ -1,21 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
     <title>修改用户信息</title>
-	<%@ include file="../../taglibs.jsp" %>
-    <script type="text/javascript">
-        $(function(){
-            parent.updateUsername('${user.realName}');
-        });
-    </script>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
-    <%@ include file="../../alertMessage.jsp" %>
+    <%@ include file="/WEB-INF/views/alertMessage.jsp" %>
     <form:form id="inputForm" action="${ctx}/security/user/saveUserInfo" method="post" modelAttribute="user" class="form-horizontal">
       <input type="hidden" id="loginName" name="loginName" value="${user.loginName}"/>
       <fieldset>
@@ -51,5 +44,11 @@
 	  <a class="easyui-linkbutton" icon="icon-save" href="javascript:void(0);" onclick="javascript:$('#inputForm').submit();">提交</a>
 	  <a class="easyui-linkbutton" icon="icon-cancel" href="javascript:void(0);" onclick="javascript:parent.$('#edit-window').window('close');">关闭</a>
 	</div>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+    <script type="text/javascript">
+        $(function(){
+            parent.updateUsername('${user.realName}');
+        });
+    </script>
   </body>
 </html>

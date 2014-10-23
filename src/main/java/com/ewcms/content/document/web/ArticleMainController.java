@@ -53,30 +53,61 @@ public class ArticleMainController {
 	@Autowired
 	private HistoryModelService historyModelService;
 	
+	/**
+	 * 初始化
+	 * 
+	 * @param model
+	 */
 	@ModelAttribute
 	public void init(Model model) {
 		model.addAttribute("statusMap", Article.Status.values());
 		model.addAttribute("genreMap", Article.Genre.values());
 		model.addAttribute("categoryMap", categoryService.findCategoryAll());
+		model.addAttribute("siteId", EwcmsContextUtil.getCurrentSiteId());
 	}
 	
+	/**
+	 * 树型栏目
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = "/tree")
 	public String tree(){
 		return "content/document/article/tree";
 	}
 	
+	/**
+	 * 显示相应栏目所属文章主页
+	 * 
+	 * @param channelId 栏目编号
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(value = "/index/{channelId}")
 	public String index(@PathVariable(value = "channelId")Long channelId, Model model){
 		model.addAttribute("channelId", channelId);
 		return "content/document/article/index";
 	}
 	
+	/**
+	 * 查询相应栏目所属文章
+	 * 
+	 * @param channelId 栏目编号
+	 * @param params 查询条件
+	 * @return
+	 */
 	@RequestMapping(value = "/query/{channelId}")
-	public @ResponseBody
-	Map<String, Object> query(@PathVariable(value = "channelId")Long channelId, @ModelAttribute QueryParameter params) {
+	public @ResponseBody Map<String, Object> query(@PathVariable(value = "channelId")Long channelId, @ModelAttribute QueryParameter params) {
 		return articleMainService.search(channelId, params);
 	}
 	
+	/**
+	 * 删除相应栏目中的文章
+	 * 
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.DELETE_ARTICLE }, position = 0)
 	@RequestMapping(value = "/delete/{channelId}")
 	public String remove(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections){
@@ -86,6 +117,15 @@ public class ArticleMainController {
 		return "redirect:/content/document/article/index/" + channelId;
 	}
 	
+	/**
+	 * 编辑相应栏目中的文章
+	 * 
+	 * @param channelId 栏目编号
+	 * @param articleMainId 文章编号
+	 * @param mask 权限数
+	 * @param model
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
 	@RequestMapping(value = "/edit/{channelId}",method = RequestMethod.GET)
 	public String edit(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "articleMainId", required = false) Long articleMainId, @RequestParam(value="mask") Integer mask, Model model) {
@@ -113,6 +153,17 @@ public class ArticleMainController {
 		return "content/document/article/edit";
 	}
 
+	/**
+	 * 保存相应栏目中的文章
+	 * 
+	 * @param article 文章对象
+	 * @param categoryList 分类列表集合
+	 * @param articleMainId 主文章编号
+	 * @param channelId 栏目编号
+	 * @param mask 权限数
+	 * @param redirectAttributes
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 3)
 	@RequestMapping(value = "/save",method = RequestMethod.POST)
 	public String save(@ModelAttribute(value = "article")Article article, @RequestParam(value = "categoryList", required = false) List<Long> categoryList, @RequestParam(value = "articleMainId", required = false)Long articleMainId, @RequestParam(value = "channelId") Long channelId, @RequestParam(value = "mask") Integer mask, RedirectAttributes redirectAttributes){
@@ -146,13 +197,14 @@ public class ArticleMainController {
 	}
 	
 	/**
-	 * 文章审核
+	 * 审核相应栏目中的文章
 	 * 
-	 * @param channelId 频道编号
-	 * @param selections 文章主体编号
-	 * @return Boolean
+	 * @param username 登录用户名
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @return
 	 */
-	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
+	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 1)
 	@RequestMapping(value = "/approve/{username}_{channelId}")
 	public @ResponseBody Boolean approve(@PathVariable(value = "username")String username, @PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections){
 		Boolean result = false;
@@ -164,6 +216,13 @@ public class ArticleMainController {
 		return result;
 	}
 	
+	/**
+	 * 独立发布相应栏目中的文章
+	 * 
+	 * @param channelId 栏目编号
+	 * @param redirectAttributes
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.PUBLISH_ARTICLE }, position = 0)
 	@RequestMapping(value = "/pubArticle/{channelId}")
 	public String pubArticle(@PathVariable(value = "channelId")Long channelId, RedirectAttributes redirectAttributes){
@@ -178,6 +237,13 @@ public class ArticleMainController {
 		return "redirect:/content/document/articlemain/index/" + channelId;
 	}
 	
+	/**
+	 * 关联发布相应栏目的文章
+	 * 
+	 * @param channelId 栏目编号
+	 * @param redirectAttributes
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.PUBLISH_ARTICLE }, position = 0)
 	@RequestMapping(value = "/associateRelease/{channelId}")
 	public String associateRelease(@PathVariable(value = "channelId")Long channelId, RedirectAttributes redirectAttributes){
@@ -192,6 +258,14 @@ public class ArticleMainController {
 		return "redirect:/content/document/articlemain/index/" + channelId;
 	}
 	
+	/**
+	 * 复制相应栏目中的文章到目标栏目
+	 * 
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @param targetChannelIds 目标栏目编号集合
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
 	@RequestMapping(value = "/copy/{channelId}")
 	public @ResponseBody Boolean copy(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections, @RequestParam(value = "targetChannelIds") List<Long> targetChannelIds){
@@ -203,6 +277,14 @@ public class ArticleMainController {
 		return result;
 	}
 	
+	/**
+	 * 移动相应栏目中的文章到目标栏目
+	 * 
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @param targetChannelIds 目标栏目编号集合
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
 	@RequestMapping(value = "/move/{channelId}")
 	public @ResponseBody Boolean move(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections") List<Long> selections, @RequestParam(value = "targetChannelIds") List<Long> targetChannelIds){
@@ -214,7 +296,17 @@ public class ArticleMainController {
 		return result;
 	}
 	
-	@ChannelAcl(acl = { AclEnum.VERIFY_ARTICLE }, position = 0)
+	/**
+	 * 审核相应栏目中的文章
+	 * 
+	 * @param username 登录用户名
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @param review 是否通过(0:通过,1:不通过)
+	 * @param reason 不通过原因
+	 * @return
+	 */
+	@ChannelAcl(acl = { AclEnum.VERIFY_ARTICLE }, position = 1)
 	@RequestMapping(value = "/approveArticle/{username}_{channelId}")
 	public @ResponseBody Boolean approveArticle(@PathVariable(value = "username")String username, @PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections") List<Long> selections, @RequestParam(value = "review") Integer review, @RequestParam(value = "reason", required = false) String reason){
 		Boolean result = false;
@@ -226,6 +318,16 @@ public class ArticleMainController {
 		return result;
 	}
 	
+	/**
+	 * 排序相应栏目中的文章
+	 * 
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @param sort 排序号
+	 * @param isTop 是否置顶
+	 * @param isInsert 是否插入
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
 	@RequestMapping(value = "/sort/{channelId}")
 	public @ResponseBody Boolean sortArticle(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections, @RequestParam(value = "sort")Long sort, @RequestParam(value = "isTop")Boolean isTop, @RequestParam(value = "isInsert")Integer isInsert){
@@ -238,6 +340,14 @@ public class ArticleMainController {
 		return result;
 	}
 	
+	/**
+	 * 查询排序中是否与设置排序号是否有重复
+	 * 
+	 * @param channelId 栏目编号
+	 * @param sort 排序号
+	 * @param isTop 是否置顶
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
 	@RequestMapping(value = "/isSort/{channelId}")
 	public @ResponseBody Boolean isSortArticle(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "sort")Long sort, @RequestParam(value = "isTop")Boolean isTop){
@@ -249,6 +359,13 @@ public class ArticleMainController {
 		return isSort;
 	}
 	
+	/**
+	 * 清除相应栏目中的文章的排序号
+	 * 
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
 	@RequestMapping(value = "/clearSort/{channelId}")
 	public @ResponseBody Boolean clearSortArticle(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections){
@@ -261,20 +378,35 @@ public class ArticleMainController {
 		return result;
 	}
 	
-	@ChannelAcl(acl = { AclEnum.PUBLISH_ARTICLE }, position = 0)
+	/**
+	 * 退回相应栏目中的文章，使文章状态回到重新编辑状态
+	 * 
+	 * @param username 登录用户名
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @param redirectAttributes
+	 * @return
+	 */
+	@ChannelAcl(acl = { AclEnum.PUBLISH_ARTICLE }, position = 1)
 	@RequestMapping(value = "/break/{username}_{channelId}")
-	public String breakArticle(@PathVariable(value = "username")String username, @PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections, RedirectAttributes redirectAttributes){
-		String message = "文章退回到重新编辑状态";
+	public @ResponseBody Boolean breakArticle(@PathVariable(value = "username")String username, @PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections, RedirectAttributes redirectAttributes){
+		Boolean result = false;
 		try{
 			articleMainService.breakArticleMain(username, selections, channelId);
-			message += SUCCESS;
+			result = true;
 		}catch(Exception e){
-			message += FAILURE;
 		}
-		redirectAttributes.addFlashAttribute("message", message);
-		return "redirect:/content/document/articlemain/index/" + channelId;
+		return result;
 	}
 	
+	/**
+	 * 置顶相应栏目中的文章
+	 * 
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @param isTop 是否置顶
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
 	@RequestMapping(value = "/top/{channelId}")
 	public @ResponseBody Boolean topArticle(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections, @RequestParam(value = "isTop")Boolean isTop){
@@ -287,6 +419,14 @@ public class ArticleMainController {
 		return result;
 	}
 	
+	/**
+	 * 共享相应栏目中的文章
+	 * 
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @param isShare 是否共享
+	 * @return
+	 */
 	@ChannelAcl(acl = { AclEnum.WRITER_ARTICLE }, position = 0)
 	@RequestMapping(value = "/share/{channelId}")
 	public @ResponseBody Boolean shareArticle(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections, @RequestParam(value = "isShare")Boolean isShare){
@@ -299,6 +439,13 @@ public class ArticleMainController {
 		return result;
 	}
 	
+	/**
+	 * 提交核审相应栏目中的文章
+	 * 
+	 * @param channelId 栏目编号
+	 * @param selections 所选文章编号集合
+	 * @return
+	 */
 	@RequestMapping(value = "/reviewEffective/{channelId}")
 	public @ResponseBody Boolean reviewEffective(@PathVariable(value = "channelId")Long channelId, @RequestParam(value = "selections")List<Long> selections){
 		Boolean isEffective = false;
@@ -309,6 +456,13 @@ public class ArticleMainController {
 		return isEffective;
 	}
 	
+	/**
+	 * 提取文章的关键字
+	 * 
+	 * @param title 文章标题
+	 * @param contents 文章内容
+	 * @return
+	 */
 	@RequestMapping(value = "/keyword")
 	public @ResponseBody String keyword(@RequestParam(value = "title") String title, @RequestParam(value = "contents") String contents) {
 		if (title != null && title.length() > 0 && contents != null && contents.length() > 0) {
@@ -318,6 +472,13 @@ public class ArticleMainController {
 		}
 	}
 
+	/**
+	 * 提取文章的摘要
+	 * 
+	 * @param title 文章标题
+	 * @param contents 文章内容
+	 * @return
+	 */
 	@RequestMapping(value = "/summary")
 	public @ResponseBody String summary(@RequestParam(value = "title") String title, @RequestParam(value = "contents") String contents) {
 		if (title != null && title.length() > 0 && contents != null && contents.length() > 0) {
@@ -327,17 +488,37 @@ public class ArticleMainController {
 		}
 	}
 
+	/**
+	 * 显示文章操作历史轨迹页面
+	 * 
+	 * @param articleId 文章编号
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping(value = "/history/index/{articleId}")
 	public String historyArticle(@PathVariable(value = "articleId") Long articleId, Model model){
 		model.addAttribute("articleId", articleId);
 		return "content/document/article/history";
 	}
 	
+	/**
+	 * 查询文章操作历史轨迹
+	 * 
+	 * @param params
+	 * @param articleId
+	 * @return
+	 */
 	@RequestMapping(value = "/history/query/{articleId}")
 	public @ResponseBody Map<String, Object> queryHistory(@ModelAttribute QueryParameter params, @PathVariable(value = "articleId") Long articleId){
 		return articleMainService.searchArticleHistory(articleId, params);
 	}
 	
+	/**
+	 * 回复文章相应的历史记录
+	 * 
+	 * @param historyId 历史记录编号
+	 * @return
+	 */
 	@RequestMapping(value = "/history/restore/{historyId}")
 	public @ResponseBody List<String> restoreArticleHistory(@PathVariable(value = "historyId")Long historyId){
 		HistoryModel historyModel = historyModelService.findByHistoryModel(historyId);
@@ -355,6 +536,11 @@ public class ArticleMainController {
 		return details;
 	}
 	
+	/**
+	 * 显示问卷调查
+	 * 
+	 * @return
+	 */
 	@RequestMapping(value = "/vote")
 	public String vote(){
 		return "content/document/article/vote";

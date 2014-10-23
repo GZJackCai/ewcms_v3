@@ -32,7 +32,7 @@ NotesIndex.prototype.init = function(options){
 	});
 	
 	$('#tb-notedetial').bind('click', function(){
-		$.ewcms.openWindow({windowId:'#notes-window', iframeId:'#editifr_notes', src: options.noteDetailUrl, width:1450,height:500,title:'备访录列表'});
+		$.ewcms.openWindow({windowId:'#edit-window',iframeId:'#editifr', src: options.noteDetailUrl, width:1450,height:500,title:'备访录列表'});
 	});
 	
 	var monthSelect = function(year, month, weight){
@@ -75,8 +75,8 @@ NotesIndex.prototype.editNotes = function(){
 };
 
 function loadingEnable(){
-	$("<div class=\"datagrid-mask\"></div>").css({display:"block",width:"100%",height:$(window).height()}).appendTo("body");
-	$("<div class=\"datagrid-mask-msg\"></div>").html("<font size='9'>正在处理，请稍候。。。</font>").appendTo("body").css({display:"block",left:($(document.body).outerWidth(true) - 190) / 2,top:($(window).height() - 45) / 2}); 
+	$('<div class="datagrid-mask"></div>').css({display:'block',width:'100%',height:$(window).height()}).appendTo('body');
+	$('<div class="datagrid-mask-msg"></div>').html('<font size="9">正在处理，请稍候。。。</font>').appendTo('body').css({display:'block',left:($(document.body).outerWidth(true) - 190) / 2,top:($(window).height() - 45) / 2}); 
 };
  
 function loadingDisable(){

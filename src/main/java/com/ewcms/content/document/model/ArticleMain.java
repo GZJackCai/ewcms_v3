@@ -11,16 +11,14 @@ import java.io.Serializable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Index;
 
 /**
  * 文章主体
@@ -38,7 +36,11 @@ import org.hibernate.annotations.Index;
  * @author 吴智俊
  */
 @Entity
-@Table(name = "content_article_main")
+@Table(name = "content_article_main",
+       indexes = {@Index(name = "idx_articlemain_channel_id", columnList = "channel_id"),
+		          @Index(name = "idx_articlemain_article_id", columnList = "article_id")
+                 }
+)
 @SequenceGenerator(name = "seq_content_article_main", sequenceName = "seq_content_article_main_id", allocationSize = 1)
 public class ArticleMain implements Serializable {
 
@@ -49,18 +51,15 @@ public class ArticleMain implements Serializable {
 	@Column(name = "id")
 	private Long id;
 	@Column(name = "channel_id", nullable = false)
-	@Index(name="idx_articlemain_channel_id")
 	private Long channelId;
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, targetEntity = Article.class)
+	@ManyToOne(cascade = CascadeType.ALL, targetEntity = Article.class)
 	@JoinColumn(name = "article_id")
-	@Index(name = "idx_articlemain_article_id")
 	private Article article;
 	@Column(name = "is_reference")
 	private Boolean isReference;
 	@Column(name = "sort")
 	private Long sort;
 	@Column(name = "top")
-	@Index(name="idx_articlemain_top")
 	private Boolean top;
 	@Column(name = "is_share")
 	private Boolean isShare;

@@ -23,7 +23,7 @@ import javax.persistence.TemporalType;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 备忘录
@@ -150,7 +150,7 @@ public class Memoranda implements Serializable {
 		this.content = content;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd")
+	@JSONField(format = "yyyy-MM-dd")
 	public Date getNoteDate() {
 		return noteDate;
 	}
@@ -175,7 +175,7 @@ public class Memoranda implements Serializable {
 		this.warn = warn;
 	}
 
-	@JsonFormat(pattern = "HH:mm")
+	@JSONField(format = "HH:mm")
 	public Date getWarnTime() {
 		return warnTime;
 	}
@@ -216,7 +216,7 @@ public class Memoranda implements Serializable {
 		}
 	}
 	
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getFireTime() {
 		return fireTime;
 	}

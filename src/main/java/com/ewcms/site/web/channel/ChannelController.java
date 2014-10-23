@@ -31,7 +31,7 @@ import com.ewcms.web.util.ChannelNode;
 import com.ewcms.web.util.TreeNodeConvert;
 import com.ewcms.web.vo.TreeNode;
 
-@Controller(value = "channel.index")
+@Controller
 @RequestMapping(value = "/site/channel")
 public class ChannelController {
 

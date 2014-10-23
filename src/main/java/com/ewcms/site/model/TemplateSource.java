@@ -11,6 +11,7 @@ package com.ewcms.site.model;
 
 import java.io.Serializable;
 import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,8 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Formula;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 模板资源
@@ -148,7 +148,7 @@ public class TemplateSource implements Serializable {
 		this.describe = describe;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getUpdTime() {
 		return updTime;
 	}
@@ -181,7 +181,7 @@ public class TemplateSource implements Serializable {
 		this.parent = parent;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public TemplatesrcEntity getSourceEntity() {
 		return sourceEntity;
 	}

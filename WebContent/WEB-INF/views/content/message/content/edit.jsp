@@ -1,22 +1,14 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>订阅内容</title>
-	<%@ include file="../../../taglibs.jsp"%>
-	<script type="text/javascript">
-		$(function(){
-			$('#inputForm').validate({});
-			parent.$('#tt').datagrid('reload');
-		})
-	</script>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
-    <%@ include file="../../../alertMessage.jsp" %>
+    <%@ include file="/WEB-INF/views/alertMessage.jsp" %>
 	<form:form id="inputForm" action="${ctx}/content/message/content/save" method="post" modelAttribute="msgContent" class="form-horizontal">
 	  <table class="formtable">
 		<tr>
@@ -35,5 +27,12 @@
 	  <a class="easyui-linkbutton" data-options="iconCls:'icon-save'" href="javascript:void(0);" onclick="javascript:$('#inputForm').submit();">提交</a>
 	  <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" href="javascript:void(0);" onclick="javascript:parent.$('#edit-window').window('close');">关闭</a>
 	</div>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript">
+		$(function(){
+			$('#inputForm').validate({});
+			parent.$('#tt').datagrid('reload');
+		})
+	</script>
   </body>
 </html>

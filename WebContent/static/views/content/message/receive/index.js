@@ -20,9 +20,9 @@ MsgReceiveIndex.prototype.init = function(options){
 		     {field:'read',title:'标记 ',width:32,
 		    	 formatter : function(val, rec) {
 		    		 if (val){
-		    			 return "&nbsp;<img src='../../../../../static/image/msg/msg_read.gif' width='13px' height='13px' title='接收消息，已读'/>";
+		    			 return "&nbsp;<img src='" + ctx + "/static/image/msg/msg_read.gif' width='13px' height='13px' title='接收消息，已读'/>";
 		    		 }else{
-		    			 return "&nbsp;<img src='../../../../../static/image/msg/msg_unread.gif' width='13px' height='13px' title='接收消息，未读'/>";
+		    			 return "&nbsp;<img src='" + ctx + "/static/image/msg/msg_unread.gif' width='13px' height='13px' title='接收消息，未读'/>";
 		    		 }
 		    	 }
 		     },
@@ -35,7 +35,7 @@ MsgReceiveIndex.prototype.init = function(options){
 		     {field:'subscription',title:'订阅',width:32,
 		    	 formatter : function(val, rec) {
 		    		 if (val){
-		    			 return "&nbsp;<img src='../../../../../static/theme/icons/ok.png' width='13px' height='13px'/>";
+		    			 return "&nbsp;<img src='" + ctx + "/static/theme/icons/ok.png' width='13px' height='13px'/>";
 		    		 }else{
 		    			 return "";
 		    		 }
@@ -61,7 +61,6 @@ MsgReceiveIndex.prototype.init = function(options){
 				return;
 			}
 			$(dataGrid).datagrid('reload');
-			MsgReceiveIndex.refreshTipMessage(options.unReadUrl);
 		});
 	});
 	
@@ -81,7 +80,6 @@ MsgReceiveIndex.prototype.init = function(options){
 				return;
 			}
 			$(dataGrid).datagrid('reload');
-			MsgReceiveIndex.refreshTipMessage(options.unReadUrl);
 		});
 	});
 	
@@ -105,40 +103,19 @@ MsgReceiveIndex.prototype.init = function(options){
     
     $("form table tr").next("tr").hide(); 
     
-    $('#toolbar-arrows').bind('click', function(){
+    $('#tb-more').bind('click', function(){
+       	var showHideLabel_value = $('#showHideLabel').text();
     	$('form table tr').next('tr').toggle();
-    	if ($(this).html() == '收缩...'){
-    		$(this).html('更多...');
+     	if (showHideLabel_value == '收缩'){
+     		$('#showHideLabel').text('更多...');
     	}else{
-    		$(this).html('收缩...');
+    		$('#showHideLabel').text('收缩');
     	}
     	$(dataGrid).datagrid('resize');
     });
-
 };
 
 MsgReceiveIndex.prototype.showRecord = function(detailUrl, unReadUrl, id){
 	url = detailUrl + '/' + id + '_' + 'message';
 	$.ewcms.openWindow({windowId:'#edit-window',iframeId:'#editifr', src : url,width:700,height:400,title:'内容'});
-	MsgReceiveIndex.refreshTipMessage(unReadUrl);
-};
-
-MsgReceiveIndex.refreshTipMessage = function(unReadUrl){
-	$.ajax({
-		  type:'post',
-		  datatype:'json',
-		  cache:false,
-		  url:unReadUrl,
-		  data: '',
-		  success:function(message, textStatus){
-			  parent.parent.$('#tipMessage').empty();
-		      var html = '<span id="messageFlash">';
-		      if (message != 'false'){
-		      	var tiplength = message.length;
-		        html += '<a href="javascript:void(0);" onclick="javascript:_home.addTab(\'个人消息\',\'message/index.do\');return false;" onfocus="this.blur();" style="color:red;font-size:13px;text-decoration:none;">【<img src="./ewcmssource/image/msg/msg_new.gif"/>新消息(' + tiplength + ')】</a>';
-		      }
-		      html += '</span>';
-		      parent.parent.$('#tipMessage').append(html);
-		  }
-	  });
 };

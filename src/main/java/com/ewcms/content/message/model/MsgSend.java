@@ -28,9 +28,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.util.Collections3;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 消息发送
@@ -126,7 +125,7 @@ public class MsgSend implements Serializable {
 		this.title = title;
 	}
 	
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getSendTime() {
 		return sendTime;
 	}
@@ -167,7 +166,7 @@ public class MsgSend implements Serializable {
 		this.msgContents = msgContents;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public List<MsgReceiveUser> getMsgReceiveUsers() {
 		return msgReceiveUsers;
 	}

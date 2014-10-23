@@ -23,7 +23,6 @@ import com.ewcms.publication.PublishServiceable;
 import com.ewcms.util.ConvertUtil;
 import com.ewcms.util.EwcmsContextUtil;
 import com.ewcms.web.QueryParameter;
-import com.ewcms.web.util.JSONUtil;
 
 /**
  * @author 吴智俊
@@ -80,14 +79,13 @@ public class ResourceController {
 		model.addAttribute("resourceId", resourceId);
 		model.addAttribute("type", type);
 		model.addAttribute("multi", multi);
-		model.addAttribute("fileDesc", resType.getFileDesc());
+		//model.addAttribute("fileDesc", resType.getFileDesc());
 		model.addAttribute("fileExt", resType.getFileExt());
 		return "content/resource/resource";
 	}
 
 	@RequestMapping(value = "/receive")
-	public @ResponseBody
-	String receive(@RequestParam(value = "resourceId", required = false) Long resourceId, @RequestParam(value = "type", required = false) String type, @RequestParam(value = "myUpload", required = false) MultipartFile myUpload) {
+	public @ResponseBody Resource receive(@RequestParam(value = "resourceId", required = false) Long resourceId, @RequestParam(value = "type", required = false) String type, @RequestParam(value = "myUpload", required = false) MultipartFile myUpload) {
 		try {
 			Resource.Type resType = Resource.Type.valueOf(StringUtils.upperCase(type));
 			Resource resource = null;
@@ -96,18 +94,18 @@ public class ResourceController {
 			} else {
 				resource = resourceService.update(resourceId, myUpload, resType);
 			}
-			return JSONUtil.toJSON(resource);
+			return resource;
 		} catch (IOException e) {
 			return null;
 		}
 	}
 
 	@RequestMapping(value = "/save")
-	public @ResponseBody String save(@RequestBody String descriptions) {
+	public @ResponseBody List<Resource> save(@RequestBody String descriptions) {
 		try{
 			Map<Long, String> map = ConvertUtil.resource(descriptions, "descriptions");
 			List<Resource> resources = resourceService.save(map);
-			return JSONUtil.renderSuccess(resources);
+			return resources;
 		}catch(Exception e){
 			return null;
 		}

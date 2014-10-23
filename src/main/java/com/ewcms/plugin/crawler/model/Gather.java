@@ -27,7 +27,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 
@@ -307,7 +307,7 @@ public class Gather implements Serializable {
 		this.baseURI = baseURI;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public Set<Domain> getDomains() {
 		return domains;
 	}
@@ -316,7 +316,7 @@ public class Gather implements Serializable {
 		this.domains = domains;
 	}
 	
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public List<MatchBlock> getMatchBlocks() {
 		return matchBlocks;
 	}
@@ -325,7 +325,7 @@ public class Gather implements Serializable {
 		this.matchBlocks = matchBlocks;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public List<FilterBlock> getFilterBlocks() {
 		return filterBlocks;
 	}

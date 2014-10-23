@@ -26,8 +26,7 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.Formula;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * <ul>
@@ -156,7 +155,7 @@ public class Site implements Serializable {
         this.metaDescripe = metaDescripe;
     }
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getCreateTime() {
         return createTime;
     }
@@ -169,7 +168,7 @@ public class Site implements Serializable {
         this.extraFile = extraFile;
     }
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getUpdateTime() {
         return updateTime;
     }
@@ -178,7 +177,7 @@ public class Site implements Serializable {
         return parent;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public void setParent(Site parent) {
         this.parent = parent;
     }
@@ -206,7 +205,7 @@ public class Site implements Serializable {
 		this.siteServer = siteServer;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
     public Organ getOrgan() {
 		return organ;
 	}

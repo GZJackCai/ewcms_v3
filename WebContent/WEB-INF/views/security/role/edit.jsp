@@ -1,22 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
     <title>权限组编辑</title>
-    <%@ include file="../../taglibs.jsp"%>
-	<script src="${ctx}/static/views/security/role/edit.js" type="text/javascript"></script>
-	<script type="text/javascript">
-		var _roleEdit = new RoleEdit();
-		$(function(){
-			_roleEdit.init({
-				checkRoleNameUrl : '${ctx}/security/role/checkRoleName'
-			});		
-		});
-	</script>
+    <%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
 	<div style="width:100%;height:100%;overflow:auto">
@@ -44,5 +33,15 @@
    	  <a class="easyui-linkbutton" icon="icon-save" href="javascript:void(0);" onclick="javascript:$('#inputForm').submit();">提交</a>
 	  <a class="easyui-linkbutton" icon="icon-cancel" href="javascript:void(0);" onclick="javascript:parent.$('#edit-window').window('close');">关闭</a>
 	</div>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script src="${ctx}/static/views/security/role/edit.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var _roleEdit = new RoleEdit();
+		$(function(){
+			_roleEdit.init({
+				checkRoleNameUrl : '${ctx}/security/role/checkRoleName'
+			});		
+		});
+	</script>
   </body>
 </html>

@@ -1,19 +1,18 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>资源信息</title>	
-	<%@ include file="../../../taglibs.jsp" %>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
-    <%@ include file="../../../alertMessage.jsp" %>
+    <%@ include file="/WEB-INF/views/alertMessage.jsp" %>
 	<form:form action="${ctx}/site/template/source/saveInfo" namespace="/site/template/source" enctype="multipart/form-data" modelAttribute="templateSource" class="form-horizontal">
 	  <input type="hidden" id="id" name="id" value="${templateSource.id}"/>
-	  <fieldset>	
+	  <fieldset>
+	    <legend><span style="color:red;">模板资源基本信息</span></legend>
 		<table class="formtable" align="center">
 		  <tr>
 			<td width="20%">资源<c:choose><c:when test="${templateSource.fileType=='DIRECTORY'}">目录</c:when><c:otherwise>文件</c:otherwise></c:choose>路径：</td>
@@ -44,5 +43,6 @@
 		</table>
 	  </fieldset>
 	</form:form>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
   </body>
 </html>

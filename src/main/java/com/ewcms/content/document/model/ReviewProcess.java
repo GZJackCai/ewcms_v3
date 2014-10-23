@@ -13,7 +13,6 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -25,10 +24,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.Index;
-
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.util.Collections3;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 审核流程定义
@@ -58,24 +55,21 @@ public class ReviewProcess implements Serializable {
 	@Column(name = "id")
 	private Long id;
 	@Column(name = "channel_id", nullable = false)
-	@Index(name = "idx_process_channel_id")
 	private Long channelId;
 	@Column(name = "name", nullable = false)
 	private String name;
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, targetEntity = ReviewUser.class)
+	@OneToMany(cascade = CascadeType.ALL, targetEntity = ReviewUser.class)
 	@JoinColumn(name = "process_id")
 	@OrderBy(value = "id")
-	@Index(name = "idx_user_process_id")
 	private Set<ReviewUser> reviewUsers = new HashSet<ReviewUser>();
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, targetEntity = ReviewRole.class)
+	@OneToMany(cascade = CascadeType.ALL, targetEntity = ReviewRole.class)
 	@JoinColumn(name = "process_id")
 	@OrderBy(value = "id")
-	@Index(name = "idx_role_process_id")
 	private Set<ReviewRole> reviewRoles = new HashSet<ReviewRole>();
-	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER, targetEntity = ReviewProcess.class)
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, targetEntity = ReviewProcess.class)
 	@JoinColumn(name = "next_id")
 	private ReviewProcess nextProcess;
-	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER, targetEntity = ReviewProcess.class)
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, targetEntity = ReviewProcess.class)
 	@JoinColumn(name = "prev_id")
 	private ReviewProcess prevProcess;
 
@@ -103,7 +97,7 @@ public class ReviewProcess implements Serializable {
 		this.name = name;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public Set<ReviewUser> getReviewUsers() {
 		return reviewUsers;
 	}
@@ -112,7 +106,7 @@ public class ReviewProcess implements Serializable {
 		this.reviewUsers = reviewUsers;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public Set<ReviewRole> getReviewRoles() {
 		return reviewRoles;
 	}
@@ -121,7 +115,7 @@ public class ReviewProcess implements Serializable {
 		this.reviewRoles = reviewRoles;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public ReviewProcess getNextProcess() {
 		return nextProcess;
 	}
@@ -130,7 +124,7 @@ public class ReviewProcess implements Serializable {
 		this.nextProcess = nextProcess;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public ReviewProcess getPrevProcess() {
 		return prevProcess;
 	}

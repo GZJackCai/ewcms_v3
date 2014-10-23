@@ -2,7 +2,7 @@ var MessageDetailIndex = function(){};
 
 MessageDetailIndex.prototype.init = function(options){
 	$('#tb-subscribe').bind('click', function(){
-		$.post(options.subscribeUrl, {'id':$('#id').val()}, function(data) {
+		$.post(options.subscribeUrl, {}, function(data) {
 			if (data == 'own'){
 				$.messager.alert('提示','您不能订阅自已发布的信息！','info');
 				return;

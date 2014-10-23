@@ -20,11 +20,11 @@ index.prototype.init=function(){
     var url = this._url;
     $(".easyui-tabs").tabs({
         onSelect:function(title){  
-            if(title == "图片"){
+            if(title == "图片资源"){
                 setIfrSrc(url,"image");
-            }else if(title == "FLASH"){
+            }else if(title == "Flash资源"){
                 setIfrSrc(url,"flash");
-            }else if(title == "视频和音频"){
+            }else if(title == "影音资源"){
                 setIfrSrc(url,"video");
             }else{
                 setIfrSrc(url,"annex");

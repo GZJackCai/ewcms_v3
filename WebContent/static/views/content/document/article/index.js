@@ -25,9 +25,6 @@ ArticleIndex.prototype.init = function(options){
 	if (currentnode.attributes.type == 'NODE'){
 		ArticleIndex.nodeArticleMenu();
 	}
-	//if ($('#node').val()=='true'){
-	//	ArticleIndex.nodeArticleMenu();
-	//}
 	
 	$(dataGrid).datagrid({
 	    nowrap:true,
@@ -49,12 +46,12 @@ ArticleIndex.prototype.init = function(options){
 	        {field:'flags',title:'属性',width:60,
 	            formatter:function(val,rec){
 	            	var pro = [];
-	                if (rec.top) pro.push("<img src='../../../../../static/image/article/top.gif' width='13px' height='13px' title='有效期限:永久置顶'/>"); 
-	                if (rec.article.isComment) pro.push("<img src='../../../../../static/image/article/comment.gif' width='13px' height='13px' title='允许评论'/>");
-	                if (rec.article.genre=="TITLE") pro.push("<img src='../../../../../static/image/article/title.gif' width='13px' height='13px' title='标题新闻'/>");
-	                if (rec.idReference) pro.push("<img src='../../../../../static/image/article/reference.gif' width='13px' height='13px' title='引用新闻'/>");
-	                if (rec.article.inside) pro.push("<img src='../../../../../static/image/article/inside.gif' width='13px' height='13px' title='内部标题'/>");
-	                if (rec.isShare) pro.push("<img src='../../../../../static/image/article/share.gif' width='13px' height='13px' title='共享' style='border:0'/>");
+	                if (rec.top) pro.push("<img src='" + ctx + "/static/image/article/top.gif' width='13px' height='13px' title='有效期限:永久置顶'/>"); 
+	                if (rec.article.isComment) pro.push("<img src='" + ctx + "/static/image/article/comment.gif' width='13px' height='13px' title='允许评论'/>");
+	                if (rec.article.genre=="TITLE") pro.push("<img src='" + ctx + "/static/image/article/title.gif' width='13px' height='13px' title='标题新闻'/>");
+	                if (rec.isReference) pro.push("<img src='" + ctx + "/static/image/article/reference.gif' width='13px' height='13px' title='引用新闻'/>");
+	                if (rec.article.inside) pro.push("<img src='" + ctx + "/static/image/article/inside.gif' width='13px' height='13px' title='内部标题'/>");
+	                if (rec.isShare) pro.push("<img src='" + ctx + "/static/image/article/share.gif' width='13px' height='13px' title='共享' style='border:0'/>");
 	                return pro.join("");
 	             }
 	         },
@@ -70,10 +67,13 @@ ArticleIndex.prototype.init = function(options){
 	                    classValue = "<span style='color:red;'>[" + classPro.join(",") + "]</span>";
 	                }
 	                return rec.article.title + classValue;
+	             },
+	             styler:function(value, row, index){
+	            	 return "cursor:pointer;cursor:hand;"
 	             }
 	          },
 	          {field:'created',title:'创建者',width:80,formatter:function(val,rec){return rec.article.created;}},
-	          {field : 'statusDescription',title : '状态',width : 120,
+	          {field:'statusDescription',title : '状态',width : 120,
 	          	  formatter : function(val, rec) {
 	          		  var processName = "";
 	          		  if (rec.article.status == 'REVIEW' && rec.article.reviewProcess != null){
@@ -103,17 +103,34 @@ ArticleIndex.prototype.init = function(options){
 				}
 			});
 			$(dataGrid).datagrid('fixDetailRowHeight',rowIndex);
+		},
+		onClickCell : function(rowIndex, field, value){
+			if (field == "title"){
+				$(this).datagrid('selectRow', rowIndex);
+				var selectedRow = $(this).datagrid('getSelected');
+				if (selectedRow.isReference == true) {
+	    			$.messager.alert('提示', '引用文章不能修改', 'info');
+	    			return;
+	    		}
+				if (selectedRow.article.statusDescription == '审核中'){
+	    			$.messager.alert('提示', '审核中的文章不能修改', 'info');
+	    			return;
+	    		}
+	    		var url_param = '/?articleMainId=' + selectedRow.id + '&mask=' + currentnode.attributes.mask;
+	    		$.ewcms.openArticleTopWindow({width:1280,height:700,title:'文章编辑', url:options.editUrl + url_param, position:'', dataGridObj:$(dataGrid)});
+			}
 		}
 	});
 	
     $("form table tr").next("tr").hide(); 
     
-    $('#toolbar-arrows').bind('click', function(){
+    $('#tb-more').bind('click', function(){
+       	var showHideLabel_value = $('#showHideLabel').text();
     	$('form table tr').next('tr').toggle();
-    	if ($(this).html() == '收缩...'){
-    		$(this).html('更多...');
+     	if (showHideLabel_value == '收缩'){
+     		$('#showHideLabel').text('更多...');
     	}else{
-    		$(this).html('收缩...');
+    		$('#showHideLabel').text('收缩');
     	}
     	$(dataGrid).datagrid('resize');
     });
@@ -152,13 +169,16 @@ ArticleIndex.prototype.init = function(options){
     			$.messager.alert('提示', '只能选择一个修改', 'info');
     			return;
     		}
-    		if (rows[0].reference == true) {
+    		if (rows[0].isReference == true) {
     			$.messager.alert('提示', '引用文章不能修改', 'info');
+    			return;
+    		}
+    		if (rows[0].article.statusDescription == '审核中'){
+    			$.messager.alert('提示', '审核中的文章不能修改', 'info');
     			return;
     		}
     		var url_param = '/?articleMainId=' + rows[0].id + '&mask=' + currentnode.attributes.mask;
     		$.ewcms.openArticleTopWindow({width:1280,height:700,title:'文章编辑', url:options.editUrl + url_param, position:'', dataGridObj:$(dataGrid)});
-    		//window.open(inputUrl + url_param,'popup','width=1280,height=700,resizable=yes,toolbar=no,directories=no,location=no,menubar=no,status=no,left=' + (window.screen.width - 1280) / 2 + ',top=' + (window.screen.height - 700)/ 2);
     	} else {
     		$.messager.alert('提示', '请选择栏目', 'info');
     	}
@@ -179,10 +199,11 @@ ArticleIndex.prototype.init = function(options){
     		if (r) {
     			$.post(options.deleteUrl, parameter, function(data) {
     				if (data){
-    					$.messager.alert('成功', '删除文档到回收站成功!', 'info');
+    					$(dataGrid).datagrid('reload');
+    					$.messager.alert('提示', '删除文档到回收站成功', 'info');
+    				} else {
+    					$.messager.alert('提示', '删除文档到回收站失败', 'info');
     				}
-    				$(dataGrid).datagrid('clearSelections');
-    				$(dataGrid).datagrid('reload');
     			});
     		}
     	});
@@ -223,9 +244,8 @@ ArticleIndex.prototype.init = function(options){
     	}
     	$.post(options.copyArticleUrl, parameter, function(data) {
     		if (data) {
-    			$.messager.alert('成功', '复制文章成功', 'info');
-    			$(dataGrid).datagrid('clearSelections');
     			$(dataGrid).datagrid('reload');
+    			$.messager.alert('成功', '复制文章成功', 'info');
     		}
     		$('#moveorcopy-window').window('close');
     	});
@@ -269,9 +289,10 @@ ArticleIndex.prototype.init = function(options){
 
     	$.post(options.moveArticleUrl, parameter, function(data) {
     		if (data) {
-    			$.messager.alert('成功', '移动文章成功', 'info');
-    			$(dataGrid).datagrid('clearSelections');
     			$(dataGrid).datagrid('reload');
+    			$.messager.alert('成功', '移动文章成功', 'info');
+    		} else {
+    			$.messager.alert('成功', '移动文章失败', 'info');
     		}
     		$('#moveorcopy-window').window('close');
     	});
@@ -290,9 +311,10 @@ ArticleIndex.prototype.init = function(options){
     		}
     		$.post(options.topUrl, parameter, function(data) {
     			if (data) {
-    				$.messager.alert('提示', '设置文章置顶成功', 'info');
-    				$(dataGrid).datagrid('clearSelections');
     				$(dataGrid).datagrid('reload');
+    				$.messager.alert('提示', '文章置顶成功', 'info');
+    			}else{
+    				$.messager.alert('提示', '文章置顶失败', 'info');
     			}
     		});
     	}
@@ -311,9 +333,10 @@ ArticleIndex.prototype.init = function(options){
     		}
     		$.post(options.topUrl, parameter, function(data) {
     			if (data) {
-    				$.messager.alert('提示', '取消文章置顶成功', 'info');
-    				$(dataGrid).datagrid('clearSelections');
     				$(dataGrid).datagrid('reload');
+    				$.messager.alert('提示', '取消文章置顶成功', 'info');
+    			} else {
+    				$.messager.alert('提示', '取消文章置顶失败', 'info');
     			}
     		});
     	}
@@ -332,9 +355,10 @@ ArticleIndex.prototype.init = function(options){
     		}
     		$.post(options.shareUrl, parameter, function(data) {
     			if (data) {
-    				$.messager.alert('提示', '设置文章共享成功', 'info');
-    				$(dataGrid).datagrid('clearSelections');
     				$(dataGrid).datagrid('reload');
+    				$.messager.alert('提示', '文章共享成功', 'info');
+    			} else {
+    				$.messager.alert('提示', '文章共享失败', 'info');
     			}
     		});
     	}
@@ -353,9 +377,10 @@ ArticleIndex.prototype.init = function(options){
     		}
     		$.post(options.shareUrl, parameter, function(data) {
     			if (data) {
-   					$.messager.alert('提示', '取消文章共享成功', 'info');
-    				$(dataGrid).datagrid('clearSelections');
     				$(dataGrid).datagrid('reload');
+   					$.messager.alert('提示', '取消文章共享成功', 'info');
+    			} else {
+    				$.messager.alert('提示', '取消文章共享失败', 'info');
     			}
     		});
     	}
@@ -388,9 +413,10 @@ ArticleIndex.prototype.init = function(options){
     							parameter['isInsert'] = -1;
     							$.post(options.sortUrl, parameter, function(data) {
     								if (data) {
-    									$.messager.alert('提示','设置排序号成功','info');
-    									$(dataGrid).datagrid('clearSelections');
     									$(dataGrid).datagrid('reload');
+    									$.messager.alert('提示','排序号设置成功','info');
+    								} else {
+    									$.messager.alert('提示','排序号设置失败','info');
     								}
     							});
     						}
@@ -410,9 +436,10 @@ ArticleIndex.prototype.init = function(options){
     	}, function(data) {
     		$('#sort-window').window('close');
     		if (data) {
-    			$.messager.alert('提示', '设置排序号成功', 'info');
-    			$(dataGrid).datagrid('clearSelections');
     			$(dataGrid).datagrid('reload');
+    			$.messager.alert('提示', '排序号设置成功', 'info');
+    		} else {
+    			$.messager.alert('提示', '排序号设置失败', 'info');
     		}
     	});
     });
@@ -430,9 +457,10 @@ ArticleIndex.prototype.init = function(options){
     		}
     		$.post(options.clearSortUrl, parameter, function(data) {
     			if (data) {
-    				$.messager.alert('提示', '设置消除排序号成功', 'info');
-    				$(dataGrid).datagrid('clearSelections');
     				$(dataGrid).datagrid('reload');
+    				$.messager.alert('提示', '清除排序号成功', 'info');
+    			} else {
+    				$.messager.alert('提示', '清除排序号失败', 'info');
     			}
     		});
     	}
@@ -450,18 +478,11 @@ ArticleIndex.prototype.init = function(options){
     		parameter = parameter + '&selections=' + rows[i].id;
     	}
     	$.post(options.approveUrl, parameter, function(data) {
-    		if (!data) {
-    			if (data == 'system-false') {
-    				$.messager.alert('提示', '文章提交审核失败', 'info');
-    			} else if (data == 'accessdenied') {
-    				$.messager.alert('提示', '您没有提交审核文章的权限', 'info');
-    			} else if (data == 'notinstate') {
-    				$.messager.alert('提示', '文章只有在初稿或重新编辑状态下才能提交审核', 'info');
-    			}
-    		} else {
-    			$.messager.alert('提示', '文章提交审核成功', 'info');
-    			$(dataGrid).datagrid('clearSelections');
+    		if (data) {
     			$(dataGrid).datagrid('reload');
+    			$.messager.alert('提示', '文章提交审核成功', 'info');
+    		} else {
+    			$.messager.alert('提示', '文章提交审核失败', 'info');
     		}
     	});
     });
@@ -515,72 +536,54 @@ ArticleIndex.prototype.init = function(options){
 
     	$.post(options.approveArticleUrl, parameter, function(data) {
     		if (data){
-	    		$.messager.alert('提示', '文章审核成功', 'info');
-	    		$(dataGrid).datagrid('clearSelections');
-	    		$(dataGrid).datagrid('reload');
+    			$(dataGrid).datagrid('reload');
 	    		$('#approve-window').window('close');
+	    		$.messager.alert('提示', '文章审核成功', 'info');
+    		}else{
+    			$.messager.alert('提示', '文章审核失败', 'info');
     		}
     	});
     });
     
     $('#menu-publish-independent ').bind('click', function(){
-    	$.post(url, {}, function(data) {
-    		if (data == 'system-false') {
-    			$.messager.alert('提示', '系统错误', 'error');
-    		} else if (data == 'accessdenied') {
-    			$.messager.alert('提示', '没有发布权限', 'info');
-    		} else if (data != 'true'){
-    			$.messager.alert('提示', data, 'info');
-    		} else {
-    			articleReload();
-    			$.messager.alert('提示', '发布正在后台运行中...', 'info');
+    	$.post(options.publishUrl, {}, function(data) {
+    		if (data){
+	    		$(dataGrid).datagrid('reload');
+	    		$.messager.alert('提示', '独立发布正在后台运行中...', 'info');
+    		}else{
+    			$.messager.alert('提示', '独立发布失败', 'info');
     		}
     	});
     });
     
-    $('menu-publish-relevance').bind('click', function(){
-    	$.post(url, {}, function(data) {
-    		if (data == 'system-false') {
-    			$.messager.alert('提示', '系统错误', 'error');
-    		} else if (data == 'accessdenied') {
-    			$.messager.alert('提示', '没有发布权限', 'info');
-    		} else if (data != 'true'){
-    			$.messager.alert('提示', data, 'info');
-    		} else {
-    			articleReload();
-    			$.messager.alert('提示', '发布正在后台运行中...', 'info');
+    $('menu-publish-associate').bind('click', function(){
+    	$.post(options.associateUrl, {}, function(data) {
+    		$.messager.alert('提示', data, 'info');
+    		if (data){
+	    		$(dataGrid).datagrid('reload');
+	    		$.messager.alert('提示', '关联发布正在后台运行中...', 'info');
+    		}else{
+    			$.messager.alert('提示', '关联发布失败', 'info');
     		}
     	});
     });
     
-    $('#tb-publish-back').bind('click', function(){
+    $('#menu-publish-back').bind('click', function(){
     	var rows = $(dataGrid).datagrid('getSelections');
     	if (rows.length == 0) {
     		$.messager.alert('提示', '请选择退回记录', 'info');
     		return;
     	}
-//    	if (rows.length > 1) {
-//    		$.messager.alert('提示', '只能选择一个退回', 'info');
-//    		return;
-//    	}
-
     	var parameter = '';
     	for ( var i = 0; i < rows.length; i++) {
     		parameter = parameter + '&selections=' + rows[i].id;
     	}
-    	$.post(url, parameter, function(data) {
-    		if (data != 'true') {
-    			if (data == 'system-false') {
-    				$.messager.alert('提示', '文章退回失败', 'info');
-    			} else if (data == 'accessdenied') {
-    				$.messager.alert('提示', '没有退回权限', 'info');
-    			} else if (data == 'notinstate') {
-    				$.messager.alert('提示', '文章只有在审核中断、发布版、已发布版状态下才能退回', 'info');
-    			}
-    		} else {
-    			$(dataGrid).datagrid('clearSelections');
-//    			articleReload();
-    			$.messager.alert('提示', '文章退回成功', 'info');
+    	$.post(options.breakUrl, parameter, function(data) {
+    		if (data){
+    			$(dataGrid).datagrid('reload');
+    			$.messager.alert('提示', '文章退回到重新编辑状态', 'info');
+    		}else{
+    			$.messager.alert('提示', '文章退回失败', 'info');
     		}
     	});
     });
@@ -602,45 +605,31 @@ ArticleIndex.prototype.init = function(options){
 
 //根据权限显示相应的菜单
 ArticleIndex.channelPermission = function(rootnode, currentnode) {
-//	if (rootnode.id == currentnode.id) {
-//		ArticleIndex.disableButtons();
-//		if (currentnode.attributes.mask > 5) {
-//			var menuPublish = '#menu-publish';
-//			var menuPublishSubIds = [
-//			                         menuPublish + '-independent',
-//			                         menuPublish + '-relevance'
-//			                        ];
-//			ArticleIndex.menuButtons('enable', menuPublish, menuPublishSubIds);
-//			$('#menu-preview').menubutton('disable');
-//		}
-//	}else{
-		if (currentnode.attributes.mask >= 2 && currentnode.attributes.mask <= 4) {
-			ArticleIndex.enableButtons();
-			if (currentnode.attributes.mask == 2){
-				var menuOperate = '#menu-operate';
-				var menuOperateSubIds = [menuOperate + '-remove'];
-				ArticleIndex.menuButtons('disable', menuOperate,  menuOperateSubIds);
-				$('#menu-approve').menubutton('disable');
-				$('#menu-publish').menubutton('disable');
-			}else if (currentnode.attributes.mask == 3){
-				$('#menu-approve').menubutton('disable');
-				$('#menu-publish').menubutton('disable');
-			}else if (currentnode.attributes.mask == 4){
-				$('#menu-publish').menubutton('disable');
-			}
-		}else if (currentnode.attributes.mask == 9){
-			ArticleIndex.enableButtons();
-		}else {
-			ArticleIndex.disableButtons();
-		}
-//	}
+	ArticleIndex.enableButtons();
+	
+	var mask = currentnode.attributes.mask;
+	if (mask == 1){
+		ArticleIndex.disableButtons();
+	}else if (mask == 2){
+		var menuOperate = '#menu-operate';
+		var menuOperateSubIds = [menuOperate + '-remove'];
+		ArticleIndex.menuButtons('disable', menuOperate,  menuOperateSubIds);
+		$(menuOperate).menubutton('enable');
+		$('#menu-approve').menubutton('disable');
+		$('#menu-publish').menubutton('disable');
+	}else if (mask == 3){
+		$('#menu-approve').menubutton('disable');
+		$('#menu-publish').menubutton('disable');
+	}else if (mask == 4){
+		$('#menu-publish').menubutton('disable');
+	}
 };
 
 ArticleIndex.nodeArticleMenu = function(){
 	ArticleIndex.disableButtons();
-	if (currentnode.attributes.mask >= 3) {
+	if (currentnode.attributes.mask >= 5) {
 		var menuPublish = '#menu-publish';
-		ArticleIndex.menuButtons('enable', menuPublish, [menuPublish + '-independent', menuPublish + '-relevance']);
+		ArticleIndex.menuButtons('enable', menuPublish, [menuPublish + '-independent', menuPublish + '-associate']);
 	}
 };
 
@@ -695,7 +684,7 @@ ArticleIndex.disableButtons = function() {
 	var menuPublish = '#menu-publish';
 	var menuPublishSubIds = [
 	                         menuPublish + '-independent',
-	                         menuPublish + '-relevance',
+	                         menuPublish + '-associate',
 	                         menuPublish + '-back'
 	                        ];
 	ArticleIndex.menuButtons('disable', menuPublish, menuPublishSubIds);
@@ -743,7 +732,7 @@ ArticleIndex.enableButtons = function() {
 	var menuPublish = '#menu-publish';
 	var menuPublishSubIds = [
 	                         menuPublish + '-independent',
-	                         menuPublish + '-relevance',
+	                         menuPublish + '-associate',
 	                         menuPublish + '-back'
 	                        ];
 	ArticleIndex.menuButtons('enable', menuPublish, menuPublishSubIds);

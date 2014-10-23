@@ -1,25 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form" %>
-<%@ taglib uri="http://shiro.apache.org/tags" prefix="shiro"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>权限管理</title>	
-	<%@ include file="../../taglibs.jsp" %>
-	<script type="text/javascript" src="${ctx}/static/views/security/role/detail.js"></script>
-	<script type="text/javascript">
-		var _roleDetail = new RoleDetail();
-		$(function(){
-			_roleDetail.init({
-				queryUrl : '${ctx}/security/roledetail/query?id=${id}',
-				editUrl : '${ctx}/security/roledetail/editPermission?id=${id}',
-				permissionUrl : '${ctx}/security/permission/query'
-			});
-		});
-	</script>	
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body class="easyui-layout">
 	<div region="center" style="padding:2px;" border="false">
@@ -33,15 +19,6 @@
 			<a id="tb-remove" href="javascript:void(0);" class="easyui-linkbutton" iconCls="icon-remove" plain="true">移除</a>
 		  </shiro:hasPermission>
 		</div>
-		<!-- 
-        <div style="padding-left:5px;">
-          <form id="queryform"  style="padding: 0;margin: 0;">
-                      名称：<input type="text" name="LIKE_realName" style="width:80px"/>&nbsp;
-                      邮箱：<input type="text" name="LIKE_email" style="width:120px"/>&nbsp;
-            <a href="javascript:void(0);" id="tb-query" class="easyui-linkbutton" iconCls="icon-search">查询</a>
-          </form>
-        </div>
-         -->
       </div>	
 	</div>
     <div id="edit-window" icon="icon-winedit" closed="true" class="easyui-window" title="" style="display:none;">
@@ -61,5 +38,17 @@
       </div>
     </div>
     <input type="hidden" id="id" name="id" value="${id}"/>
+    <%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript" src="${ctx}/static/views/security/role/detail.js"></script>
+	<script type="text/javascript">
+		var _roleDetail = new RoleDetail();
+		$(function(){
+			_roleDetail.init({
+				queryUrl : '${ctx}/security/roledetail/query?id=${id}',
+				editUrl : '${ctx}/security/roledetail/editPermission?id=${id}',
+				permissionUrl : '${ctx}/security/permission/query'
+			});
+		});
+	</script>
   </body>
 </html>

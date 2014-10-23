@@ -22,7 +22,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 触发器
@@ -102,7 +102,7 @@ public class JobTrigger implements Serializable {
         this.startType = startType;
     }
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getStartDate() {
         return startDate;
     }
@@ -111,7 +111,7 @@ public class JobTrigger implements Serializable {
         this.startDate = startDate;
     }
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getEndDate() {
         return endDate;
     }

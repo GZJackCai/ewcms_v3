@@ -8,13 +8,14 @@
 
 	<properties>
 		<spring.version>4.0.4.RELEASE</spring.version>
-		<hibernate.version>4.2.1.Final</hibernate.version>
+		<hibernate.version>4.3.0.Final</hibernate.version>
 		<spring-data-jpa.version>1.4.2.RELEASE</spring-data-jpa.version>
 		<shiro.version>1.2.2</shiro.version>
 		<quartz.version>2.1.3</quartz.version>
 		<ehcache.version>2.6.5</ehcache.version>
 		<hibernate-validator.version>4.3.1.Final</hibernate-validator.version>
-		<jackson.version>2.3.0</jackson.version>
+	    <!-- <jackson.version>2.3.0</jackson.version> -->
+		<fastjson.version>1.1.43</fastjson.version>
 		<slf4j.version>1.7.5</slf4j.version>
 		<logback.version>1.0.12</logback.version>
 		<commons-dbcp.version>1.4</commons-dbcp.version>
@@ -255,6 +256,7 @@
 		</dependency>
 
 		<!-- JSON begin -->
+		<!-- 
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
@@ -275,8 +277,15 @@
 			<artifactId>jackson-module-jaxb-annotations</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+		  -->
 		<!-- JSON end -->
-
+		<!-- json 相关jar包 -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>${fastjson.version}</version>
+        </dependency>
+        
 		<!-- LOGGING begin -->
 		<!-- slf4j -->
 		<dependency>

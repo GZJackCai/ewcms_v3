@@ -18,10 +18,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.Index;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 访问统计
@@ -62,7 +61,6 @@ public class Visit implements Serializable {
 	@Column(name = "id")
 	private Long id;
 	@Column(name = "unique_id")
-	@Index(name = "plugin_visit_unique_id_idx")
 	private String uniqueId;
 	@Column(name = "screen")
 	private String screen;
@@ -279,7 +277,7 @@ public class Visit implements Serializable {
 		this.uniqueId = uniqueId;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd")
 	public Date getVisitDate() {
 		return visitDate;
 	}
@@ -288,7 +286,7 @@ public class Visit implements Serializable {
 		this.visitDate = visitDate;
 	}
 
-	@JsonFormat(pattern = "HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "HH:mm:ss")
 	public Date getVisitTime() {
 		return visitTime;
 	}

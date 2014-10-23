@@ -3,7 +3,7 @@ package com.ewcms.visit.vo.totality;
 import java.io.Serializable;
 import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 全站点击率
@@ -38,7 +38,7 @@ public class SiteClickVo implements Serializable {
 		this.avgTime = avgTime;
 	}
 	
-	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd")
 	public Date getVisitDate() {
 		return visitDate;
 	}

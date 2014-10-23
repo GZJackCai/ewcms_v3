@@ -28,9 +28,8 @@ import javax.persistence.TemporalType;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.plugin.externalds.model.BaseDs;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 报表对象
@@ -125,7 +124,7 @@ public class TextReport implements Serializable {
         this.name = name;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public byte[] getTextEntity() {
         return textEntity;
     }
@@ -134,12 +133,12 @@ public class TextReport implements Serializable {
         this.textEntity = textEntity;
     }
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getCreateDate() {
 		return createDate;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getUpdateDate() {
         return updateDate;
     }
@@ -164,7 +163,7 @@ public class TextReport implements Serializable {
         this.remarks = remarks;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public Set<Parameter> getParameters() {
         return parameters;
     }
@@ -173,7 +172,7 @@ public class TextReport implements Serializable {
         this.parameters = parameters;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public BaseDs getBaseDs() {
         return baseDs;
     }

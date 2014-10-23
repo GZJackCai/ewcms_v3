@@ -11,12 +11,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ewcms.publication.PublishException;
 import com.ewcms.publication.uri.UriRuleable;
 
 /**
@@ -44,20 +46,22 @@ public class FileOperator implements ResourceOperatorable{
     @Override
     public String write(InputStream source,UriRuleable uriRule,String suffix) throws IOException {
                 
-        //String uri = uriRule.getUri();
-		String uri = uriRule.getPatter();
-		if(suffix != null && !suffix.equals("")){
-		    uri = uri + "." + suffix;
-		}
-		OutputStream target = FileUtils.openOutputStream(getLocalFile(uri));
-		byte[] buff = new byte[1024 * 10];
-		while(source.read(buff) > 0){
-		    target.write(buff);
-		}
-		target.flush();
-		target.close();
-		source.close();
-		
+	    String uri = "";
+		try {
+			uri = uriRule.uri(new HashMap<String,Object>());
+			if(suffix != null && !suffix.equals("")){
+			    uri = uri + "." + suffix;
+			}
+			OutputStream target = FileUtils.openOutputStream(getLocalFile(uri));
+			byte[] buff = new byte[1024 * 10];
+			while(source.read(buff) > 0){
+			    target.write(buff);
+			}
+			target.flush();
+			target.close();
+			source.close();
+		} catch (PublishException e) {
+		}		
 		return uri;
     }
     

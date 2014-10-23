@@ -24,9 +24,9 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.plugin.citizen.model.Citizen;
 import com.ewcms.site.model.Organ;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 事项基本信息
@@ -280,7 +280,7 @@ public class Matter implements Serializable {
 		this.sort = sort;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public List<WorkingBody> getWorkingBodys() {
 		return workingBodys;
 	}
@@ -289,7 +289,7 @@ public class Matter implements Serializable {
 		this.workingBodys = workingBodys;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public Organ getOrgan() {
 		return organ;
 	}
@@ -298,7 +298,7 @@ public class Matter implements Serializable {
 		this.organ = organ;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public List<MatterAnnex> getMatterAnnexs() {
 		return matterAnnexs;
 	}

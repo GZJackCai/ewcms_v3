@@ -20,103 +20,134 @@ UploadUtils = {
     getImageQueueElementId:function(row){
         return "image_queue_" + row.id;
     },
-    initThumbUpload:function(context,opts,row){
+    initThumbUpload:function(options,row){
         var utils = this;
         $("#"+this.getImageFileElementId(row)).uploadify({
-            'uploader': opts.uploaderUrl,
-            'expressInstall':opts.expressInstallUrl,
-            'cancelImg': opts.cancelImgUrl,
-            'script': opts.thumbScriptUrl + ";jsessionid=" + opts.jsessionid,
-            'queueID': this.getImageQueueElementId(row),
-            'fileDataName': 'myUpload',
-            'scriptData': {'resourceId':row.id},
-            'auto': true,
+        	'swf': options.uploaderUrl,
+            'uploader': options.thumbScriptUrl + ";jsessionid=" + options.jsessionid,
+        	'buttonText': '上传引导图文件',
+        	'fileObjName': 'myUpload',
+            'fileTypeDesc': '支持的格式：',
+            'fileTypeExts' : '*.jpg;*.gif;*.jpeg;*.png;*.bmp',
+            'expressInstall' : options.expressInstallUrl,
             'multi':  false,
-            'fileDesc': 'jpg/gif/jpeg/png/bmp',
-            'fileExt' : '*.jpg;*.gif;*.jpeg;*.png;*.bmp',
-            onComplete: function (event, queueID, fileObj, response, data) {
-                var res = (new Function( "return " + response ))();
-                if(res != null){
-                    var uri = context + res.value.thumbUri ;
-                    $("#"+utils.getImageElementId(row)).attr("src",uri);    
-                }else{
-                    $.messager.alert('提示',fileObj['name']+'上传错误');
-                }
+            'formData':  {'resourceId':row.id},
+            'progressData':'speed',
+            'queueID':  this.getImageQueueElementId(row),
+            'height' : 20,
+            'width' : 100,
+            'onFallback':function(){
+            	$.messager.alert('提示','您未安装FLASH控件，无法上传图片！请安装FLASH控件后再试。');
+            },
+            'onUploadSuccess' : function(file, data, response) {  
+            	if (response){ 
+	            	var thumbUri = (new Function( "return " + data ))();
+	                if(thumbUri != null){
+	                	var src = ctx + thumbUri + "?_=" + Date.parse(new Date());
+	                	$("#"+utils.getImageElementId(row)).attr("src",src);    
+	                }else{
+	                    $.messager.alert('提示',fileObj['name']+'上传错误');
+	                }
+            	}else{
+            		$.messager.alert('提示','上传错误');
+            	}
             }
         });
     }
 };
 
-var Upload = function(context,saveaction,opts){
-    this._context = context;
+var Upload = function(saveaction, options){
     this._saveaction = saveaction;
-    this._opts = opts;
+    this._options = options;
 };
 
-Upload.prototype.init=function(){
+Upload.prototype.init = function(){
     var utils = UploadUtils;
-    var context = this._context;
-    var opts = this._opts;
+    var options = this._options;
     
     $('#tt').datagrid({
-        nowrap: false,
-        width:560,
+        //nowrap: false,
+        width:540,
         height:280,
         columns:[[
-                  {field:'ck',checkbox:true,width:20},
-                  {field:'id',hidden:true},
-                  {field:'thumbUri',title:'引导图',width:40,align:'center',
-                      formatter:function(value,row){
-                          if(value){
-                              value = context + value;
-                          }else{
-                              value = "" ;
-                          }
-                          return '<img id="'+utils.getImageElementId(row)+'" src="' + value + '" style="width:40px;height:30px;margin:0;padding: 0;"/>';
-                      }
-                  }, {field:'description',title:'描述',width:180,
-                      formatter:function(value,row){
-                          return "<input id='"+utils.getInputElementId(row)+"' type='text' name='"+ utils.getInputElementName(row) +"' value='"+value+"' style='width:170px;'/>";
-                      }
-                  }, {field:'uploadImage',title:'引导图上传',width:300,align:"center",
-                      formatter:function(value,row){
-                          return '<input type="file" id="'+utils.getImageFileElementId(row)+'"/><div id="'+utils.getImageQueueElementId(row)+'"></div>' ;
-                      }
-                  }
-                  ]],
-                  onSelect:function(rowIndex, rowData){
-                      $("#"+utils.getInputElementId(rowData)).attr("name",utils.getInputElementName(rowData));
-                  },
-                  onUnselect:function(rowIndex, rowData){
-                      $("#"+utils.getInputElementId(rowData)).attr("name","");
-                  }
+        	{field:'ck',checkbox:true,width:20},
+        	{field:'id',hidden:true},
+        	{field:'thumbUri',title:'引导图',width:60,align:'center',
+            	formatter:function(value,row){
+                    if(value){
+                       	value = ctx + value;
+                    }else{
+                        value = "" ;
+                    }
+                    return '<img id="'+utils.getImageElementId(row)+'" src="' + value + '" style="width:40px;height:30px;margin:0;padding: 0;"/>';
+                }
+            }, 
+            {field:'description',title:'描述',width:180,
+             	formatter:function(value,row){
+             		return "<input id='" + utils.getInputElementId(row) + "' type='text' name='"+ utils.getInputElementName(row) + "' value='" + value + "' style='width:170px;' onchange=" + options.objectName + ".descChange('" + utils.getInputElementId(row) + "') />";
+             	}
+         	}, 
+         	{field:'uploadImage',title:'引导图上传',width:120,align:'center',
+            	formatter:function(value,row){
+                	return '<input type="file" id="'+utils.getImageFileElementId(row)+'"/><div id="'+utils.getImageQueueElementId(row)+'"></div>' ;
+            	}
+         	}
+        ]],
+        onSelect:function(rowIndex, rowData){
+        	$("#"+utils.getInputElementId(rowData)).attr("name",utils.getInputElementName(rowData));
+        },
+        onUnselect:function(rowIndex, rowData){
+        	$("#"+utils.getInputElementId(rowData)).attr("name","");
+        },
+        onBeforeLoad:function(param){
+        	if (options.type != 'image'){
+            	$('#tt').datagrid('hideColumn', 'thumbUri');
+            }else{
+            	$('#tt').datagrid('showColumn', 'thumbUri');
+            }
+        	return true;
+        }
     });
     
     $("#upload").uploadify({
-        'uploader': opts.uploaderUrl,
-        'expressInstall':opts.expressInstallUrl,
-        'cancelImg': opts.cancelImgUrl,
-        'script': opts.scriptUrl + ";jsessionid=" + opts.jsessionid,
+        'swf': options.uploaderUrl,
+        'uploader': options.scriptUrl + ";jsessionid=" + options.jsessionid,
+    	'buttonText': '上传文件',
+    	'fileObjName': 'myUpload',
+        'fileTypeDesc': '支持的格式：',
+        'fileTypeExts' : options.fileExt,
+        'expressInstall' : options.expressInstallUrl,
+        'multi':  options.multi,
+        'formData': {'resourceId':options.resourceId, 'type':options.type},
+        'progressData':'speed',
         'queueID': 'upload_queue',
-        'fileDataName': 'myUpload',
-        'scriptData': {'resourceId':opts.resourceId,'type':opts.type},
-        //'buttonImg': opts.buttonImg,
-        'percentage':'speed',
-        'auto': true,
-        'multi':  opts.multi,
-        'fileDesc': opts.fileDesc,
-        'fileExt' : opts.fileExt,
-        onComplete: function (event, queueID, fileObj, response, data) {
-            var res = (new Function( "return " + response ))();
-            if(res != null){
-                $('#tt').datagrid("appendRow",res);
-                utils.initThumbUpload(context, opts, res);    
-            }else{
-                $.messager.alert('提示',fileObj['name']+'上传错误');
-            }
+        'height' : 20,
+        'width' : 100,
+        'onFallback':function(){
+        	$.messager.alert('提示','您未安装FLASH控件，无法上传图片！请安装FLASH控件后再试。');
         },
-        onAllComplete:function(event,data){
-            $("#upload_queue").css('display','none');
+        'onUploadStart' : function(file) {
+        	$("#upload_queue").css('display','');
+        },
+        'onUploadComplete' : function(file){
+        	$("#upload_queue").css('display','none');
+        },
+        'onUploadSuccess' : function(file, data, response) {
+        	if (response){
+	        	var res = (new Function( "return " + data ))();
+	            if(res != null){
+	                $('#tt').datagrid("appendRow",res);
+	                utils.initThumbUpload(options, res);
+	                
+	                
+	            }else{
+	                $.messager.alert('提示',fileObj['name']+'上传错误');
+	            }
+        	}else{
+        		$.messager.alert('提示','上传错误');
+        	}
+        },
+        'onQueueComplete':function(queueData){
             $("#resource_infos").css('display','');
             $('#tt').datagrid("selectAll");
             $.each($('td'), function(index, td){
@@ -124,25 +155,25 @@ Upload.prototype.init=function(){
                     return false;
                 });
             });
-        },
-        onSelectOnce:function(event,data){
-            //$("#upload_queue").css('display','');
-            //$("#resource_infos").css('display','none');
-            //var rows = $('#tt').datagrid("getRows").length;
-            //for(var i = rows -1 ; i >= 0 ; i--){
-            //    $('#tt').datagrid("deleteRow",i);
-            //}
         }
     });
 };
 
+//Upload.prototype.descChange = function(id){
+//	$('#' + id).bind("propertychange",function(){
+//		$('#' + id).val($('#' + id).val);
+//	})
+//};
+
 Upload.prototype.insert=function(callback,message){
     var params = $('#resource_infos').serialize();
+    params = decodeURIComponent(params, true);
+    params= encodeURI(encodeURI(params));
     $.post(this._saveaction,params,function(data){
         if(callback){
-            callback(data.value,data.success);
+            callback(data.value, true);
         }else{
-            if(!data.success){
+            if(data == null){
                 if(message){
                     $.messager.alert('提示',message, 'info');
                 }else{

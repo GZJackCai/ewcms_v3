@@ -4,7 +4,7 @@ var ArticleTree = function(tree){
 
 ArticleTree.prototype.init = function(options){
 	var tree = this._tree;
-	$(tree).tree( {
+	$(tree).tree({
 		checkbox : false,
 		url : options.queryUrl,
 		onClick : function(node) {

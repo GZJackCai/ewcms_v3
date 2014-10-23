@@ -30,8 +30,8 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.site.model.Site;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * 资源信息
@@ -229,7 +229,7 @@ public class Resource implements Serializable {
         this.status = status;
     }
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getCreateTime() {
         return createTime;
     }
@@ -238,7 +238,7 @@ public class Resource implements Serializable {
         this.createTime = createTime;
     }
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getUpdateTime() {
         return updateTime;
     }
@@ -247,7 +247,7 @@ public class Resource implements Serializable {
         this.updateTime = updateTime;
     }
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     public Date getPublishTime() {
         return publishTime;
     }

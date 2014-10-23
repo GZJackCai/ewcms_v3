@@ -31,9 +31,9 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.site.model.Organ;
 import com.ewcms.util.Collections3;
-import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * 用户信息
@@ -164,7 +164,7 @@ public class User implements Serializable {
 		this.email = email;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getRegisterDate() {
 		return registerDate;
 	}
@@ -201,7 +201,7 @@ public class User implements Serializable {
 		this.organ = organ;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getBirthday() {
 		return birthday;
 	}

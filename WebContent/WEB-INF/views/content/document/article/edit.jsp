@@ -1,47 +1,15 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
     <title>文档编辑：</title>	
-    <%@ include file="../../../taglibs.jsp"%>
+    <%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
 	<link rel="stylesheet" type="text/css" href="${ctx}/static/views/content/document/article/article.css"></link>
-	<script type="text/javascript" src="${ctx}/static/views/jquery.cookies.js"></script>
-	<script type="text/javascript" src="${ctx}/static/tiny_mce/tiny_mce_gzip.js"></script>
-	<script type="text/javascript" src="${ctx}/static/tiny_mce/config_gzip.js"></script>
-	<script type="text/javascript" src="${ctx}/static/tiny_mce/config.js"></script>
-	<script type="text/javascript" src="${ctx}/static/views/content/document/article/edit.js"></script>
-	<script type="text/javascript" src="${ctx}/static/views/content/document/article/article-toolbar.js"></script>
-	<script type="text/javascript">
-		var _articleEdit = new ArticleEdit({
-			loginName : '<shiro:principal property="loginName"/>',
-			pages : ${pages},
-			currentPage : 1,
-			mask : ${mask},
-			noImage : '${ctx}/static/image/article/nopicture.jpg',
-			categoryUrl : '${ctx}/content/document/category/all?articleId=${article.id}',
-			insertResourceUrl : '${ctx}/content/resource/insert',
-			voteUrl : '${ctx}/content/document/article/vote',
-			treeUrl : '${ctx}/site/channel/tree',
-			editUrl : '${ctx}/content/document/article/edit/${channelId}',
-			saveUrl : '${ctx}/content/document/article/save',
-			approveUrl : '${ctx}/content/document/article/approve/${channelId}',
-			historyUrl : '${ctx}/content/document/article/history/index/${article.id}',
-			keyWordUrl : '${ctx}/content/document/article/keyword',
-			summaryUrl : '${ctx}/content/document/article/summary',
-			relationUrl : '${ctx}/content/document/relation/index/${article.id}'
-		});
-		$(function(){
-			_articleEdit.init();
-		});
-	</script>
   </head>
   <body>
-    <%@ include file="../../../alertMessage.jsp" %>
+    <%@ include file="/WEB-INF/views/alertMessage.jsp" %>
   	<form:form id="articleSave" action="${ctx}/content/document/article/save" method="post" modelAttribute="article" class="form-horizontal">
 	  <div id="wrapper" >
 		<table id="buttonBarTable" width="100%" border="0" cellpadding="0" cellspacing="0" style="border: #B7D8ED 1px solid;">
@@ -212,8 +180,8 @@
 				<li onclick="ArticleEdit.changePage('p1')" onmouseover="ArticleEdit.onOverPage('p1')" onmouseout="ArticleEdit.onOutPage('p1')" class="current" id="p1" name="tabs"><b>页 1</b></li>
 			  </c:if>
 			  </ul>
-			  <span class="add"><a onclick="ArticleEdit.addPage();" href="#" alt="在当前页后插入"><img src="${ctx}/static/image/article/icon_plus.gif" border="0"/></a></span>
-			  <span class="add"><a onclick="ArticleEdit.delPage();" href="#" alt="删除当前页"><img src="${ctx}/static/image/article/icon_minus.gif" border="0"/></a></span>
+			  <span class="add"><a onclick="ArticleEdit.addPage();" href="javascript:void(0);" alt="在当前页后插入"><img src="${ctx}/static/image/article/icon_plus.gif" border="0"/></a></span>
+			  <span class="add"><a onclick="ArticleEdit.delPage();" href="javascript:void(0);" alt="删除当前页"><img src="${ctx}/static/image/article/icon_minus.gif" border="0"/></a></span>
 			</td>
 			<td width="20%" height="20" valign="middle" align="right" bgcolor="#F7F8FD" class="pagetab" style="vertical-align: middle;">最后保存时间:<span id="saveTime_general"><c:if test="${not empty article.modified}">${article.modified}</c:if></span></td>
 		  </tr>
@@ -293,5 +261,35 @@
         </div>
       </div>
     </div>
+    <%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+    <script type="text/javascript" src="${ctx}/static/views/jquery.cookies.js"></script>
+	<script type="text/javascript" src="${ctx}/static/tiny_mce/tiny_mce_gzip.js"></script>
+	<script type="text/javascript" src="${ctx}/static/tiny_mce/config_gzip.js"></script>
+	<script type="text/javascript" src="${ctx}/static/tiny_mce/config.js"></script>
+	<script type="text/javascript" src="${ctx}/static/views/content/document/article/edit.js"></script>
+	<script type="text/javascript" src="${ctx}/static/views/content/document/article/article-toolbar.js"></script>
+	<script type="text/javascript">
+		var _articleEdit = new ArticleEdit({
+			loginName : '<shiro:principal property="loginName"/>',
+			pages : ${pages},
+			currentPage : 1,
+			mask : ${mask},
+			noImage : '${ctx}/static/image/article/nopicture.jpg',
+			categoryUrl : '${ctx}/content/document/category/all?articleId=${article.id}',
+			insertResourceUrl : '${ctx}/content/resource/insert',
+			voteUrl : '${ctx}/content/document/article/vote',
+			treeUrl : '${ctx}/site/channel/tree',
+			editUrl : '${ctx}/content/document/article/edit/${channelId}',
+			saveUrl : '${ctx}/content/document/article/save',
+			approveUrl : '${ctx}/content/document/article/approve/${channelId}',
+			historyUrl : '${ctx}/content/document/article/history/index/${article.id}',
+			keyWordUrl : '${ctx}/content/document/article/keyword',
+			summaryUrl : '${ctx}/content/document/article/summary',
+			relationUrl : '${ctx}/content/document/relation/index/${article.id}'
+		});
+		$(function(){
+			_articleEdit.init();
+		});
+	</script>
   </body>
 </html>

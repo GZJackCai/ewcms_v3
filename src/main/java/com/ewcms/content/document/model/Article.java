@@ -11,15 +11,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -30,11 +31,10 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import org.hibernate.annotations.Index;
+
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 文章信息
@@ -73,7 +73,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author 吴智俊
  */
 @Entity
-@Table(name = "content_article")
+@Table(name = "content_article", 
+       indexes = {@Index(name = "idx_article_published", columnList = "published"),
+		          @Index(name = "idx_article_modified", columnList = "modified"),
+		          @Index(name = "idx_article_status", columnList = "status")
+                 }
+)
 @SequenceGenerator(name = "seq_content_article", sequenceName = "seq_content_article_id", allocationSize = 1)
 public class Article implements Serializable {
 
@@ -142,10 +147,9 @@ public class Article implements Serializable {
 	private String tag;
 	@Column(name = "summary", columnDefinition = "text")
 	private String summary;
-	@OneToMany(cascade = CascadeType.ALL, targetEntity = Content.class,fetch=FetchType.EAGER, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, targetEntity = Content.class, orphanRemoval = true)
 	@JoinColumn(name = "article_id")
 	@OrderBy(value = "page asc")
-	@Index(name = "idx_content_article_id")
 	private List<Content> contents = new ArrayList<Content>();
 	@Column(name = "image")
 	private String image;
@@ -158,42 +162,38 @@ public class Article implements Serializable {
 	private String created;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "published")
-	@Index(name="idx_article_published")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date published;
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "modified", nullable = false)
-	@Index(name = "idx_article_modified")
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date modified;
 	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
-	@Index(name="idx_article_status")
 	private Status status;
 	@Column(name = "url", columnDefinition = "text")
 	private String url;
 	@Column(name = "is_delete")
 	private Boolean isDelete;
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, targetEntity = Relation.class, mappedBy = "relationArticle")
+	@OneToMany(cascade = CascadeType.ALL, targetEntity = Relation.class, mappedBy = "article")
 	@OrderBy(value = "sort")
-	@Index(name = "idx_article_relation_id")
 	private List<Relation> relations = new ArrayList<Relation>();
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "createtime", nullable = false)
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date createTime;
-	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, targetEntity = Category.class)
+	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, targetEntity = Category.class)
 	@JoinTable(name = "content_article_category", joinColumns = @JoinColumn(name = "article_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
 	@OrderBy(value = "id")
-	@Index(name = "idx_article_category_id")
+	//@Index(name = "idx_article_category_id")
 	private List<Category> categories = new ArrayList<Category>();
 	@Column(name = "total")
 	private Integer contentTotal;
 	@Column(name = "inside")
 	private Boolean inside;
-	@OneToOne(cascade={CascadeType.PERSIST,CascadeType.MERGE, CascadeType.REFRESH}, targetEntity = ReviewProcess.class)
+	@OneToOne(cascade={CascadeType.PERSIST, CascadeType.REFRESH}, targetEntity = ReviewProcess.class)
 	@JoinColumn(name="reviewprocess_id")
-	@Index(name = "idx_article_reviewprocess_id")
+	//@Index(name = "idx_article_reviewprocess_id")
 	private ReviewProcess reviewProcess;
 	
 	public Article() {
@@ -277,7 +277,7 @@ public class Article implements Serializable {
 		this.summary = summary;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public List<Content> getContents() {
 		return contents;
 	}
@@ -326,7 +326,7 @@ public class Article implements Serializable {
 		this.created = created;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getPublished() {
 		return published;
 	}
@@ -335,7 +335,7 @@ public class Article implements Serializable {
 		this.published = published;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getModified() {
 		return modified;
 	}
@@ -372,7 +372,7 @@ public class Article implements Serializable {
 		this.isDelete = isDelete;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public List<Relation> getRelations() {
 		return relations;
 	}
@@ -381,7 +381,7 @@ public class Article implements Serializable {
 		this.relations = relations;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getCreateTime() {
 		return createTime;
 	}

@@ -1,40 +1,14 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>专栏信息设置</title>	
-	<%@ include file="../../taglibs.jsp" %>
-	<script type="text/javascript" src="${ctx}/static/views/site/channel/info.js"></script>
-	<script type="text/javascript"> 
-	    var _channelInfo = new ChannelInfo();
-	   	$(function() {
-	   		<c:choose>
-	   		  <c:when test="${empty channel.appChannel}">
-	   		    $('#span-viewconnect').hide();
-	   		  </c:when>
-	   		  <c:otherwise>
-	   		    $('#span-viewconnect').show();
-	   		  </c:otherwise>
-	   		</c:choose>
-	   		
-	   		_channelInfo.init({
-	   			pinyinUrl : '${ctx}/site/channel/pinYin',
-	   			referImageUrl : '${ctx}/resource/insert?type=image&multi=false',
-	   			clearImageUrl : '${ctx}/static/image/article/nopicture.jpg',
-	   			connectUrl : '${ctx}/site/channel/connect/${channel.id}',
-	   			disConnectUrl : '${ctx}/site/channel/disConnect/${channel.id}',
-	   			viewConnectUrl : '${ctx}/site/channel/apply/index/${channel.id}'
-	   		});
-	   	});
-	</script>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
-    <%@ include file="../../alertMessage.jsp" %>
+    <%@ include file="/WEB-INF/views/alertMessage.jsp" %>
 	<form:form action="${ctx}/site/channel/saveInfo" method="post" enctype="multipart/form-data" modelAttribute="channel" class="form-horizontal">
 	  <fieldset>
 	  <legend><span style="color:red;">栏目信息</span></legend>
@@ -160,6 +134,30 @@
        	  <iframe id="editifr_pop"  name="editifr_pop" class="editifr" frameborder="0" width="100%" height="100%" scrolling="no"></iframe>
         </div>
       </div>
-    </div>	
+    </div>
+    <%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript" src="${ctx}/static/views/site/channel/info.js"></script>
+	<script type="text/javascript"> 
+	    var _channelInfo = new ChannelInfo();
+	   	$(function() {
+	   		<c:choose>
+	   		  <c:when test="${empty channel.appChannel}">
+	   		    $('#span-viewconnect').hide();
+	   		  </c:when>
+	   		  <c:otherwise>
+	   		    $('#span-viewconnect').show();
+	   		  </c:otherwise>
+	   		</c:choose>
+	   		
+	   		_channelInfo.init({
+	   			pinyinUrl : '${ctx}/site/channel/pinYin',
+	   			referImageUrl : '${ctx}/resource/insert?type=image&multi=false',
+	   			clearImageUrl : '${ctx}/static/image/article/nopicture.jpg',
+	   			connectUrl : '${ctx}/site/channel/connect/${channel.id}',
+	   			disConnectUrl : '${ctx}/site/channel/disConnect/${channel.id}',
+	   			viewConnectUrl : '${ctx}/site/channel/apply/index/${channel.id}'
+	   		});
+	   	});
+	</script>
   </body>
 </html>

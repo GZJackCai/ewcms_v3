@@ -1,21 +1,14 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>模板资源上传</title>
-	<%@ include file="../../../taglibs.jsp"%>
-	<script type="text/javascript">
-	    <c:if test="${not empty templateSouce.id}">
-	       parent.importLoad();
-	    </c:if>
-	</script>		
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
-    <%@ include file="../../../alertMessage.jsp" %>
+    <%@ include file="/WEB-INF/views/alertMessage.jsp" %>
     <div style="width:100%;height:100%;overflow:auto">
 	<h1 class="title">资源文件导入</h1>
 	<form:form action="${ctx}/site/template/source/saveImport" method="post" enctype="multipart/form-data" modelAttribute="templateSource" class="form-horizontal">
@@ -42,5 +35,11 @@
 	  </fieldset>			
 	</form:form>
 	</div>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript">
+	    <c:if test="${not empty templateSouce.id}">
+	       parent.importLoad();
+	    </c:if>
+	</script>
   </body>
 </html>

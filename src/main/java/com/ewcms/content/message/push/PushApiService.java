@@ -61,7 +61,19 @@ public class PushApiService {
      */
     public void pushTodo(String userName, List<Map<String, Object>> todos){
     	Map<String, Object> data = new HashMap<String, Object>();
-    	data.put("todos", data);
+    	data.put("todos", todos);
+    	pushService.push(userName, data);
+    }
+    
+    /**
+     * 提醒消息信息
+     * 
+     * @param userName 用户名
+     * @param pops 提醒消息信息列表
+     */
+    public void pushPop(String userName, List<Map<String, Object>> pops){
+    	Map<String, Object> data = new HashMap<String, Object>();
+    	data.put("pops", pops);
     	pushService.push(userName, data);
     }
     
@@ -70,7 +82,7 @@ public class PushApiService {
      *
      * 比如刷新主页时，需要offline
      *
-     * @param userName
+     * @param userName 用户名
      */
     public void offline(final String userName) {
         pushService.offline(userName);

@@ -11,6 +11,7 @@ package com.ewcms.scheduling.generate.job.report.model;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,10 +22,10 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.plugin.report.model.ChartReport;
 import com.ewcms.plugin.report.model.TextReport;
 import com.ewcms.scheduling.model.JobInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 报表调度器任务
@@ -76,7 +77,7 @@ public class EwcmsJobReport extends JobInfo {
         this.outputFormat = outputFormat;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public Set<EwcmsJobParameter> getEwcmsJobParameters() {
         return ewcmsJobParameters;
     }
@@ -85,7 +86,7 @@ public class EwcmsJobReport extends JobInfo {
         this.ewcmsJobParameters = ewcmsJobParameters;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public TextReport getTextReport() {
         return textReport;
     }
@@ -94,7 +95,7 @@ public class EwcmsJobReport extends JobInfo {
         this.textReport = textReport;
     }
 
-    @JsonIgnore
+    @JSONField(serialize = false)
     public ChartReport getChartReport() {
         return chartReport;
     }

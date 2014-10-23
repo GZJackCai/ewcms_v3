@@ -4,15 +4,13 @@
  * http://www.ewcms.com
  */
  
-var ResourceInsert = function(dataGrid,context,urls){
+var ResourceInsert = function(dataGrid,urls){
 	this._dataGrid = dataGrid || '#tt';
-    this._context = context;
     this._urls = urls;
 };
 
 ResourceInsert.prototype.init=function(opts){
 	var dataGrid = this._dataGrid;
-    var context = this._context;
     var urls = this._urls;
     
 	
@@ -30,7 +28,8 @@ ResourceInsert.prototype.init=function(opts){
            {field:'ck',checkbox:true},
            {field:'thumbUri',title:'引导图',width:60,align:'center',formatter:function(val,row){
                if(val){
-                   return '<img src="' + context + val  + '" style="width:40px;height:30px;margin:0;padding: 0;"/>';
+            	   var src = ctx + val + '?_=' + Date.parse(new Date());
+                   return '<img src="' + src  + '" style="width:40px;height:30px;margin:0;padding: 0;"/>';
                }else{
                    return '<div style="height:30px;">&nbsp;</div>';
                }

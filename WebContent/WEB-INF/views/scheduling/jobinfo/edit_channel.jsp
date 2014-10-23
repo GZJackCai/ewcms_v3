@@ -1,23 +1,14 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>调度器任务</title>
-	<%@ include file="../../taglibs.jsp" %>
-	<script type="text/javascript" src="${ctx}/static/views/scheduling/jobinfo/editchannel.js"></script>
-    <script type="text/javascript">
-		var _jobChannelEdit = new JobChannelEdit();
-		$(function(){
-			_jobChannelEdit.init();
-		});
-    </script>	
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
-    <%@ include file="../../alertMessage.jsp" %>
+    <%@ include file="/WEB-INF/views/alertMessage.jsp" %>
 	<form:form id="inputForm" action="${ctx}/scheduling/job/channel/save" method="post" modelAttribute="pageDisplay" class="form-horizontal">
 	  <fieldset>
 	  <legend><span style="color:red">栏目定时</span></legend>
@@ -160,5 +151,13 @@
 	  <input type="hidden" id="start" name="start" value="2"/>
 	  <input type="hidden" id="channelId" name="channelId" value="${pageDisplay.channelId}"/>
 	</form:form>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript" src="${ctx}/static/views/scheduling/jobinfo/editchannel.js"></script>
+    <script type="text/javascript">
+		var _jobChannelEdit = new JobChannelEdit();
+		$(function(){
+			_jobChannelEdit.init();
+		});
+    </script>
   </body>
 </html>

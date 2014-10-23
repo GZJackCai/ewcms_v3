@@ -1,17 +1,11 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://www.springframework.org/tags/form" prefix="form"%>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>文字报表</title>
-	<%@ include file="../../../taglibs.jsp" %>
-	<script type="text/javascript" src="${ctx}/static/views/plugin/report/show/index.js"></script>
-	<script type="text/javascript">
-		var _showIndex = new ShowIndex();
-	</script>		
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
   </head>
   <body>
 	<div style="padding: 2px;" border="false">
@@ -71,6 +65,11 @@
           <iframe id="editifr"  name="editifr" class="editifr" frameborder="0" style="overflow-x:hidden;overflow-y:scroll"></iframe>
         </div>
       </div>
-    </div>	
+    </div>
+    <%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
+	<script type="text/javascript" src="${ctx}/static/views/plugin/report/show/index.js"></script>
+	<script type="text/javascript">
+		var _showIndex = new ShowIndex();
+	</script>	
   </body>
 </html>

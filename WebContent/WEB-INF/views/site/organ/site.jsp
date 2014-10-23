@@ -1,12 +1,12 @@
-<%@ page contentType="text/html; charset=UTF-8"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<c:set var="ctx" value="${pageContext.request.contextPath}"/>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>站点管理</title>	
-	<%@ include file="../../taglibs.jsp" %>
+	<%@ include file="/WEB-INF/views/jspf/import-css.jspf" %>
+	<%@ include file="/WEB-INF/views/jspf/import-js.jspf" %>
 	<script type="text/javascript" src="${ctx}/static/views/site/organ/site.js"></script>
   </head>
   <c:choose>

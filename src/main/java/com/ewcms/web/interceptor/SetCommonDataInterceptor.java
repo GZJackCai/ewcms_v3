@@ -1,32 +1,48 @@
+/**
+ * Copyright (c) 2005-2012 https://github.com/zhangkaitao
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ */
 package com.ewcms.web.interceptor;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-public class SetCommonDataInterceptor extends HandlerInterceptorAdapter {
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-    private final PathMatcher pathMatcher = new AntPathMatcher();
+/**
+ * 设置通用数据的Interceptor
+ * <p/>
+ * 使用Filter时 文件上传时 getParameter时为null 所以改成Interceptor
+ * <p/>
+ * 1、ctx---->request.contextPath
+ * 2、currentURL---->当前地址
+ * 
+ * @author wu_zhijun
+ */
+public class SetCommonDataInterceptor extends HandlerInterceptorAdapter {
+	/**
+     * 当前请求的地址 带参数
+     */
+    private String CURRENT_URL = "currentURL";
+    
+    /**
+     * 当前请求的地址 不带参数
+     */
+    private String NO_QUERYSTRING_CURRENT_URL = "noQueryStringCurrentURL";
+
+    private String CONTEXT_PATH = "ctx";
+    
     /**
      * 上个页面地址
      */
     String BACK_URL = "BackURL";
-
-    /**
-     * 当前请求的地址 带参数
-     */
-    String CURRENT_URL = "currentURL";
-
-    /**
-     * 当前请求的地址 不带参数
-     */
-    String NO_QUERYSTRING_CURRENT_URL = "noQueryStringCurrentURL";
     
-    String CONTEXT_PATH = "ctx";
+    
+    private final PathMatcher pathMatcher = new AntPathMatcher();
 
     private static final String[] DEFAULT_EXCLUDE_PARAMETER_PATTERN = new String[]{
             "\\&\\w*page.pn=\\d+",

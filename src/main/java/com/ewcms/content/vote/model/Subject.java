@@ -26,7 +26,7 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 问卷调查主题
@@ -120,7 +120,7 @@ public class Subject implements Serializable {
 		}
 	}
 	
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public List<SubjectItem> getSubjectItems() {
 		return subjectItems;
 	}
@@ -137,7 +137,7 @@ public class Subject implements Serializable {
 		this.sort = sort;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public Questionnaire getQuestionnaire() {
 		return questionnaire;
 	}

@@ -20,8 +20,8 @@ import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.ewcms.plugin.online.model.Matter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * 公民
@@ -65,7 +65,7 @@ public class Citizen implements Serializable {
 		this.name = name;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public List<Matter> getMatters() {
 		return matters;
 	}

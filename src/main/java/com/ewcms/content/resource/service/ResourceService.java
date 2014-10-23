@@ -134,7 +134,7 @@ public class ResourceService {
         Site site = getCurrentSite();
         ResourceOperatorable operator = new FileOperator(site.getResourceDir());
         String name = getFilename(myUpload.getOriginalFilename());
-        String uri = operator.write(myUpload.getInputStream(), UriRules.newResource(getResourceContext()),getSuffix(name));
+        String uri = operator.write(myUpload.getInputStream(), UriRules.newResource(getResourceContext()), getSuffix(name));
         Resource resource = new Resource();
         resource.setUri(uri);
         resource.setSize(myUpload.getSize());

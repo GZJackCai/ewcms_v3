@@ -33,8 +33,7 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Formula;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * <ul>
@@ -173,7 +172,7 @@ public class Template implements Serializable {
 		this.describe = describe;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getUpdTime() {
 		return updTime;
 	}
@@ -198,12 +197,7 @@ public class Template implements Serializable {
 		this.parent = parent;
 	}
 
-	public static long getSerialversionuid() {
-	    
-		return serialVersionUID;
-	}
-
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public Site getSite() {
 		return site;
 	}
@@ -212,7 +206,7 @@ public class Template implements Serializable {
 		this.site = site;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public TemplateEntity getTemplateEntity() {
 		return templateEntity;
 	}

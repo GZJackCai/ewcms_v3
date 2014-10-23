@@ -21,8 +21,7 @@ import javax.persistence.TemporalType;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.alibaba.fastjson.annotation.JSONField;
 
 /**
  * 记录model对象操作
@@ -95,7 +94,7 @@ public class HistoryModel implements Serializable {
 		this.methodName = methodName;
 	}
 
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+08:00")
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	public Date getCreateDate() {
 		return createDate;
 	}
@@ -124,7 +123,7 @@ public class HistoryModel implements Serializable {
 		this.idType = idType;
 	}
 
-	@JsonIgnore
+	@JSONField(serialize = false)
 	public byte[] getModelObject() {
 		return modelObject;
 	}

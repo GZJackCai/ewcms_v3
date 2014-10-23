@@ -1,31 +1,15 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="org.apache.shiro.web.filter.authc.FormAuthenticationFilter"%>
 <%@ page import="org.apache.shiro.authc.ExcessiveAttemptsException"%>
 <%@ page import="org.apache.shiro.authc.IncorrectCredentialsException"%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
-	<script type="text/javascript">
-		if(parent != self) {
-			top.location = "<c:url value='/login'/>";
-		}
-	</script>
 	<head>
         <title>Ewcms用户登录</title>
-		<link href="<c:url value='/static/jquery-validation/1.10.0/validate.css'/>" type="text/css" rel="stylesheet" />
-        <link href="<c:url value='/static/views/login.css'/>"  type="text/css" rel="stylesheet"/>
-        <script src="<c:url value='/static/jquery/1.8.0/jquery.min.js'/>" type="text/javascript"></script>
-        <script src="<c:url value='/static/views/login.js'/>" type="text/javascript"></script>
-		<script type="text/javascript">
-            $(function() {
-                var _login = new login("<c:url value = '/checkcode.jpg'/>");
-                _login.init();
-            });
-		</script>
+        <link href="${ctx}/static/views/login.css"  type="text/css" rel="stylesheet"/>
 	</head>
-
 	<body id="userlogin_body">
     	<div></div>
 		<div id="user_login">
@@ -81,7 +65,7 @@
 			        			</div>
 			        		</li>
 			    		<li class="user_main_r">
-			    			<input class="ibtnentercssclass" id="ibtnenter" style="border-top-width: 0px; border-left-width: 0px; border-bottom-width: 0px; border-right-width: 0px" type="image" src="<c:url value='/static/image/login/user_botton.gif'/>" name="ibtnenter"/> 
+			    			<input class="ibtnentercssclass" id="ibtnenter" style="border-top-width: 0px; border-left-width: 0px; border-bottom-width: 0px; border-right-width: 0px" type="image" src="${ctx}/static/image/login/user_botton.gif" name="ibtnenter"/> 
 			    		</li>
 			    	</ul>
 		    	</dd>
@@ -95,5 +79,16 @@
 				</dd>
 			</dl>
 		</div>
+        <script src="${ctx}/static/jquery/jquery-1.11.1.min.js" type="text/javascript"></script>
+        <script src="${ctx}/static/views/login.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			if(parent != self) {
+				top.location = "<c:url value='/login'/>";
+			}
+			$(function() {
+                var _login = new login("<c:url value = '/checkcode.jpg'/>");
+                _login.init();
+            });
+		</script>
      </body>
 </html>

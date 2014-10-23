@@ -14,6 +14,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -178,6 +179,7 @@ public class MsgSendService {
 		msgContentDao.delete(msgContentId);
 	}
 	
+	@Async
 	public List<Map<String, Object>> findTopRowNoticesOrSubscription(Type type, Integer row) {
 		QueryParameter queryParameter = new QueryParameter();
 		queryParameter.setRows(row);

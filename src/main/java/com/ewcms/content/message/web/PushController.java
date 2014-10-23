@@ -1,5 +1,7 @@
 package com.ewcms.content.message.web;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import com.ewcms.content.message.model.MsgSend.Type;
 import com.ewcms.content.message.push.PushService;
 import com.ewcms.content.message.service.MsgReceiveService;
 import com.ewcms.content.message.service.MsgSendService;
+import com.ewcms.content.notes.service.MemorandaService;
 
 @Controller
 @RequestMapping(value = "/content/message")
@@ -28,6 +31,8 @@ public class PushController {
 	private MsgSendService msgSendService;
 	@Autowired
 	private ArticleMainService articleMainService;
+	@Autowired
+	private MemorandaService memorandaService;
     @Autowired
     private PushService pushService;
 
@@ -51,12 +56,14 @@ public class PushController {
             List<Map<String, Object>> notices = msgSendService.findTopRowNoticesOrSubscription(Type.NOTICE, 10);
             List<Map<String, Object>> subscriptions = msgSendService.findTopRowNoticesOrSubscription(Type.SUBSCRIPTION, 10);
             List<Map<String, Object>> todos = articleMainService.findBeApprovalArticleMain(username);
-
+            List<Map<String, Object>> pops = memorandaService.getMemorandaFireTime(username, new Date(Calendar.getInstance().getTime().getTime()));
+            
             Map<String, Object> data = new HashMap<String, Object>();
             data.put("unreadMessageCount", unreadMessageCount);
             data.put("notices", notices);
             data.put("subscriptions", subscriptions);
             data.put("todos", todos);
+            data.put("pops", pops);
             pushService.online(username);
             return data;
         } else {

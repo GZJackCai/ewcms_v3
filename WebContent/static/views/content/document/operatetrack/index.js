@@ -23,7 +23,7 @@ var dataGrid = this._dataGrid;
 					var reason = '&nbsp;&nbsp;';
 					if (rec.reason != null && rec.reason.length > 0){
 						var reasonUrl = options.reasonUrl + '/' + rec.id;
-						reason += '<a href="#" onclick="_operateTrackIndex.showReason(\'' + reasonUrl + '\');">原因</a>';
+						reason += '<a href="javascript:void(0);" onclick="_operateTrackIndex.showReason(\'' + reasonUrl + '\');">原因</a>';
 					}
 					return val + reason; 
 				}
