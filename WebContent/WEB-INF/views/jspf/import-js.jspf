@@ -1,0 +1,6 @@
+<script type="text/javascript" src="${ctx}/static/views/skin.js"></script>
+    <script type="text/javascript" src="${ctx}/static/views/jquery.ewcms.js"></script>
+    <script type="text/javascript" src="${ctx}/static/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="${ctx}/static/easyui/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="${ctx}/static/jquery-validation/1.13.1/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="${ctx}/static/jquery-validation/1.13.1/messages_zh.min.js"></script>
