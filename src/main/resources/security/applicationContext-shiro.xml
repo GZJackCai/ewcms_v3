@@ -77,6 +77,8 @@
 				/checkcode.jpg = anon
 				/static/** = anon
 				/favicon.ico = anon
+				/visit = anon
+				<!-- TODO 问卷调查未加入 -->
 				/logout = logout
 				/login = captcha,authc
 				/** = authc

@@ -110,7 +110,17 @@
 		<url-pattern>/result.vote</url-pattern>
 	</servlet-mapping>
 
+	<servlet>
+		<servlet-name>visit</servlet-name>
+		<servlet-class>com.ewcms.web.servlet.VisitServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>visit</servlet-name>
+		<url-pattern>/visit</url-pattern>
+	</servlet-mapping>
+
 	<!-- Open Entity Manager in View filter -->
+	<!-- 
 	<filter>
 		<filter-name>openEntityManagerInViewFilter</filter-name>
 		<filter-class>org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter</filter-class>
@@ -120,7 +130,8 @@
 		<filter-name>openEntityManagerInViewFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-	
+	 -->
+	 
 	<!-- Filter 定义 -->
 
 	<!-- Character Encoding filter -->

@@ -1,7 +1,7 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>在线情况</title>	
@@ -9,10 +9,10 @@
   </head>
   <body class="easyui-layout">
     <div region="north" style="height:310px" border="false">
-	  <table width="100%" border="0" cellspacing="6" cellpadding="0"style="border-collapse: separate; border-spacing: 6px;">
+	  <table width="100%" border="0" cellspacing="6" cellpadding="0" style="border-collapse: separate; border-spacing: 6px;">
 		<tr>
 		  <td>
-			从 <input type="text" id="startDate" name="startDate" class="easyui-datebox" style="width:120px" required/> 至 <input type="text" id="endDate" name="endDate" class="easyui-datebox" style="width:120px" required/> <a class="easyui-linkbutton" href="javascript:void(0)" onclick="refresh();return false;">查看</a>
+			从 <input type="text" id="startDate" name="startDate" class="easyui-datebox" style="width:120px" editable="false" required="required"/> 至 <input type="text" id="endDate" name="endDate" class="easyui-datebox" style="width:120px" editable="false" required="required"/> <a class="easyui-linkbutton" href="javascript:void(0)" onclick="refresh();return false;">查看</a>
 		  </td>
 		</tr>
 		<tr valign="top">
@@ -37,46 +37,45 @@
 	<script type="text/javascript" src="${ctx}/static/views/visit/dateutil.js"></script>
 	<script type="text/javascript" src="${ctx}/static/fcf/js/FusionCharts.js"></script>
 	<script type="text/javascript">
-			var startDate = dateTimeToString(new Date(new Date() - 30*24*60*60*1000));
-			var endDate = dateTimeToString(new Date());
-			$(function() {
-				showChart();
-				
-				$('#startDate').datebox('setValue', startDate);
-				$('#endDate').datebox('setValue', endDate);
-				$('#tt').datagrid({
-					singleSelect : true,
-					pagination : false,
-					nowrap : true,
-					striped : true,
-					url : '${ctx}/visit/totality/online/table?startDate=' + $('#startDate').datebox('getValue') + '&endDate=' + $('#endDate').datebox('getValue'),
-				    columns:[[  
-				            {field:'hourExpression',title:'时段',width:120}, 
-				            {field:'countFifteen',title:'停留>10分钟',width:100},
-				            {field:'countTen',title:'停留6 - 10分钟',width:100},  
-				            {field:'countFive',title:'停留0 - 5分钟',width:100}
-				    ]]  
-				});
+		$(function() {
+			$('#startDate').datebox('setValue', dateTimeToString(new Date(new Date() - 15*24*60*60*1000)));
+			$('#endDate').datebox('setValue', dateTimeToString(new Date()));
+			$('#tt').datagrid({
+				singleSelect : true,
+				pagination : false,
+				nowrap : true,
+				striped : true,
+				url : '${ctx}/visit/totality/online/table?startDate=' + $('#startDate').datebox('getValue') + '&endDate=' + $('#endDate').datebox('getValue'),
+				columns:[[  
+				        {field:'hour',title:'时段',width:120,
+				            formatter : function(val, rec){
+	                        	return rec.onlinePk.hourExpression;
+	                        }		
+				        }, 
+				        {field:'fifteenCount',title:'停留 ＞ 10分钟',width:120},
+				        {field:'tenCount',title:'停留6 - 10分钟',width:120},  
+				        {field:'fiveCount',title:'停留0 - 5分钟',width:120}
+				]]  
 			});
-			function showChart(){
-				var parameter = {};
-				parameter['startDate'] = startDate;
-				parameter['endDate'] = endDate;
-				parameter['labelCount'] = 24;
-				$.post('${ctx}/visit/totality/online/report', parameter, function(result) {
-			  		var myChart = new FusionCharts('${ctx}/static/fcf/swf/MSLine.swf?ChartNoDataText=无数据显示', 'myChartId', '640', '250','0','0');
-		      		myChart.setDataXML(result);      
-		      		myChart.render("divChart");
-		   		});
-			}
-			function refresh(){
-				startDate = $('#startDate').datebox('getValue');
-				endDate = $('#endDate').datebox('getValue');
-				showChart();
-				$('#tt').datagrid({
-					url:'${ctx}/visit/totality/online/table?startDate=' + startDate + '&endDate=' + endDate
-				})
-			}
+			showChart();
+		});
+		function showChart(){
+			var parameter = {};
+			parameter['startDate'] = $('#startDate').datebox('getValue');
+			parameter['endDate'] = $('#endDate').datebox('getValue');
+			parameter['labelCount'] = 24;
+			$.post('${ctx}/visit/totality/online/report', parameter, function(result) {
+			  	var myChart = new FusionCharts('${ctx}/static/fcf/swf/MSLine.swf?ChartNoDataText=无数据显示', 'myChartId', '640', '250','0','0');
+		      	myChart.setDataXML(result);      
+		      	myChart.render("divChart");
+		   	});
+		}
+		function refresh(){
+			$('#tt').datagrid({
+				url:'${ctx}/visit/totality/online/table?startDate=' + $('#startDate').datebox('getValue') + '&endDate=' + $('#endDate').datebox('getValue')
+			});
+			showChart();
+		}
 	</script>
   </body>
 </html>

@@ -1,7 +1,7 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>栏目点击排行</title>	
@@ -9,12 +9,12 @@
   </head>
   <body class="easyui-layout">
 	<div region="north" style="height:330px" border="false">
-	  <table width="100%" border="0" cellspacing="6" cellpadding="0"style="border-collapse: separate; border-spacing: 6px;">
+	  <table width="100%" border="0" cellspacing="6" cellpadding="0" style="border-collapse: separate; border-spacing: 6px;">
 		<tr>
 		  <td>当前报表：<span id="explain"></span> 下子栏目点击排行</td>
 		</tr>
 		<tr>
-		  <td>从 <input type="text" id="startDate" name="startDate" class="easyui-datebox" style="width:120px" required/> 至 <input type="text" id="endDate" name="endDate" class="easyui-datebox" style="width:120px" required/> <a class="easyui-linkbutton" href="javascript:void(0)" onclick="refresh();return false;">查看</a></td>
+		  <td>从 <input type="text" id="startDate" name="startDate" class="easyui-datebox" style="width:120px" editable="false" required="required"/> 至 <input type="text" id="endDate" name="endDate" class="easyui-datebox" style="width:120px" editable="false" required="required"/> <a class="easyui-linkbutton" href="javascript:void(0)" onclick="refresh();return false;">查看</a></td>
 		</tr>
 		<tr valign="top">
 		  <td>
@@ -45,13 +45,9 @@
 	<script type="text/javascript" src="${ctx}/static/views/visit/dateutil.js"></script>
 	<script type="text/javascript" src="${ctx}/static/fcf/js/FusionCharts.js"></script>
 	<script type="text/javascript">
-		var startDate = dateTimeToString(new Date(new Date() - 30*24*60*60*1000));
-		var endDate = dateTimeToString(new Date());
 		var channelId = "0";
 		var channelIds = [];
 		$(function() {
-			showChart();
-			
 			$('#startDate').datebox('setValue', dateTimeToString(new Date(new Date() - 15*24*60*60*1000)));
 			$('#endDate').datebox('setValue', dateTimeToString(new Date()));
 			channelIds.push(0);
@@ -61,35 +57,41 @@
 				pagination : false,
 				nowrap : true,
 				striped : true,
-				url : '${ctx}/visit/traffic/channel/table?startDate=' + startDate + '&endDate=' + endDate,
+				url : '${ctx}/visit/traffic/channel/table?startDate=' + $('#startDate').datebox('getValue') + '&endDate=' + $('#endDate').datebox('getValue'),
 			    columns:[[ 
-			             {field:'channelId',title:'栏目编号',hidden:true},
+			             {field:'channelId',title:'栏目编号',hidden:true,
+			            	formatter : function(val, rec){
+			            		return rec.channelClickPk.channelId;
+			            	}	 
+			             },
 			             {field:'channelName',title:'栏目名称',width:200,
 			            	formatter : function(val, rec){
-			            		if (val == null) return '';
-			            		if (rec.isChildren){
-			            			return '<a href="javascript:void(0);" style="text-decoration: none" onclick="channelChildren(\'' + rec.channelId + '\',\'' + rec.channelName + '\')">' + val + '</a>';
-			            		}else{
-			            			return val;
-			            		}
+			            		if (rec.channelClickPk.channelName == null) return '';
+			            		return rec.channelClickPk.channelName;
+			            		//if (rec.isChildren){
+			            		//	return '<a href="javascript:void(0);" style="text-decoration: none" onclick="channelChildren(\'' + rec.channelClickPk.channelId + '\',\'' + rec.channelClickPk.channelName + '\')">' + val + '</a>';
+			            		//}else{
+			            		//	return val;
+			            		//}
 			            	}
 			            },
-			            {field:'levelPageView',title:'本级PV量',width:100},
-			            {field:'levelStickTime',title:'本级页均停留时间',width:110},
+			            {field:'pageViewSum',title:'本级PV量',width:120},
+			            {field:'stickTimeAvg',title:'本级页均停留时间(秒)',width:140},
 			            {field:'trend',title:'时间趋势',width:70,
 			            	formatter : function(val, rec){	
-			            		return '<a href="javascript:void(0)" style="text-decoration: none" onclick="openTrend(\'' + rec.channelName + '\',\'' + rec.channelId + '\')">时间趋势</a>';
+			            		return '<a href="javascript:void(0)" style="text-decoration: none" onclick="openTrend(\'' + rec.channelClickPk.channelName + '\',\'' + rec.channelClickPk.channelId + '\')">时间趋势</a>';
 			            	}
 			            },
-			            {field:'pageView',title:'子栏目PV量',width:100},
-			            {field:'stickTime',title:'子栏页均停留时间',width:110}
+			            {field:'childPageViewSum',title:'子栏目PV量',width:120},
+			            {field:'childStickTimeAvg',title:'子栏页均停留时间(秒)',width:140}
 			    ]]  
 			});
+			showChart();
 		});
 		function showChart(){
 			var parameter = {};
-			parameter['startDate'] = startDate;
-			parameter['endDate'] = endDate;
+			parameter['startDate'] = $('#startDate').datebox('getValue');
+			parameter['endDate'] = $('#endDate').datebox('getValue');
 			if (channelId != '0'){
 				parameter['parentChannelId'] = channelId;
 			}
@@ -102,7 +104,7 @@
 		function refresh(){
 			startDate = $('#startDate').datebox('getValue');
 			endDate = $('#endDate').datebox('getValue');
-			var tableUrl = '${ctx}/visit/traffic/channel/table?startDate=' + startDate + '&endDate=' + endDate;
+			var tableUrl = '${ctx}/visit/traffic/channel/table?startDate=' + $('#startDate').datebox('getValue') + '&endDate=' + $('#endDate').datebox('getValue');
 			if (channelId != '0'){
 				tableUrl += '&parentChannelId=' + channelId; 
 			}
@@ -122,8 +124,8 @@
 			startDate = $('#startDate').datebox('getValue');
 			endDate = $('#endDate').datebox('getValue');
 			var parameter = {};
-			parameter['startDate'] = startDate;
-			parameter['endDate'] = endDate;
+			parameter['startDate'] = $('#startDate').datebox('getValue');
+			parameter['endDate'] = $('#endDate').datebox('getValue');
 			parameter['parentChannelId'] = id;
 			$.post('${ctx}/visit/traffic/channel/report', parameter, function(result) {
 		  		var myChart = new FusionCharts('${ctx}/static/fcf/swf/Pie3D.swf?ChartNoDataText=无数据显示', 'myChartId', '640', '250','0','0');

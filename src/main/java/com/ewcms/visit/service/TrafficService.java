@@ -2,135 +2,121 @@ package com.ewcms.visit.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ewcms.site.model.Channel;
 import com.ewcms.site.service.ChannelService;
-import com.ewcms.visit.dao.TrafficDao;
+import com.ewcms.visit.dao.traffic.ArticleClickDao;
+import com.ewcms.visit.dao.traffic.ChannelClickDao;
+import com.ewcms.visit.dao.traffic.UrlClickDao;
+import com.ewcms.visit.model.traffic.ArticleClick;
+import com.ewcms.visit.model.traffic.ChannelClick;
+import com.ewcms.visit.model.traffic.UrlClick;
 import com.ewcms.visit.util.ChartVisitUtil;
 import com.ewcms.visit.util.DateTimeUtil;
-import com.ewcms.visit.vo.traffic.ArticleClickVo;
-import com.ewcms.visit.vo.traffic.ChannelClickVo;
-import com.ewcms.visit.vo.traffic.UrlClickVo;
+import com.ewcms.web.QueryParameter;
 import com.ewcms.web.util.PaginationUtil;
 
-/**
- * 访问量排行
- * 
- * @author 吴智俊
- */
 @Component
 @Transactional(readOnly = true)
 public class TrafficService {
 	
 	@Autowired
-	private TrafficDao trafficDao;
+	private ChannelClickDao channelClickDao;
 	@Autowired
 	private ChannelService channelService;
+	@Autowired
+	private ArticleClickDao articleClickDao;
+	@Autowired
+	private UrlClickDao urlClickDao;
 	
-	private Long findParentChannelId(Long parentChannelId, Long siteId){
-		if (parentChannelId == null || parentChannelId == -1L){
-			Channel rootChannel = channelService.getChannelRoot(siteId);
-			if (rootChannel == null) return null;
-			return rootChannel.getId();
-		}
-		return parentChannelId;
+	public List<ChannelClick> findChannelTable(Date startVisitDate, Date endVisitDate, Long channelId, Long siteId){
+		channelId = channelService.findRootChannelId(channelId, siteId);
+		List<ChannelClick> channelClicks = channelClickDao.findChannelClick(startVisitDate, endVisitDate, siteId, channelId);
+		return channelClicks;
 	}
 	
-	public List<ChannelClickVo> findChannelTable(Date startDate, Date endDate, Long parentChannelId, Long siteId){
-		parentChannelId = findParentChannelId(parentChannelId, siteId);
-		List<ChannelClickVo> channelClickVos = trafficDao.findChannelClickTable(startDate, endDate, parentChannelId, siteId);
-		return channelClickVos;
-	}
-	
-	@SuppressWarnings("rawtypes")
-	public String findChannelReport(Date startDate, Date endDate, Long parentChannelId, Long siteId){
-		parentChannelId = findParentChannelId(parentChannelId, siteId);
+	public String findChannelReport(Date startVisitDate, Date endVisitDate, Long channelId, Long siteId){
+		channelId = channelService.findRootChannelId(channelId, siteId);
 		
 		Map<String, Long> dataSet = new LinkedHashMap<String, Long>();
 		
-		List<Map> channelClickList = trafficDao.findChannelClickReport(startDate, endDate, parentChannelId, siteId);
-		Iterator channelClickIt = channelClickList.iterator();  
-		while (channelClickIt.hasNext()){
-			Map map = (Map)channelClickIt.next();
-			String channelName = (String) map.get("channelName");
-			Long levelPv = (Long) map.get("levelPv");
-			Long pv = (Long) map.get("pv");
-			Long sum = (levelPv == null ? 0 : levelPv) + (pv == null ? 0 : pv);
+		List<ChannelClick> channelClicks = channelClickDao.findChannelClick(startVisitDate, endVisitDate, siteId, channelId);
+		for (ChannelClick channelClick : channelClicks){
+			String channelName = channelClick.getChannelClickPk().getChannelName();
+			Long pageViewSum = channelClick.getPageViewSum();
+			Long parentPageViewSum = channelClick.getChildPageViewSum();
+			Long sum = (pageViewSum == null ? 0 : pageViewSum) + (parentPageViewSum == null ? 0 : parentPageViewSum);
 			dataSet.put(channelName, sum);
 		}
 		return ChartVisitUtil.getPie3DChart(dataSet);
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public String findChannelTrendReport(Date startDate, Date endDate, Long channelId, Integer labelCount, Long siteId){
+	public String findChannelTrendReport(Date startVisitDate, Date endVisitDate, Long channelId, Integer labelCount, Long siteId){
 		Map<String, Map<String, Long>> dataSet = new LinkedHashMap<String, Map<String, Long>>();
 		
-		Map<String, Long> sumPvMap = DateTimeUtil.getDateAreaLongMap(startDate, endDate);
-		List<Map> dateAreaSumPvList = trafficDao.findChannelClickTrendReport(startDate, endDate, channelId, siteId);
-		Iterator sumPvIt = dateAreaSumPvList.iterator();  
-		while (sumPvIt.hasNext()){
-			Map map = (Map)sumPvIt.next();
-			Date visitDate = (Date) map.get("visitDate");
-			Long sumPv = (Long) map.get("sumPv");
-			sumPvMap.put(DateTimeUtil.getDateToString(visitDate), sumPv == null ? 0L : sumPv);
+		Map<String, Long> sumPvMap = DateTimeUtil.getDateAreaLongMap(startVisitDate, endVisitDate);
+		List<ChannelClick> channelClicks = channelClickDao.findChannelClickTrend(startVisitDate, endVisitDate, siteId, channelId);
+		for (ChannelClick channelClick : channelClicks){
+			Date visitDate = channelClick.getChannelClickPk().getVisitDate();
+			Long pageViewSum = channelClick.getPageViewSum();
+			sumPvMap.put(DateTimeUtil.getDateToString(visitDate), pageViewSum == null ? 0L : pageViewSum);
 		}
 		dataSet.put("PV", sumPvMap);
 		
-		List<String> dateAreaList = DateTimeUtil.getDateAreaList(startDate, endDate);
+		List<String> dateAreaList = DateTimeUtil.getDateAreaList(startVisitDate, endVisitDate);
 		return ChartVisitUtil.getLine2DChart(dateAreaList, dataSet, labelCount);
 	}
 	
-	public Map<String, Object> findArticleClickTable(Date startDate, Date endDate, Long parentChannelId, Long siteId, Integer rows, Integer page){
+	public Map<String, Object> findArticleClickTable(Date startVisitDate, Date endVisitDate, Long parentChannelId, Long siteId, QueryParameter params){
+		Pageable pageable = new PageRequest(params.getPage() - 1, params.getRows());
+
 		List<Long> channelIds = new ArrayList<Long>();
 		if (parentChannelId != null && parentChannelId > 1L){
 			channelIds.add(parentChannelId);
-			getChannelId(channelIds, parentChannelId);
+			channelService.getChannelId(channelIds, parentChannelId);
 		}
-		List<ArticleClickVo> articleClickVos = trafficDao.findArticleClickTable(startDate, endDate, channelIds, siteId, rows, page);
-		Long total = trafficDao.findArticleClickCount(startDate, endDate, channelIds, siteId);
-		return PaginationUtil.pagination(total, articleClickVos);
-	}
-	
-	private void getChannelId(List<Long> channelIds, Long parentChannelId){
-		List<Channel> channels = channelService.getChannelChildren(parentChannelId);
-		if (!channels.isEmpty()){
-			for (Channel channel : channels){
-				channelIds.add(channel.getId());
-				getChannelId(channelIds, channel.getId());
-			}
+		
+		Long total = 0L;
+		Page<ArticleClick> articleClicks = null;
+		if (channelIds.isEmpty()){
+			total = articleClickDao.countArticleClick(startVisitDate, endVisitDate, siteId);
+			articleClicks = articleClickDao.findArticleClick(startVisitDate, endVisitDate, siteId, pageable);
+		}else{
+			total = articleClickDao.countArticleClick(startVisitDate, endVisitDate, siteId, channelIds);
+			articleClicks = articleClickDao.findArticleClick(startVisitDate, endVisitDate, siteId, channelIds, pageable);
 		}
+		return PaginationUtil.pagination(total, articleClicks.getContent());
 	}
 	
-	public Map<String, Object> findUrlClickTable(Date startDate, Date endDate, Long siteId, Integer rows, Integer page){
-		Long total = trafficDao.findUrlClickCount(startDate, endDate, siteId);
-		List<UrlClickVo> urlClickVos = trafficDao.findUrlClickTable(startDate, endDate, siteId, rows, page);
-		return PaginationUtil.pagination(total, urlClickVos);
+	public Map<String, Object> findUrlClickTable(Date startVisitDate, Date endVisitDate, Long siteId, QueryParameter params){
+		Long total = urlClickDao.countUrlClick(startVisitDate, endVisitDate, siteId);
+		Pageable pageable = new PageRequest(params.getPage() - 1, params.getRows());
+		Page<UrlClick> urlClicks = urlClickDao.findUrlClick(startVisitDate, endVisitDate, siteId, pageable);
+		return PaginationUtil.pagination(total, urlClicks.getContent());
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public String findUrlClickTrendReport(Date startDate, Date endDate, String url, Integer labelCount, Long siteId){
+	public String findUrlClickTrendReport(Date startVisitDate, Date endVisitDate, String url, Integer labelCount, Long siteId){
 		Map<String, Map<String, Long>> dataSet = new LinkedHashMap<String, Map<String, Long>>();
 		
-		Map<String, Long> sumPvMap = DateTimeUtil.getDateAreaLongMap(startDate, endDate);
-		List<Map> dateAreaSumPvList = trafficDao.findUrlClickTrendReport(startDate, endDate, url, siteId);
-		Iterator sumPvIt = dateAreaSumPvList.iterator();  
-		while (sumPvIt.hasNext()){
-			Map map = (Map)sumPvIt.next();
-			Date visitDate = (Date) map.get("visitDate");
-			Long sumPv = (Long) map.get("sumPv");
-			sumPvMap.put(DateTimeUtil.getDateToString(visitDate), sumPv == null ? 0L : sumPv);
+		Map<String, Long> sumPvMap = DateTimeUtil.getDateAreaLongMap(startVisitDate, endVisitDate);
+		List<UrlClick> urlClicks = urlClickDao.findUrlClick(startVisitDate, endVisitDate, siteId, url);
+		for (UrlClick urlClick : urlClicks){
+			Date visitDate = urlClick.getUrlClickPk().getVisitDate();
+			Long urlCount = urlClick.getUrlCount();
+			sumPvMap.put(DateTimeUtil.getDateToString(visitDate), urlCount == null ? 0L : urlCount);
 		}
 		dataSet.put("PV", sumPvMap);
 		
-		List<String> dateAreaList = DateTimeUtil.getDateAreaList(startDate, endDate);
+		List<String> dateAreaList = DateTimeUtil.getDateAreaList(startVisitDate, endVisitDate);
 		return ChartVisitUtil.getLine2DChart(dateAreaList, dataSet, labelCount);
 	}
 }

@@ -36,8 +36,8 @@ public class VisitUtil {
 	private static String langNameArr[];
 	private static int TRANSACTION_ID_LENGTH = 32;
 	private static char cs[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".toCharArray();
-	private static int FIRFOX_VERSION = 30;
-	private static int MSIE_VERSION = 30;
+	private static int FIRFOX_VERSION = 100;
+	private static int MSIE_VERSION = 100;
 
 	public final static String UNLOAD_EVENT = "Unload";
 	
@@ -125,6 +125,10 @@ public class VisitUtil {
 	public static String getOS(String useragent) {
 		if (EmptyUtil.isNull(useragent))
 			return "其他";
+		if (useragent.indexOf("Windows NT 6.3") > 0)
+			return "Windows 8.1";
+		if (useragent.indexOf("Windows NT 6.2") > 0)
+			return "Windows 8";
 		if (useragent.indexOf("Windows NT 6.1") > 0)
 			return "Windows 7";
 		if (useragent.indexOf("Windows NT 6.0") > 0)

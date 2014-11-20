@@ -485,4 +485,23 @@ public class ChannelService {
 		
 		return SearchMain.search(params, "IN_id", Long.class, channelDao, Channel.class);
 	}
+	
+	public Long findRootChannelId(Long channelId, Long siteId){
+		if (channelId == null || channelId == -1L){
+			Channel rootChannel = getChannelRoot(siteId);
+			if (rootChannel == null) return null;
+			return rootChannel.getId();
+		}
+		return channelId;
+	}
+	
+	public void getChannelId(List<Long> channelIds, Long parentChannelId){
+		List<Channel> channels = getChannelChildren(parentChannelId);
+		if (!channels.isEmpty()){
+			for (Channel channel : channels){
+				channelIds.add(channel.getId());
+				getChannelId(channelIds, channel.getId());
+			}
+		}
+	}
 }

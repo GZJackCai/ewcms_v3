@@ -1,7 +1,7 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <%@ page language="java" contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ include file="/WEB-INF/views/jspf/taglibs.jspf" %>
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
 	<title>区域分布</title>	
@@ -11,7 +11,7 @@
     <input type="hidden" id="country" name="country" value="${country}"/>
     <input type="hidden" id="province" name="province" value="${province}"/>
 	<div region="north" style="height:310px" border="false">
-	  <table width="100%" border="0" cellspacing="6" cellpadding="0"style="border-collapse: separate; border-spacing: 6px;">
+	  <table width="100%" border="0" cellspacing="6" cellpadding="0" style="border-collapse: separate; border-spacing: 6px;">
 		<tr>
 		  <td>
 			当前位置：<a href="${ctx}/visit/totality/region/country/index" style="text-decoration: none">全部</a> >> <a href="${ctx}/visit/totality/region/province/index/${country}" style="text-decoration: none">${country}(国家)</a> >> <font color="red">${province}(省份)</font>
@@ -19,7 +19,7 @@
 		</tr>
 		<tr>
 		  <td>
-			从 <input type="text" id="startDate" name="startDate" class="easyui-datebox" style="width:120px" required/> 至 <input type="text" id="endDate" name="endDate" class="easyui-datebox" style="width:120px" required/> <a class="easyui-linkbutton" href="javascript:void(0)" onclick="refresh();return false;">查看</a>
+			从 <input type="text" id="startDate" name="startDate" class="easyui-datebox" style="width:120px" editable="false" required="required"/> 至 <input type="text" id="endDate" name="endDate" class="easyui-datebox" style="width:120px" editable="false" required="required"/> <a class="easyui-linkbutton" href="javascript:void(0)" onclick="refresh();return false;">查看</a>
 		  </td>
 		</tr>
 		<tr valign="top">
@@ -51,39 +51,39 @@
 	<script type="text/javascript" src="${ctx}/static/views/visit/dateutil.js"></script>
 	<script type="text/javascript" src="${ctx}/static/fcf/js/FusionCharts.js"></script>
 	<script type="text/javascript">
-			var startDate = dateTimeToString(new Date(new Date() - 30*24*60*60*1000));
-			var endDate = dateTimeToString(new Date());
-			$(function() {
-				showChart();
-				
-				$('#startDate').datebox('setValue', startDate);
-				$('#endDate').datebox('setValue', endDate);
-				
-				$('#tt').datagrid({
-					singleSelect : true,
-					pagination : false,
-					nowrap : true,
-					striped : true,
-					url :  '${ctx}/visit/totality/region/city/table/${country}_${province}?startDate=' + $('#startDate').datebox('getValue') + '&endDate=' + $('#endDate').datebox('getValue'),
-				    columns:[[  
-				            {field:'name',title:'城市',width:120},
-				            {field:'rate',title:'PV比例',width:100},
-				            {field:'sumPv',title:'PV数量',width:100},  
-				            {field:'countUv',title:'UV数量',width:100},
-				            {field:'countIp',title:'IP数量',width:100},
-				            {field:'avgTime',title:'平均访问时长',width:100},
-				            {field:'trend',title:'时间趋势',width:70,
-				            	formatter : function(val, rec){	
-				            		return '<a style="text-decoration: none" href="javascript:void(0);" onclick="openTrend(\'' + rec.name + '\')">时间趋势</a>';
-				            	}
+		$(function() {
+			$('#startDate').datebox('setValue', dateTimeToString(new Date(new Date() - 15*24*60*60*1000)));
+			$('#endDate').datebox('setValue', dateTimeToString(new Date()));
+			$('#tt').datagrid({
+				singleSelect : true,
+				pagination : false,
+				nowrap : true,
+				striped : true,
+				url :  '${ctx}/visit/totality/region/city/table/${country}_${province}?startDate=' + $('#startDate').datebox('getValue') + '&endDate=' + $('#endDate').datebox('getValue'),
+				columns:[[  
+				        {field:'country',title:'城市',width:120,
+				            formatter : function(val, rec){
+				            	return rec.regionPk.city;
 				            }
+				        },
+				        {field:'rate',title:'PV比例',width:120},
+				        {field:'pageViewSum',title:'PV数量',width:120},  
+				        {field:'uniqueIdCount',title:'UV数量',width:120},
+				        {field:'ipCount',title:'IP数量',width:120},
+				        {field:'stickTimeAvg',title:'平均访问时长(秒)',width:120},
+				        {field:'trend',title:'时间趋势',width:70,
+				            formatter : function(val, rec){	
+				            	return '<a style="text-decoration: none" href="javascript:void(0);" onclick="openTrend(\'' + rec.regionPk.city + '\')">时间趋势</a>';
+				            }
+				        }
 				    ]]  
 				});
+				showChart();
 			});
 			function showChart(){
 				var parameter = {};
-				parameter['startDate'] = startDate;
-				parameter['endDate'] = endDate;
+				parameter['startDate'] = $('#startDate').datebox('getValue');
+				parameter['endDate'] = $('#endDate').datebox('getValue');
 				$.post('${ctx}/visit/totality/region/city/report/${country}_${province}', parameter, function(result) {
 			  		var myChart = new FusionCharts('${ctx}/static/fcf/swf/Pie3D.swf?ChartNoDataText=无数据显示', 'myChartId', '640', '250','0','0');
 		      		myChart.setDataXML(result);      
@@ -91,12 +91,10 @@
 		   		});
 			}
 			function refresh(){
-				startDate = $('#startDate').datebox('getValue');
-				endDate = $('#endDate').datebox('getValue');
-				showChart();
 				$('#tt').datagrid({
 					url : '${ctx}/visit/totality/region/city/table/${country}_${province}?startDate=' + $('#startDate').datebox('getValue') + '&endDate=' + $('#endDate').datebox('getValue')
 				});
+				showChart();
 			}
 			function openTrend(value){
 				var url = '${ctx}/visit/totality/region/city/trend/index/${country}_${province}_' + value + '?startDate=' + $('#startDate').datebox('getValue') + '&endDate=' + $('#endDate').datebox('getValue');

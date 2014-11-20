@@ -1,6 +1,6 @@
 function Poll(pollingUrl, messageDetailUrl, todoUrl) {
     var longPolling = function(url, callback) {
-        $.ajax({
+    	$.ajax({
             url: url,
             async: true,
             cache: false,
@@ -45,6 +45,7 @@ function Poll(pollingUrl, messageDetailUrl, todoUrl) {
             	$('#tipMessage').empty();
             }
             if(data.notices) {
+            	alert("1");
                 $('#notice .t-list').empty();
         		var noticesHtml = '<div class="t-list"><table width="100%">';
         	    var pro = [];

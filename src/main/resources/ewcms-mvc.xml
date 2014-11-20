@@ -19,7 +19,7 @@
 		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice" />
 	</context:component-scan>
 	
-	<mvc:annotation-driven validator="validator">
+	<mvc:annotation-driven validator="validator" conversion-service="conversionService">
 		<mvc:async-support default-timeout="30000" task-executor="executor"/>
 		<mvc:message-converters register-defaults="true">
             <!-- StringHttpMessageConverter编码为UTF-8，防止乱码 -->
@@ -86,6 +86,8 @@
         </mvc:interceptor>
     </mvc:interceptors>
     
+	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean"/>  
+	
 	<!-- 定义JSP -->
 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">

@@ -84,7 +84,6 @@ public class MsgSendService {
 		}else if (msgSend.getType() == Type.NOTICE){
 			msgSend.setMsgReceiveUsers(null);
 			msgSendDao.save(msgSend);
-			
 			pushApiService.pushNewNotice(findTopRowNoticesOrSubscription(Type.NOTICE, 10));
 		}else if (msgSend.getType() == Type.SUBSCRIPTION){
 			msgSend.setMsgReceiveUsers(null);

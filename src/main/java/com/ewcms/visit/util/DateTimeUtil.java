@@ -16,9 +16,12 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ewcms.visit.vo.totality.OnlineVo;
-import com.ewcms.visit.vo.totality.SiteClickVo;
-import com.ewcms.visit.vo.totality.TimeDistributedVo;
+import com.ewcms.visit.model.totality.Online;
+import com.ewcms.visit.model.totality.Summary;
+
+//import com.ewcms.visit.vo.totality.OnlineVo;
+//import com.ewcms.visit.vo.totality.SiteClickVo;
+//import com.ewcms.visit.vo.totality.TimeDistributedVo;
 
 /**
  * 
@@ -29,7 +32,7 @@ public class DateTimeUtil {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DateTimeUtil.class);
 	
-	private static final SimpleDateFormat DF = new SimpleDateFormat("yyyy-MM-dd");
+	private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 	
 	public static Calendar getCalendar(){
 		Calendar calendar = Calendar.getInstance();
@@ -40,10 +43,86 @@ public class DateTimeUtil {
 		return calendar;
 	}
 	
+	/**
+	 * 获取当前日期(使用默认格式)
+	 * 
+	 * @return
+	 */
+	public static Date getCurrent(){
+		return getCurrent(DEFAULT_DATE_FORMAT);
+	}
+	
+	/**
+	 * 获取当前日期(使用自定义格式)
+	 * 
+	 * @param format
+	 * @return
+	 */
+	public static Date getCurrent(String format) {
+		SimpleDateFormat simple = new SimpleDateFormat(format);
+		Date current = new Date(Calendar.getInstance().getTime().getTime());
+		try {
+			current = simple.parse(simple.format(current));
+		} catch (Exception e) {
+		}
+		return current;
+	}
+	
+	/**
+	 * 获取昨天日期(使用默认值)
+	 * 
+	 * @return
+	 */
+	public static Date getYesterday(){
+		return getYesterday(DEFAULT_DATE_FORMAT);
+	}
+	
+	/**
+	 * 获取昨天日期(使用自定义值)
+	 * 
+	 * @param format
+	 * @return
+	 */
+	public static Date getYesterday(String format){
+		SimpleDateFormat simple = new SimpleDateFormat(format);
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DATE, - 1);
+		Date date = calendar.getTime();
+		try {
+			date = simple.parse(simple.format(date));
+		} catch (Exception e) {
+		}
+		return date;
+	}
+	
+	/**
+	 * 获取小时(默认当前时间)
+	 * 
+	 * @return
+	 */
+	public static Integer getHour(){
+		return getHour(null);
+	}
+	
+	/**
+	 * 获取小时(传入时间)
+	 * 
+	 * @param time 时间
+	 * @return
+	 */
+	public static Integer getHour(Date time){
+		Calendar calendar = Calendar.getInstance();
+		if (time != null){
+			calendar.setTime(time);
+		}
+		return calendar.get(Calendar.HOUR_OF_DAY);
+	}
+	
 	public static Date getThisWeekMonday() {
 		Calendar calendar = getCalendar();
 		int day_of_week = calendar.get(Calendar.DAY_OF_WEEK) - 2;
-		calendar.add(Calendar.DATE, -day_of_week);
+		calendar.add(Calendar.DATE, - day_of_week);
 		return calendar.getTime();
 	}
 	
@@ -51,7 +130,7 @@ public class DateTimeUtil {
 		Calendar calendar = getCalendar();
 
 		int day_of_week = calendar.get(Calendar.DAY_OF_WEEK) - 2;
-		calendar.add(Calendar.DATE, -day_of_week);
+		calendar.add(Calendar.DATE, - day_of_week);
 		calendar.add(Calendar.DATE, 6);
 		
 		return calendar.getTime();
@@ -71,8 +150,26 @@ public class DateTimeUtil {
 		return calendar.getTime();
 	}
 	
+	/**
+	 * 日期型转换成字符串型(使用默认格式)
+	 * 
+	 * @param date 日期
+	 * @return
+	 */
 	public static String getDateToString(Date date){
-		return DF.format(date);
+		return getDateToString(date, DEFAULT_DATE_FORMAT);
+	}
+	
+	/**
+	 * 日期型转换成字符串型(使用自定义格式)
+	 * 
+	 * @param date
+	 * @param format
+	 * @return
+	 */
+	public static String getDateToString(Date date, String format){
+		SimpleDateFormat simple = new SimpleDateFormat(format);
+		return simple.format(date);
 	}
 	
 	/**
@@ -105,17 +202,19 @@ public class DateTimeUtil {
 	 * @return
 	 */
 	public static Map<String, Long> getDateAreaLongMap(Date startDate, Date endDate) {
+		SimpleDateFormat simple = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
+		
 		Map<String, Long> map = new TreeMap<String, Long>();
 		try {
 			Long mid = endDate.getTime() - startDate.getTime() + 1;
 			int day = (int) (mid / (1000 * 60 * 60 * 24));
 
-			map.put(DF.format(startDate), 0L);
+			map.put(simple.format(startDate), 0L);
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(startDate);
 			for (int i = 0; i < day; i++) {
 				calendar.add(Calendar.DATE, 1);
-				map.put(DF.format(calendar.getTime()), 0L);
+				map.put(simple.format(calendar.getTime()), 0L);
 			}
 		} catch (Exception e) {
 			logger.warn("日期转换错误");
@@ -124,17 +223,18 @@ public class DateTimeUtil {
 	}
 	
 	public static Map<String, String> getDateAreaStringMap(Date startDate, Date endDate) {
+		SimpleDateFormat simple = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
 		Map<String, String> map = new TreeMap<String, String>();
 		try {
 			Long mid = endDate.getTime() - startDate.getTime() + 1;
 			int day = (int) (mid / (1000 * 60 * 60 * 24));
 
-			map.put(DF.format(startDate), "0");
+			map.put(simple.format(startDate), "0");
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(startDate);
 			for (int i = 0; i < day; i++) {
 				calendar.add(Calendar.DATE, 1);
-				map.put(DF.format(calendar.getTime()), "0");
+				map.put(simple.format(calendar.getTime()), "0");
 			}
 		} catch (Exception e) {
 			logger.warn("日期转换错误");
@@ -142,27 +242,27 @@ public class DateTimeUtil {
 		return map;
 	}
 	
-	public static List<SiteClickVo> getDateAreaSiteClickList(Date startDate, Date endDate){
-		List<SiteClickVo> siteClickVos = new ArrayList<SiteClickVo>();
+	public static List<Summary> getDateAreaSiteClickList(Date startDate, Date endDate){
+		List<Summary> summarys = new ArrayList<Summary>();
 		try {
 			Long mid = endDate.getTime() - startDate.getTime() + 1;
 			int day = (int) (mid / (1000 * 60 * 60 * 24));
 
-			siteClickVos.add(new SiteClickVo(endDate));
+			summarys.add(new Summary(endDate));
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(endDate);
 			for (int i = day; i > 0; i--) {
 				calendar.add(Calendar.DATE, -1);
-				siteClickVos.add(new SiteClickVo(calendar.getTime()));
+				summarys.add(new Summary(calendar.getTime()));
 			}
 		} catch (Exception e) {
 			logger.warn("日期转换错误");
 		}
-		return siteClickVos;
+		return summarys;
 	}
 	
-	public static List<SiteClickVo> getDateAreaSiteClickList(Date startDate, Date endDate, Integer rows, Integer page){
-		List<SiteClickVo> siteClickVos = getDateAreaSiteClickList(startDate, endDate);
+	public static List<Summary> getDateAreaSiteClickList(Date startDate, Date endDate, Integer rows, Integer page){
+		List<Summary> siteClickVos = getDateAreaSiteClickList(startDate, endDate);
 		if (page <= 0) {
 			page = 0;
 		}else{
@@ -186,18 +286,18 @@ public class DateTimeUtil {
 		return (Long) (mid / (1000 * 60 * 60 * 24));
 	}
 	
-	public static List<TimeDistributedVo> getTimeAreaTimeDistributedList(){
-		List<TimeDistributedVo> timeDistributedVos = new ArrayList<TimeDistributedVo>();
+	public static List<Summary> getTimeAreaTimeDistributedList(){
+		List<Summary> timeDistributedVos = new ArrayList<Summary>();
 		for (int i = 0; i <= 23; i++){
-			timeDistributedVos.add(new TimeDistributedVo(i));
+			timeDistributedVos.add(new Summary(i));
 		}
 		return timeDistributedVos;
 	}
 	
-	public static List<OnlineVo> getTimeAreaOnlineList(){
-		List<OnlineVo> onlineVos = new ArrayList<OnlineVo>();
+	public static List<Online> getTimeAreaOnlineList(){
+		List<Online> onlineVos = new ArrayList<Online>();
 		for (int i = 0; i <= 23; i++){
-			onlineVos.add(new OnlineVo(i));
+			onlineVos.add(new Online(i));
 		}
 		return onlineVos;
 	}

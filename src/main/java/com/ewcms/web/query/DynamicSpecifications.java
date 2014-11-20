@@ -34,10 +34,10 @@ public class DynamicSpecifications {
 						String[] names = StringUtils.split(filter.fieldName, ".");
 						Path expression;
 						try{
+							expression = root.get(names[0]);
+						}catch (Exception e){
 							//字段为集合类时使用
 							expression = root.join(names[0]);
-						}catch (Exception e){
-							expression = root.get(names[0]);
 						}
 						for (int i = 1; i < names.length; i++) {
 							expression = expression.get(names[i]);
@@ -77,31 +77,47 @@ public class DynamicSpecifications {
 							predicates.add(builder.in(expression).value(filter.value));
 							break;
 						case GTD:
-							try{
-								predicates.add(builder.greaterThan(expression, Date.valueOf((String)filter.value)));
-							} catch (Exception e){
-								logger.warn("查询条件不是有效的日期类型:{}", (String)filter.value);
+							if (filter.value.getClass().getName().equals("java.lang.String")){
+								try{
+									predicates.add(builder.greaterThan(expression, Date.valueOf((String)filter.value)));
+								} catch (Exception e){
+									logger.warn("查询条件不是有效的日期类型:{}", (String)filter.value);
+								}
+							}else if (filter.value.getClass().getName().equals("java.util.Date")){
+								predicates.add(builder.greaterThan(expression, (Comparable)filter.value));
 							}
 							break;
 						case LTD:
-							try{
-								predicates.add(builder.lessThan(expression, Date.valueOf((String)filter.value)));
-							} catch (Exception e){
-								logger.warn("查询条件不是有效的日期类型:{}", (String)filter.value);
+							if (filter.value.getClass().getName().equals("java.lang.String")){
+								try{
+									predicates.add(builder.lessThan(expression, Date.valueOf((String)filter.value)));
+								} catch (Exception e){
+									logger.warn("查询条件不是有效的日期类型:{}", (String)filter.value);
+								}
+							}else if (filter.value.getClass().getName().equals("java.util.Date")){
+								predicates.add(builder.lessThan(expression, (Comparable)filter.value));
 							}
 							break;
 						case GTED:
-							try{
-								predicates.add(builder.greaterThanOrEqualTo(expression, Date.valueOf((String)filter.value)));
-							} catch (Exception e){
-								logger.warn("查询条件不是有效的日期类型:{}", (String)filter.value);
+							if (filter.value.getClass().getName().equals("java.lang.String")){
+								try{
+									predicates.add(builder.greaterThanOrEqualTo(expression, Date.valueOf((String)filter.value)));
+								} catch (Exception e){
+									logger.warn("查询条件不是有效的日期类型:{}", (String)filter.value);
+								}
+							}else if (filter.value.getClass().getName().equals("java.util.Date")){
+								predicates.add(builder.greaterThanOrEqualTo(expression, (Comparable)filter.value));
 							}
 							break;
 						case LTED:
-							try{
-								predicates.add(builder.lessThanOrEqualTo(expression, Date.valueOf((String)filter.value)));
-							} catch (Exception e){
-								logger.warn("查询条件不是有效的日期类型:{}", (String)filter.value);
+							if (filter.value.getClass().getName().equals("java.lang.String")){
+								try{
+									predicates.add(builder.lessThanOrEqualTo(expression, Date.valueOf((String)filter.value)));
+								} catch (Exception e){
+									logger.warn("查询条件不是有效的日期类型:{}", (String)filter.value);
+								}
+							}else if (filter.value.getClass().getName().equals("java.util.Date")){
+								predicates.add(builder.lessThanOrEqualTo(expression, (Comparable)filter.value));
 							}
 							break;
 						case BEQ:
@@ -124,7 +140,6 @@ public class DynamicSpecifications {
 					if (predicates.size() > 0) {
 						return builder.and(predicates.toArray(new Predicate[predicates.size()]));
 					}
-					
 				}
 				return builder.conjunction();
 			}

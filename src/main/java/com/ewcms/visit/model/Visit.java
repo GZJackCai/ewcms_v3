@@ -6,14 +6,13 @@
 package com.ewcms.visit.model;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -50,18 +49,17 @@ import com.alibaba.fastjson.annotation.JSONField;
  * 
  */
 @Entity
-@Table(name = "plugin_visit")
-@SequenceGenerator(name = "seq_plugin_visit", sequenceName = "seq_plugin_visit_id", allocationSize = 1)
+@Table(name = "plugin_visit",
+       indexes = {@Index(name = "idx_visit_visitdate", columnList = "visit_date"),
+		          @Index(name = "idx_visit_visittime", columnList = "visit_time")
+                 }
+)
 public class Visit implements Serializable {
 
 	private static final long serialVersionUID = -4173049848036627669L;
 
-	@Id
-	@GeneratedValue(generator = "seq_plugin_visit", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
-	@Column(name = "unique_id")
-	private String uniqueId;
+	@EmbeddedId
+	private VisitPk visitPk;
 	@Column(name = "screen")
 	private String screen;
 	@Column(name = "color_depth")
@@ -82,8 +80,6 @@ public class Visit implements Serializable {
 	private Boolean cookieEnabled;
 	@Column(name = "browser")
 	private String browser;
-	@Column(name = "ip")
-	private String ip;
 	@Column(name = "country")
 	private String country;
 	@Column(name = "province")
@@ -92,12 +88,9 @@ public class Visit implements Serializable {
 	private String city;
 	@Column(name = "rv_flag")
 	private Boolean rvFlag;
-	@Temporal(TemporalType.DATE)
-	@Column(name = "visit_date", columnDefinition = "Date default CURRENT_DATE", insertable = false, updatable = false)
-	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date visitDate;
 	@Temporal(TemporalType.TIME)
-	@Column(name = "visit_time", columnDefinition = "TIME default CURRENT_TIME", insertable = false, updatable = false)
+//	@Column(name = "visit_time", columnDefinition = "TIME default CURRENT_TIME", insertable = false, updatable = false)
+	@Column(name = "visit_time")
 	@DateTimeFormat(pattern = "HH:mm:ss")
 	private Date visitTime;
 	@Column(name = "stick_time")
@@ -114,10 +107,6 @@ public class Visit implements Serializable {
 	private String host;
 	@Column(name = "frequency")
 	private Long frequency;
-	@Column(name = "site_id")
-	private Long siteId;
-	@Column(name = "url")
-	private String url;
 	@Column(name = "referer", columnDefinition = "text")
 	private String referer;
 	@Column(name = "depth")
@@ -131,14 +120,11 @@ public class Visit implements Serializable {
 		country = "未知";
 		province = "未知";
 		city = "未知";
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
+		event = "";
+		referer = "";
+		visitTime = new Date(Calendar.getInstance().getTime().getTime());
+		javaEnabled = false;
+		cookieEnabled = false;
 	}
 
 	public String getScreen() {
@@ -221,14 +207,6 @@ public class Visit implements Serializable {
 		this.browser = browser;
 	}
 
-	public String getIp() {
-		return ip;
-	}
-
-	public void setIp(String ip) {
-		this.ip = ip;
-	}
-
 	public String getCountry() {
 		return country;
 	}
@@ -253,37 +231,12 @@ public class Visit implements Serializable {
 		this.city = city;
 	}
 
-	public Long getSiteId() {
-		return siteId;
-	}
-
-	public void setSiteId(Long siteId) {
-		this.siteId = siteId;
-	}
-
 	public Boolean getRvFlag() {
 		return rvFlag;
 	}
 
 	public void setRvFlag(Boolean rvFlag) {
 		this.rvFlag = rvFlag;
-	}
-
-	public String getUniqueId() {
-		return uniqueId;
-	}
-
-	public void setUniqueId(String uniqueId) {
-		this.uniqueId = uniqueId;
-	}
-
-	@JSONField(format = "yyyy-MM-dd")
-	public Date getVisitDate() {
-		return visitDate;
-	}
-
-	public void setVisitDate(Date visitDate) {
-		this.visitDate = visitDate;
 	}
 
 	@JSONField(format = "HH:mm:ss")
@@ -351,14 +304,6 @@ public class Visit implements Serializable {
 		this.frequency = frequency;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
 	public String getReferer() {
 		return referer;
 	}
@@ -383,11 +328,19 @@ public class Visit implements Serializable {
 		this.remotePort = remotePort;
 	}
 
+	public VisitPk getVisitPk() {
+		return visitPk;
+	}
+
+	public void setVisitPk(VisitPk visitPk) {
+		this.visitPk = visitPk;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((visitPk == null) ? 0 : visitPk.hashCode());
 		return result;
 	}
 
@@ -400,10 +353,10 @@ public class Visit implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Visit other = (Visit) obj;
-		if (id == null) {
-			if (other.id != null)
+		if (visitPk == null) {
+			if (other.visitPk != null)
 				return false;
-		} else if (!id.equals(other.id))
+		} else if (!visitPk.equals(other.visitPk))
 			return false;
 		return true;
 	}

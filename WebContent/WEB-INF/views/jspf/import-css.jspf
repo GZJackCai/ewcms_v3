@@ -1,9 +1,9 @@
 <script type="text/javascript" src="${ctx}/static/views/loading.js"></script>
-    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/black/easyui.css" rel="stylesheet" title="black"/>
-    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/bootstrap/easyui.css" rel="stylesheet" title="bootstrap"/>
-    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/default/easyui.css" rel="stylesheet" title="default"/>
-    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/gray/easyui.css" rel="stylesheet" title="gray"/>
-    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/metro/easyui.css" rel="stylesheet" title="metro"/>
+    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/black/easyui.css" title="black"/>
+    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/bootstrap/easyui.css" title="bootstrap"/>
+    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/default/easyui.css" title="default"/>
+    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/gray/easyui.css" title="gray"/>
+    <link rel="stylesheet" type="text/css" href="${ctx}/static/easyui/themes/metro/easyui.css" title="metro"/>
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]><script src="${ctx}/static/views/html5.js"></script><![endif]-->

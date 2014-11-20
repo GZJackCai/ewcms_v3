@@ -44,25 +44,25 @@ public class VisitTreeUtil {
 		threeTreeMap.put("2回头率", "/loyalty/back");
 		threeTreeMap.put("3停留时间", "/loyalty/sticktime");
 		
-		fourTreeMap.put("0来源组成", "source");
-		fourTreeMap.put("1搜索引擎", "search");
-		fourTreeMap.put("2来源网站", "webSite");
+		fourTreeMap.put("0来源组成", "/clickrate/sourceform");
+		fourTreeMap.put("1搜索引擎", "/clickrate/searchengine");
+		fourTreeMap.put("2来源网站", "/clickrate/website");
 		
-		fiveTreeMap.put("0操作系统", "os");
-		fiveTreeMap.put("1浏览器", "browser");
-		fiveTreeMap.put("2语言", "language");
-		fiveTreeMap.put("3屏幕分辨率", "screen");
-		fiveTreeMap.put("4屏幕色深", "colorDepth");
-		fiveTreeMap.put("5是否支持Apple", "javaEnabled");
-		fiveTreeMap.put("6Flash版本", "flashVersion");
-		fiveTreeMap.put("7是否允许Cookies", "cookieEnabled");
+		fiveTreeMap.put("0操作系统", "/clientside/os");
+		fiveTreeMap.put("1浏览器", "/clientside/browser");
+		fiveTreeMap.put("2语言", "/clientside/language");
+		fiveTreeMap.put("3屏幕分辨率", "/clientside/screen");
+		fiveTreeMap.put("4屏幕色深", "/clientside/colordepth");
+		fiveTreeMap.put("5是否支持Apple", "/clientside/javaenabled");
+		fiveTreeMap.put("6Flash版本", "/clientside/flashversion");
+		fiveTreeMap.put("7是否允许Cookies", "/clientside/cookieenabled");
 		
-		sixTreeMap.put("0人员发布统计", "staffReleased");
-		sixTreeMap.put("1栏目发布统计", "channelReleased");
-		sixTreeMap.put("2机构发布统计", "organReleased");
+		sixTreeMap.put("0人员发布统计", "/publishedstats/person");
+		sixTreeMap.put("1栏目发布统计", "/publishedstats/channel");
+		sixTreeMap.put("2机构发布统计", "/publishedstats/organ");
 		
-		sevenTreeMap.put("0政民互动统计", "interactive");
-		sevenTreeMap.put("1网上咨询统计", "advisory");
+		sevenTreeMap.put("0政民互动统计", "/interactive/zhengmin");
+		sevenTreeMap.put("1网上咨询统计", "/interactive/advisory");
 		//sevenTreeMap.put("2留言审核统计", "audit");
 	}
 	

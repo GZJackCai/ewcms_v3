@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author 周冬初
+ * @author 吴智俊
  * 
  */
 public class TreeNode implements Serializable {
@@ -26,6 +26,7 @@ public class TreeNode implements Serializable {
 	private List<TreeNode> children;
 	private String state;
 	private Map<String, String> attributes = new HashMap<String, String>();
+	private Object data;
 
 	public String getId() {
 		return id;
@@ -81,5 +82,13 @@ public class TreeNode implements Serializable {
 
 	public void setAttributes(Map<String, String> attributes) {
 		this.attributes = attributes;
+	}
+
+	public Object getData() {
+		return data;
+	}
+
+	public void setData(Object data) {
+		this.data = data;
 	}
 }
