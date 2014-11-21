@@ -16,8 +16,8 @@
 		<hibernate-validator.version>4.3.1.Final</hibernate-validator.version>
 	    <!-- <jackson.version>2.3.0</jackson.version> -->
 		<fastjson.version>1.2.1</fastjson.version>
-		<slf4j.version>1.7.5</slf4j.version>
-		<logback.version>1.0.12</logback.version>
+		<slf4j.version>1.7.7</slf4j.version>
+		<logback.version>1.1.2</logback.version>
 		<commons-dbcp.version>1.4</commons-dbcp.version>
 		<commons-lang3.version>3.1</commons-lang3.version>
 		<commons-io.version>2.4</commons-io.version>
@@ -301,23 +301,21 @@
 			<version>${logback.version}</version>
 		</dependency>
 
-		<!-- log4j 实际调用slf4j -->
+		<!-- 代码直接调用log4j会被桥接到slf4j -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>
 			<version>${slf4j.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 
-		<!-- common-logging 实际调用slf4j -->
+		<!-- 代码直接调用commons-logging会被桥接到slf4j -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
 			<version>${slf4j.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 
-		<!-- java.util.logging 实际调用slf4j -->
+		<!-- 代码直接调用java.util.logging会被桥接到slf4j -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jul-to-slf4j</artifactId>
@@ -327,9 +325,9 @@
 
 		<!-- log4jdbc -->
 		<dependency>
-			<groupId>org.lazyluke</groupId>
-			<artifactId>log4jdbc-remix</artifactId>
-			<version>0.2.7</version>
+			<groupId>com.googlecode.log4jdbc</groupId>
+			<artifactId>log4jdbc</artifactId>
+			<version>1.2</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- LOGGING end -->
