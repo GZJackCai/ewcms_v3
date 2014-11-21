@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -56,7 +55,7 @@ public class MsgSendService {
 
 	private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 	
-	public Long addMsgSend(MsgSend msgSend, String content, List<String> ReceiveUserNames) {
+	public Long addMsgSend(MsgSend msgSend, String content, List<String> receiveUserNames) {
 		msgSend.setUserName(EwcmsContextUtil.getLoginName());
 		msgSend.setStatus(MsgStatus.FAVORITE);
 		MsgContent msgContent = new MsgContent();
@@ -67,17 +66,17 @@ public class MsgSendService {
 		msgSend.setMsgContents(msgContents);
 		
 		if (msgSend.getType() == Type.GENERAL){
-			List<String> receiveUserNames = new ArrayList<String>();
+			List<String> userNames = new ArrayList<String>();
 			
 			List<MsgReceiveUser> msgReceiveUsers = new ArrayList<MsgReceiveUser>();
 			MsgReceiveUser msgReceiveUser;
-			for (String receiveUserName : ReceiveUserNames){
+			for (String receiveUserName : userNames){
 				if (receiveUserName.equals(msgSend.getUserName())) continue;
 				msgReceiveUser = new MsgReceiveUser();
 				msgReceiveUser.setUserName(receiveUserName);
 				msgReceiveUser.setRealName(userDao.findByLoginName(receiveUserName).getRealName());
 				msgReceiveUsers.add(msgReceiveUser);
-				receiveUserNames.add(receiveUserName);
+				userNames.add(receiveUserName);
 			}
 			msgSend.setMsgReceiveUsers(msgReceiveUsers);
 			msgSendDao.save(msgSend);
@@ -92,7 +91,7 @@ public class MsgSendService {
 			pushApiService.pushNewSubscription(findTopRowNoticesOrSubscription(Type.SUBSCRIPTION, 10));
 		}
 		if (msgSend.getType() == Type.GENERAL){
-			for (String receiveUserName : ReceiveUserNames){
+			for (String receiveUserName : receiveUserNames){
 				if (receiveUserName.equals(msgSend.getUserName())) continue;
 				MsgReceive msgReceive = new MsgReceive();
 				msgReceive.setUserName(receiveUserName);
@@ -178,7 +177,6 @@ public class MsgSendService {
 		msgContentDao.delete(msgContentId);
 	}
 	
-	@Async
 	public List<Map<String, Object>> findTopRowNoticesOrSubscription(Type type, Integer row) {
 		QueryParameter queryParameter = new QueryParameter();
 		queryParameter.setRows(row);

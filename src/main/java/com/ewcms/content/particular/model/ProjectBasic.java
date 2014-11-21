@@ -5,7 +5,6 @@
  */
 package com.ewcms.content.particular.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -14,9 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -27,13 +23,13 @@ import javax.persistence.TemporalType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.site.model.Organ;
 
 /**
  * 项目基本数据
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>code:项目编号(系统自动生成,格式为：行政区划代码+组织机构代码+年份+建设单位项目编号)</li>
  * <li>name:项目名称</li>
  * <li>buildTime:建设时间</li>
@@ -67,8 +63,8 @@ import com.ewcms.site.model.Organ;
 
 @Entity
 @Table(name = "particular_project_basic")
-@SequenceGenerator(name = "seq_particular_project_basic", sequenceName = "seq_particular_project_basic_id", allocationSize = 1)
-public class ProjectBasic implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_particular_project_basic_id", allocationSize = 1)
+public class ProjectBasic extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -2278978849489626058L;
 
@@ -103,10 +99,6 @@ public class ProjectBasic implements Serializable {
 		}
 	}
 	
-	@Id
-	@GeneratedValue(generator = "seq_particular_project_basic",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "code", length = 23, nullable = false, unique = true)
 	private String code;
 	@Column(name = "name", length = 200, nullable = false)
@@ -174,14 +166,6 @@ public class ProjectBasic implements Serializable {
 		release = false;
 	}
 	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getCode() {
 		return code;
 	}
@@ -406,30 +390,5 @@ public class ProjectBasic implements Serializable {
 
 	public void setPublished(Date published) {
 		this.published = published;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((code == null) ? 0 : code.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ProjectBasic other = (ProjectBasic) obj;
-		if (code == null) {
-			if (other.code != null)
-				return false;
-		} else if (!code.equals(other.code))
-			return false;
-		return true;
 	}
 }

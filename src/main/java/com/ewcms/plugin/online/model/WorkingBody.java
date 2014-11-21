@@ -5,16 +5,12 @@
  */
 package com.ewcms.plugin.online.model;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -23,6 +19,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.content.document.model.ArticleMain;
 import com.ewcms.site.model.Organ;
 
@@ -30,7 +28,6 @@ import com.ewcms.site.model.Organ;
  * 网上办事主体
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>parent:所属父栏目</li>
  * <li>children:包含子栏目集</li>
  * <li>name: 栏目名称</li>
@@ -46,14 +43,11 @@ import com.ewcms.site.model.Organ;
  */
 @Entity
 @Table(name = "plugin_workingbody")
-@SequenceGenerator(name = "seq_plugin_workingbody", sequenceName = "seq_plugin_workingbody_id", allocationSize = 1)
-public class WorkingBody implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_workingbody_id", allocationSize = 1)
+public class WorkingBody extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -8453397499458969173L;
 
-	@Id
-	@GeneratedValue(generator = "seq_plugin_workingbody", strategy = GenerationType.SEQUENCE)
-	private Integer id;
 	@ManyToOne(cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST }, targetEntity = WorkingBody.class)
 	@JoinColumn(name = "parent_id")
 	private WorkingBody parent;
@@ -85,14 +79,6 @@ public class WorkingBody implements Serializable {
 		isPublish = false;
 	}
 	
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
 	public WorkingBody getParent() {
 		return parent;
 	}
@@ -165,30 +151,5 @@ public class WorkingBody implements Serializable {
 
 	public void setIsPublish(Boolean isPublish) {
 		this.isPublish = isPublish;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		WorkingBody other = (WorkingBody) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

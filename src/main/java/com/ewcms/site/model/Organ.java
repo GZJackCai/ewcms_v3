@@ -6,15 +6,11 @@
 
 package com.ewcms.site.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -27,34 +23,31 @@ import org.hibernate.annotations.Formula;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * <ul>
- * <li>id:机构编号
- * <li>name:机构名称
- * <li>describe:机构说明
- * <li>icon: 机构引导图
- * <li>floatNo:层级
- * <li>orderNo:同级次序
- * <li>parent:父机构
- * <li>createTime:创建时间
- * <li>updateTime:修改时间
- * <li>homeSiteId:机构主站编号
+ * <li>name:机构名称</li>
+ * <li>describe:机构说明</li>
+ * <li>icon: 机构引导图</li>
+ * <li>floatNo:层级</li>
+ * <li>orderNo:同级次序</li>
+ * <li>parent:父机构</li>
+ * <li>createTime:创建时间</li>
+ * <li>updateTime:修改时间</li>
+ * <li>homeSiteId:机构主站编号</li>
  * </ul>
  * 
- * @author 周冬初
+ * @author 吴智俊
  * 
  */
 @Entity
 @Table(name = "site_organ")
-@SequenceGenerator(name = "seq_site_organ", sequenceName = "seq_site_organ_id", allocationSize = 1)
-public class Organ implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_site_organ_id", allocationSize = 1)
+public class Organ extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 7433796728497541934L;
 
-	@Id
-	@GeneratedValue(generator = "seq_site_organ", strategy = GenerationType.SEQUENCE)
-	private Long id;
 	@Column(length = 100)
 	private String name;
 	@Column()
@@ -87,14 +80,6 @@ public class Organ implements Serializable {
 	private String url;
 	@Column()
 	private Long homeSiteId;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getName() {
 		return name;
@@ -188,30 +173,5 @@ public class Organ implements Serializable {
 
 	public boolean hasChildren() {
 		return this.childrenCount > 0;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Organ other = (Organ) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

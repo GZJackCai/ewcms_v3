@@ -6,7 +6,6 @@
 
 package com.ewcms.content.vote.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -17,9 +16,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
@@ -30,12 +26,12 @@ import javax.persistence.TemporalType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * 问卷调查主体
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>title:调查主题</li>
  * <li>numberSum:投票人数</li>
  * <li>startTime:开始时间</li>
@@ -52,8 +48,8 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 @Entity
 @Table(name = "plugin_vote_questionnaire")
-@SequenceGenerator(name = "seq_plugin_vote_questionnaire", sequenceName = "seq_plugin_vote_questionnaire_id", allocationSize = 1)
-public class Questionnaire implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_vote_questionnaire_id", allocationSize = 1)
+public class Questionnaire extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -6666565689620227616L;
 
@@ -75,10 +71,6 @@ public class Questionnaire implements Serializable {
 		}
 	}
 	
-	@Id
-	@GeneratedValue(generator = "seq_plugin_vote_questionnaire", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "title", nullable = false, length = 100)
 	private String title;
 	@Column(name = "number_sum", nullable = false)
@@ -111,14 +103,6 @@ public class Questionnaire implements Serializable {
 		verifiCode = false;
 		status = Status.VIEW;
 		voteEnd = false;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getTitle() {
@@ -210,30 +194,5 @@ public class Questionnaire implements Serializable {
 
 	public void setVoteEnd(Boolean voteEnd) {
 		this.voteEnd = voteEnd;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Questionnaire other = (Questionnaire) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

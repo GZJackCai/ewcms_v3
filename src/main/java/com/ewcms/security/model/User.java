@@ -1,6 +1,5 @@
 package com.ewcms.security.model;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -10,9 +9,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -32,6 +28,7 @@ import org.hibernate.annotations.FetchMode;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.site.model.Organ;
 import com.ewcms.util.Collections3;
 
@@ -39,7 +36,6 @@ import com.ewcms.util.Collections3;
  * 用户信息
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>loginName:登录名</li>
  * <li>password:密码</li>
  * <li>realName:用户名</li>
@@ -55,16 +51,12 @@ import com.ewcms.util.Collections3;
  */
 @Entity
 @Table(name = "acct_user")
-@SequenceGenerator(name = "seq_acct_user", sequenceName = "seq_acct_user_id", allocationSize = 1)
+@SequenceGenerator(name = "seq", sequenceName = "seq_acct_user_id", allocationSize = 1)
 @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-public class User implements Serializable {
+public class User extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 4456583773180927749L;
 
-	@Id
-    @GeneratedValue(generator = "seq_acct_user",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "login_name", nullable = false, unique = true, length = 20)
 	private String loginName;
 	@Transient
@@ -108,14 +100,6 @@ public class User implements Serializable {
 	@Column(length = 20)
 	private String mphone;
    
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getLoginName() {
 		return loginName;
 	}
@@ -249,31 +233,5 @@ public class User implements Serializable {
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((loginName == null) ? 0 : loginName.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		User other = (User) obj;
-		if (loginName == null) {
-			if (other.loginName != null)
-				return false;
-		} else if (!loginName.equals(other.loginName))
-			return false;
-		return true;
 	}
 }

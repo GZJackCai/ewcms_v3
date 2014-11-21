@@ -6,16 +6,12 @@
 
 package com.ewcms.content.document.model;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -25,13 +21,13 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.util.Collections3;
 
 /**
  * 审核流程定义
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>channelId:频道编号</li>
  * <li>name:名称</li>
  * <li>userName:审核员</li>
@@ -45,15 +41,11 @@ import com.ewcms.util.Collections3;
  */
 @Entity
 @Table(name = "content_review_process")
-@SequenceGenerator(name = "seq_content_review_process", sequenceName = "seq_content_review_process_id", allocationSize = 1)
-public class ReviewProcess implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_content_review_process_id", allocationSize = 1)
+public class ReviewProcess extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 4540829300109250778L;
 
-	@Id
-	@GeneratedValue(generator = "seq_content_review_process", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "channel_id", nullable = false)
 	private Long channelId;
 	@Column(name = "name", nullable = false)
@@ -72,14 +64,6 @@ public class ReviewProcess implements Serializable {
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, targetEntity = ReviewProcess.class)
 	@JoinColumn(name = "prev_id")
 	private ReviewProcess prevProcess;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public Long getChannelId() {
 		return channelId;
@@ -141,30 +125,5 @@ public class ReviewProcess implements Serializable {
 	@Transient
 	public String getRoleNames(){
 		return Collections3.extractToString(reviewRoles, "roleName", ",");
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ReviewProcess other = (ReviewProcess) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

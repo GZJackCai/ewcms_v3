@@ -6,21 +6,17 @@
 
 package com.ewcms.content.vote.model;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * 用户填写问卷调查结果 
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>subjectName:主题名
  * <li>subjectValue:主题值</li>
  * </ul>
@@ -29,27 +25,15 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "plugin_vote_record")
-@SequenceGenerator(name = "seq_plugin_vote_record", sequenceName = "seq_plugin_vote_record_id", allocationSize = 1)
-public class Record implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_vote_record_id", allocationSize = 1)
+public class Record extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 1681610497803424816L;
 
-	@Id
-	@GeneratedValue(generator = "seq_plugin_vote_record", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "subject_name")
 	private String subjectName;
 	@Column(name = "subject_value", columnDefinition = "text")
 	private String subjectValue;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getSubjectName() {
 		return subjectName;
@@ -65,30 +49,5 @@ public class Record implements Serializable {
 
 	public void setSubjectValue(String subjectValue) {
 		this.subjectValue = subjectValue;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Record other = (Record) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

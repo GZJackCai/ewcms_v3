@@ -6,7 +6,6 @@
 
 package com.ewcms.content.message.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -18,9 +17,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -29,13 +25,13 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.util.Collections3;
 
 /**
  * 消息发送
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>userName:用户</li>
  * <li>title:标题</li>
  * <li>sendTime:发送时间</li>
@@ -49,8 +45,8 @@ import com.ewcms.util.Collections3;
  */
 @Entity
 @Table(name = "plugin_message_send")
-@SequenceGenerator(name = "seq_plugin_message_send", sequenceName = "seq_plugin_message_send_id", allocationSize = 1)
-public class MsgSend implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_message_send_id", allocationSize = 1)
+public class MsgSend extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 8470154441934582608L;
 
@@ -72,10 +68,6 @@ public class MsgSend implements Serializable {
 		}
 	}
 	
-	@Id
-    @GeneratedValue(generator = "seq_plugin_message_send",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "username", nullable = false)
 	private String userName;
 	@Column(name = "title", length = 200)
@@ -101,14 +93,6 @@ public class MsgSend implements Serializable {
 		sendTime = new Date(Calendar.getInstance().getTime().getTime());
 	}
 	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getUserName() {
 		return userName;
 	}
@@ -178,30 +162,5 @@ public class MsgSend implements Serializable {
 	@Transient
 	public String getMsgReceiveRealName(){
 		return Collections3.extractToString(msgReceiveUsers, "realName", ",");
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		MsgSend other = (MsgSend) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

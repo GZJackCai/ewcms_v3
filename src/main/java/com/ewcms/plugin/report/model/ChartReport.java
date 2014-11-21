@@ -5,7 +5,6 @@
  */
 package com.ewcms.plugin.report.model;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -16,9 +15,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -29,12 +25,12 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.plugin.externalds.model.BaseDs;
 
 /**
  * 图表
  * <ul>
- * <li>id:编号</li>
  * <li>name:名称</li>
  * <li>sql:SQL表达式</li>
  * <li>chartType:类型</li>
@@ -76,8 +72,8 @@ import com.ewcms.plugin.externalds.model.BaseDs;
  */
 @Entity
 @Table(name = "plugin_report_chart")
-@SequenceGenerator(name = "seq_plugin_report_chart", sequenceName = "seq_plugin_report_chart_id", allocationSize = 1)
-public class ChartReport implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_report_chart_id", allocationSize = 1)
+public class ChartReport extends BaseSequenceEntity<Long> {
 
     private static final long serialVersionUID = -2358576914939775115L;
     
@@ -116,10 +112,6 @@ public class ChartReport implements Serializable {
         }
     }
     
-	@Id
-    @GeneratedValue(generator = "seq_plugin_report_chart",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-    private Long id;
     @Column(name = "name", nullable = false, length = 50, unique = true)
     private String name;
     @Column(name = "chartsql", columnDefinition = "text")
@@ -196,14 +188,6 @@ public class ChartReport implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updatedate")
     private Date updateDate;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -492,42 +476,4 @@ public class ChartReport implements Serializable {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
-
-	@Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ChartReport other = (ChartReport) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
-            return false;
-        }
-        return true;
-    }
 }

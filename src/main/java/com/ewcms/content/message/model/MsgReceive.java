@@ -6,7 +6,6 @@
 
 package com.ewcms.content.message.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -15,22 +14,19 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * 
  * 信息接收
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>userName:用户</li>
  * <li>read:读取标志</li>
  * <li>status:状态</li>
@@ -45,15 +41,11 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 @Entity
 @Table(name = "plugin_message_receive")
-@SequenceGenerator(name = "seq_plugin_message_receive", sequenceName = "seq_plugin_message_receive_id", allocationSize = 1)
-public class MsgReceive implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_message_receive_id", allocationSize = 1)
+public class MsgReceive extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -8925782877706243408L;
 
-	@Id
-    @GeneratedValue(generator = "seq_plugin_message_receive",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "username", nullable = false)
 	private String userName;
 	@Column(name = "read")
@@ -76,14 +68,6 @@ public class MsgReceive implements Serializable {
 		subscription = false;
 	}
 	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getUserName() {
 		return userName;
 	}
@@ -143,30 +127,5 @@ public class MsgReceive implements Serializable {
 
 	public void setSubscription(Boolean subscription) {
 		this.subscription = subscription;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		MsgReceive other = (MsgReceive) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

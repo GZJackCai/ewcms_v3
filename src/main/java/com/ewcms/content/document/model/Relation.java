@@ -6,14 +6,9 @@
 
 package com.ewcms.content.document.model;
 
-import java.io.Serializable;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -22,12 +17,12 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * 相关文章
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>sort:排序</li>
  * <li>article:文章信息</li>
  * </ul>
@@ -39,15 +34,11 @@ import com.alibaba.fastjson.annotation.JSONField;
        indexes = {@Index(name = "idx_relation_aticle_id", columnList = "relation_article_id")
                  }
 )
-@SequenceGenerator(name = "seq_content_relation", sequenceName = "seq_content_relation_id", allocationSize = 1)
-public class Relation implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_content_relation_id", allocationSize = 1)
+public class Relation extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -4281309365714981737L;
 
-	@Id
-	@GeneratedValue(generator = "seq_content_relation", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "sort")
 	private Integer sort;
 	@OneToOne(cascade={CascadeType.PERSIST,CascadeType.MERGE}, targetEntity = Article.class)
@@ -56,14 +47,6 @@ public class Relation implements Serializable {
 	@ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH}, optional = false)
 	@JoinColumn(name = "article_id")
 	private Article article;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public Integer getSort() {
 		return sort;
@@ -88,30 +71,5 @@ public class Relation implements Serializable {
 
 	public void setArticle(Article article) {
 		this.article = article;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Relation other = (Relation) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

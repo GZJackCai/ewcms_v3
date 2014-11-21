@@ -10,18 +10,16 @@
 
 package com.ewcms.plugin.interaction.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  *
@@ -29,15 +27,11 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "plugin_interaction")
-@SequenceGenerator(name = "seq_plugin_interaction", sequenceName = "seq_plugin_interaction_id", allocationSize = 1)
-public class Interaction implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_interaction_id", allocationSize = 1)
+public class Interaction extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 3018757843242796157L;
 	
-	@Id
-    @GeneratedValue(generator = "seq_plugin_interaction",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-    private Integer id;
     @Column(name="username")
     private String username;
     @Column(name="name")
@@ -101,14 +95,6 @@ public class Interaction implements Serializable {
 
     public void setDate(Date date) {
         this.date = date;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getIp() {
@@ -198,27 +184,4 @@ public class Interaction implements Serializable {
 	public void setTel(String tel) {
 		this.tel = tel;
 	}
-
-	@Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Interaction other = (Interaction) obj;
-        if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + (this.id != null ? this.id.hashCode() : 0);
-        return hash;
-    }
-    
 }

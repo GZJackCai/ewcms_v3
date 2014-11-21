@@ -6,7 +6,6 @@
 
 package com.ewcms.content.vote.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -16,9 +15,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -28,12 +24,12 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * 投票人员信息
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>ip:IP</li>
  * <li>questionnaireId:问卷调查编号</li>
  * <li>records:用户填写问卷调查结果对象集合</li>
@@ -44,15 +40,11 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 @Entity
 @Table(name = "plugin_vote_person")
-@SequenceGenerator(name = "seq_plugin_vote_person", sequenceName = "seq_plugin_vote_person_id", allocationSize = 1)
-public class Person implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_vote_person_id", allocationSize = 1)
+public class Person extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 4350370572885048704L;
 
-	@Id
-	@GeneratedValue(generator = "seq_plugin_vote_person", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "ip", nullable = false)
 	private String ip;
 	@Column(name = "questionnaire_id")
@@ -67,14 +59,6 @@ public class Person implements Serializable {
 	
 	public Person(){
 		recordTime = new Date(Calendar.getInstance().getTime().getTime());
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getIp() {
@@ -108,30 +92,5 @@ public class Person implements Serializable {
 
 	public void setRecordTime(Date recordTime) {
 		this.recordTime = recordTime;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Person other = (Person) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

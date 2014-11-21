@@ -6,22 +6,18 @@
 
 package com.ewcms.content.vote.model;
 
-import java.io.Serializable;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * 问卷调查主题明细
@@ -39,8 +35,8 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 @Entity
 @Table(name = "plugin_vote_subject_item")
-@SequenceGenerator(name = "seq_plugin_vote_subject_item", sequenceName = "seq_plugin_vote_subject_item_id", allocationSize = 1)
-public class SubjectItem implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_vote_subject_item_id", allocationSize = 1)
+public class SubjectItem extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 8605463440202838775L;
 
@@ -62,10 +58,6 @@ public class SubjectItem implements Serializable {
 		}
 	}
 	
-	@Id
-	@GeneratedValue(generator = "seq_plugin_vote_subject_item", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "title", length = 100)
 	private String title;
 	@Enumerated(EnumType.STRING)
@@ -84,14 +76,6 @@ public class SubjectItem implements Serializable {
 	public SubjectItem(){
 		this.status = Status.CHOOSE;
 		voteNumber = 0L;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getTitle() {
@@ -149,30 +133,5 @@ public class SubjectItem implements Serializable {
 
 	public void setSubject(Subject subject) {
 		this.subject = subject;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SubjectItem other = (SubjectItem) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

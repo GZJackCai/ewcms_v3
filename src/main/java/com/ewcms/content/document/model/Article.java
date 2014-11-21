@@ -6,7 +6,6 @@
 
 package com.ewcms.content.document.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -17,9 +16,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -35,12 +31,12 @@ import javax.persistence.TemporalType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * 文章信息
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>title:标题</li>
  * <li>titleStyle:标题样式</li>
  * <li>shortTitle:短标题</li>
@@ -79,8 +75,8 @@ import com.alibaba.fastjson.annotation.JSONField;
 		          @Index(name = "idx_article_status", columnList = "status")
                  }
 )
-@SequenceGenerator(name = "seq_content_article", sequenceName = "seq_content_article_id", allocationSize = 1)
-public class Article implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_content_article_id", allocationSize = 1)
+public class Article extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -5809802652492615658L;
 
@@ -121,10 +117,6 @@ public class Article implements Serializable {
 		}
 	}
 	
-	@Id
-    @GeneratedValue(generator = "seq_content_article",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "title", nullable = false)
 	private String title;
 	@Column(name = "title_style")
@@ -203,14 +195,6 @@ public class Article implements Serializable {
 		createTime = new Date(Calendar.getInstance().getTime().getTime());
 		isDelete = false;
 		inside = false;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getTitle() {
@@ -445,30 +429,4 @@ public class Article implements Serializable {
 	public void setSubTitleStyle(String subTitleStyle) {
 		this.subTitleStyle = subTitleStyle;
 	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Article other = (Article) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
-	}
-
 }

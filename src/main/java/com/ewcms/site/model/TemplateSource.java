@@ -4,12 +4,8 @@
  * http://www.ewcms.com
  */
 
-/**
- * 
- */
 package com.ewcms.site.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -18,9 +14,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -36,12 +29,12 @@ import org.hibernate.annotations.Formula;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * 模板资源
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>name:模板资源名称</li>
  * <li>describe:资源说明</li>
  * <li>updTime:资源 最后修改时间</li>
@@ -54,19 +47,18 @@ import com.alibaba.fastjson.annotation.JSONField;
  * <li>release:资源是否已发布</li>
  * </ul>
  * 
- * @author 周冬初
  * @author wuzhijun
  * 
  */
 @Entity
 @Table(name = "site_templatesource")
-@SequenceGenerator(name = "seq_site_templatesource", sequenceName = "seq_site_templatesource_id", allocationSize = 1)
-public class TemplateSource implements Serializable {
-	private static final long serialVersionUID = 1L;
+@SequenceGenerator(name = "seq", sequenceName = "seq_site_templatesource_id", allocationSize = 1)
+public class TemplateSource extends BaseSequenceEntity<Long> {
+
+	private static final long serialVersionUID = 6265560034327166036L;
+
 	private static final String PATH_SEPARATOR = "/";
-	@Id
-	@GeneratedValue(generator = "seq_site_templatesource", strategy = GenerationType.SEQUENCE)
-	private Long id;
+
 	@Column(length = 50)
 	private String name;
 	@Column(columnDefinition = "text")
@@ -122,14 +114,6 @@ public class TemplateSource implements Serializable {
 
 	public void setPath(String path) {
 		this.path = path;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public String getName() {
@@ -236,30 +220,5 @@ public class TemplateSource implements Serializable {
 		path = StringUtils.removeEnd(path, PATH_SEPARATOR);
 
 		return path;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TemplateSource other = (TemplateSource) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

@@ -5,7 +5,6 @@
  */
 package com.ewcms.content.particular.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -14,9 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -27,13 +23,13 @@ import javax.persistence.TemporalType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.site.model.Organ;
 
 /**
  * 从业人员文章信息
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>employeBasic:证件号码</li>
  * <li>organ:组织机构</li>
  * <li>content:内容</li>
@@ -47,15 +43,11 @@ import com.ewcms.site.model.Organ;
  */
 @Entity
 @Table(name = "particular_employe_article")
-@SequenceGenerator(name = "seq_particular_employe_article", sequenceName = "seq_particular_employe_article_id", allocationSize = 1)
-public class EmployeArticle implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_particular_employe_article_id", allocationSize = 1)
+public class EmployeArticle extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -8490253787064907481L;
 
-	@Id
-	@GeneratedValue(generator = "seq_particular_employe_article", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@OneToOne(cascade = { CascadeType.PERSIST, CascadeType.MERGE,
 			CascadeType.REFRESH }, targetEntity = EmployeBasic.class)
 	@JoinColumn(name = "employebasic_cardcode", nullable = false)
@@ -82,14 +74,6 @@ public class EmployeArticle implements Serializable {
 		release = false;
 	}
 	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public EmployeBasic getEmployeBasic() {
 		return employeBasic;
 	}
@@ -153,30 +137,5 @@ public class EmployeArticle implements Serializable {
 
 	public void setRelease(Boolean release) {
 		this.release = release;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		EmployeArticle other = (EmployeArticle) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

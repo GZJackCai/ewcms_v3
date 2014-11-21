@@ -9,18 +9,16 @@
  */
 package com.ewcms.plugin.interaction.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  *
@@ -28,15 +26,11 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "plugin_interaction_speak")
-@SequenceGenerator(name = "seq_plugin_interaction_speak", sequenceName = "seq_plugin_interaction_speak_id", allocationSize = 1)
-public class Speak implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_interaction_speak_id", allocationSize = 1)
+public class Speak extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -3735127388543391139L;
 
-	@Id
-    @GeneratedValue(generator = "seq_plugin_interaction_speak",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-    private Integer id;
     @Column(name = "username")
     private String username;
     @Column(name = "name")
@@ -77,14 +71,6 @@ public class Speak implements Serializable {
         this.date = date;
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public String getIp() {
         return ip;
     }
@@ -115,27 +101,5 @@ public class Speak implements Serializable {
 
     public void setInteractionId(Integer interactionId) {
         this.interactionId = interactionId;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final Speak other = (Speak) obj;
-        if (this.id != other.id && (this.id == null || !this.id.equals(other.id))) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 37 * hash + (this.id != null ? this.id.hashCode() : 0);
-        return hash;
     }
 }

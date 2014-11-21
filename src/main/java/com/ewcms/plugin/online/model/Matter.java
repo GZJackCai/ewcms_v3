@@ -5,16 +5,12 @@
  */
 package com.ewcms.plugin.online.model;
 
-import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -25,6 +21,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.plugin.citizen.model.Citizen;
 import com.ewcms.site.model.Organ;
 
@@ -32,7 +29,6 @@ import com.ewcms.site.model.Organ;
  * 事项基本信息
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>name:名称</li>
  * <li>acceptedWay:受理方式</li>
  * <li>handleSite:办理地点</li>
@@ -61,14 +57,11 @@ import com.ewcms.site.model.Organ;
  */
 @Entity
 @Table(name = "plugin_matter")
-@SequenceGenerator(name = "seq_plugin_matter", sequenceName = "seq_plugin_matter_id", allocationSize = 1)
-public class Matter implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_matter_id", allocationSize = 1)
+public class Matter extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -3169015550175955635L;
 
-	@Id
-	@GeneratedValue(generator = "seq_plugin_matter", strategy = GenerationType.SEQUENCE)
-	private Integer id;
 	@Column(name = "matter_name", nullable = false)
 	private String name;
 	@Column(name = "accepted_way", columnDefinition = "text")
@@ -119,14 +112,6 @@ public class Matter implements Serializable {
 	@JoinTable(name = "plugin_matter_citizen", joinColumns = @JoinColumn(name = "matter_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "citizen_id", referencedColumnName = "id"))
 	@OrderBy(value = "id")
 	private List<Citizen> citizens;
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
 
 	public List<Citizen> getCitizens() {
 		return citizens;
@@ -305,30 +290,5 @@ public class Matter implements Serializable {
 
 	public void setMatterAnnexs(List<MatterAnnex> matterAnnexs) {
 		this.matterAnnexs = matterAnnexs;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Matter other = (Matter) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

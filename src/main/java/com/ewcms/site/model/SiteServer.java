@@ -9,19 +9,15 @@
  */
 package com.ewcms.site.model;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.ewcms.common.model.BaseSequenceEntity;
+
 /**
  * <ul>
- * <li>id:编号</li>
  * <li>path:发布路径</li>
  * <li>hostName:服务器IP</li>
  * <li>port: 端口</li>
@@ -29,18 +25,15 @@ import javax.persistence.Table;
  * <li>password:密码</li>
  * </ul>
  * 
- * @author 周冬初
+ * @author 吴智俊
  */
 @Entity
 @Table(name = "site_siteserver")
-@SequenceGenerator(name = "seq_site_siteserver", sequenceName = "seq_site_siteserver_id", allocationSize = 1)
-public class SiteServer implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_site_siteserver_id", allocationSize = 1)
+public class SiteServer extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -1138195790814414334L;
 
-	@Id
-	@GeneratedValue(generator = "seq_site_siteserver", strategy = GenerationType.SEQUENCE)
-	private Long id;
 	@Column(length = 100)
 	private String path;
 	@Column(length = 20)
@@ -51,14 +44,6 @@ public class SiteServer implements Serializable {
 	private String userName;
 	@Column(length = 20)
 	private String password;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getPath() {
 		return path;
@@ -99,5 +84,4 @@ public class SiteServer implements Serializable {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
 }

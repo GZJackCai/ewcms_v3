@@ -6,7 +6,6 @@
 
 package com.ewcms.content.resource.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -15,9 +14,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
@@ -31,32 +27,34 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.site.model.Site;
 
 /**
  * 资源信息
  *
- * id:编号
- * name:名称
- * size:大小
- * path:文件地址
- * imagePath:引导图地址
- * uri:访问地址
- * imageUri:引导图访问地址
- * type：资源类型
- * description：描述
- * site：所属站点
- * state：资源状态
- * createTime：创建实际
- * updateTime：修改时间
- * publishTime：发布时间
+ * <ul>
+ * <li>name:名称</li>
+ * <li>size:大小</li>
+ * <li>path:文件地址</li>
+ * <li>imagePath:引导图地址</li>
+ * <li>uri:访问地址</li>
+ * <li>imageUri:引导图访问地址</li>
+ * <li>type：资源类型</li>
+ * <li>description：描述</li>
+ * <li>site：所属站点</li>
+ * <li>state：资源状态</li>
+ * <li>createTime：创建实际</li>
+ * <li>updateTime：修改时间</li>
+ * <li>publishTime：发布时间</li>
+ * </ul>
  * 
- * @author 吴智俊 王伟
+ * @author 吴智俊
  */
 @Entity
 @Table(name = "content_resource")
-@SequenceGenerator(name = "seq_content_resource", sequenceName = "seq_content_resource_id", allocationSize = 1)
-public class Resource implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_content_resource_id", allocationSize = 1)
+public class Resource extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -6959680908438751060L;
 
@@ -103,9 +101,6 @@ public class Resource implements Serializable {
         }
     }
     
-    @Id
-    @GeneratedValue(generator = "seq_content_resource", strategy = GenerationType.SEQUENCE)
-    private Long id;
     @Column(length = 100, nullable = false)
     private String name;
     @Column(nullable = false)
@@ -141,14 +136,6 @@ public class Resource implements Serializable {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date publishTime;
         
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
@@ -280,35 +267,5 @@ public class Resource implements Serializable {
     public static String resourcePath(Site site,String uri){
         String path =  site.getResourceDir() + "/" + uri;
         return "/" + StringUtils.join(StringUtils.split(path, "/"),"/");
-    }
-    
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Resource other = (Resource) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        return true;
     }
 }

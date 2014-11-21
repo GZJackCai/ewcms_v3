@@ -6,7 +6,6 @@
 
 package com.ewcms.plugin.crawler.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -18,9 +17,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -28,13 +24,13 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * 
  * 采集器信息
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>name:名称</li>
  * <li>description:描述</li>
  * <li>status:状态(true:启用,false:停用)</li>
@@ -76,8 +72,8 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 @Entity
 @Table(name = "plugin_crawler_gather")
-@SequenceGenerator(name = "seq_plugin_crawler_gather", sequenceName = "seq_plugin_crawler_gather_id", allocationSize = 1)
-public class Gather implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_crawler_gather_id", allocationSize = 1)
+public class Gather extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -6421132072889992004L;
 	
@@ -99,10 +95,6 @@ public class Gather implements Serializable {
     	}
    }
 
-	@Id
-	@GeneratedValue(generator = "seq_plugin_crawler_gather", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "name", nullable = false, length = 100)
 	private String name;
 	@Column(name = "description", columnDefinition = "text")
@@ -195,14 +187,6 @@ public class Gather implements Serializable {
 		isLocal = false;
 	}
 	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -468,30 +452,5 @@ public class Gather implements Serializable {
 
 	public void setKeys(String keys) {
 		this.keys = keys;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Gather other = (Gather) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

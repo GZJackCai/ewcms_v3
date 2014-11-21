@@ -5,27 +5,20 @@
  */
 package com.ewcms.plugin.crawler.model;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.ewcms.common.model.BaseSequenceEntity;
+
 @Entity
 @Table(name = "plugin_crawler_storage")
-@SequenceGenerator(name = "seq_plugin_crawler_storage", sequenceName = "seq_plugin_crawler_storage_id", allocationSize = 1)
-public class Storage implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_crawler_storage_id", allocationSize = 1)
+public class Storage extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = -6416296085234192162L;
 
-	@Id
-	@GeneratedValue(generator = "seq_plugin_crawler_storage", strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "gather_id")
 	private Long gatherId;
 	@Column(name = "gather_name")
@@ -34,14 +27,6 @@ public class Storage implements Serializable {
 	private String title;
 	@Column(name = "url", unique = true)
 	private String url;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public Long getGatherId() {
 		return gatherId;
@@ -73,30 +58,5 @@ public class Storage implements Serializable {
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Storage other = (Storage) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

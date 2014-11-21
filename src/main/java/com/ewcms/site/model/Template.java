@@ -9,7 +9,6 @@
  */
 package com.ewcms.site.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -17,9 +16,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -34,10 +30,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Formula;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * <ul>
- * <li>id:编号</li>
  * <li>name:模板名称</li>
  * <li>describe:模板说明</li>
  * <li>updTime:模板最后修改时间</li>
@@ -52,34 +48,31 @@ import com.alibaba.fastjson.annotation.JSONField;
  * <li>isVerify:是否校验</li>
  * </ul>
  * 
- * @author 周冬初
+ * @author 吴智俊
  * 
  */
 @Entity
 @Table(name = "site_template")
-@SequenceGenerator(name = "seq_site_template", sequenceName = "seq_site_template_id", allocationSize = 1)
-public class Template implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_site_template_id", allocationSize = 1)
+public class Template extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 3402146114224682928L;
 
 	private static final String PATH_SEPARATOR = "/";
-	
+
 	public enum TemplateType {
-	    HOME("专栏首页"),LIST("专栏列表"),DETAIL("文章内容");
+		HOME("专栏首页"), LIST("专栏列表"), DETAIL("文章内容");
 		private String description;
-		
-		private TemplateType(String description){
+
+		private TemplateType(String description) {
 			this.description = description;
 		}
-		
-		public String getDescription(){
+
+		public String getDescription() {
 			return description;
 		}
 	}
-	
-	@Id
-	@GeneratedValue(generator = "seq_site_template", strategy = GenerationType.SEQUENCE)
-	private Long id;
+
 	@Column(length = 50)
 	private String name;
 	@Column(columnDefinition = "text")
@@ -92,10 +85,10 @@ public class Template implements Serializable {
 	@ManyToOne(cascade = { CascadeType.REFRESH }, targetEntity = Site.class)
 	@JoinColumn(name = "site_id", nullable = false)
 	private Site site;
-    @ManyToOne(cascade = {CascadeType.REFRESH}, targetEntity = Template.class)
-    @JoinColumn(name = "parent_id", nullable = true)
-    private Template parent;
-    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = TemplateEntity.class, orphanRemoval = true)
+	@ManyToOne(cascade = { CascadeType.REFRESH }, targetEntity = Template.class)
+	@JoinColumn(name = "parent_id", nullable = true)
+	private Template parent;
+	@OneToOne(cascade = { CascadeType.ALL }, targetEntity = TemplateEntity.class, orphanRemoval = true)
 	@JoinColumn(name = "tplEntityId", nullable = true)
 	private TemplateEntity templateEntity;
 	@Formula(value = "(Select count(o.id) From site_template o Where o.parent_id= id)")
@@ -104,30 +97,33 @@ public class Template implements Serializable {
 	private Long channelId;
 	@Column(length = 150)
 	private String path;
-	@Column(length = 150,unique=true)
+	@Column(length = 150, unique = true)
 	private String uniquePath;
 	@Column(length = 150)
 	private String uriPattern;
 	@Column(length = 15)
 	@Enumerated(EnumType.STRING)
 	private TemplateType type;
-    @Column()
-    private Boolean enabledUse = false;
-    @Column(name = "is_verify")
-    private Boolean isVerify = false;
-    @Column()
-    @Enumerated(EnumType.STRING)
-    private FileType fileType;
-    
+	@Column()
+	private Boolean enabledUse = false;
+	@Column(name = "is_verify")
+	private Boolean isVerify = false;
+	@Column()
+	@Enumerated(EnumType.STRING)
+	private FileType fileType;
+
 	public Boolean getEnabledUse() {
 		return enabledUse;
 	}
+
 	public void setEnabledUse(Boolean enabledUse) {
 		this.enabledUse = enabledUse;
 	}
+
 	public String getUniquePath() {
 		return uniquePath;
 	}
+
 	public void setUniquePath(String uniquePath) {
 		this.uniquePath = uniquePath;
 	}
@@ -138,14 +134,6 @@ public class Template implements Serializable {
 
 	public void setPath(String path) {
 		this.path = path;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public Long getChannelId() {
@@ -214,12 +202,12 @@ public class Template implements Serializable {
 	public void setTemplateEntity(TemplateEntity templateEntity) {
 		this.templateEntity = templateEntity;
 	}
-	
+
 	public boolean hasChildren() {
 		return this.childrenCount > 0;
 	}
-	
-    public String getUriPattern() {
+
+	public String getUriPattern() {
 		return uriPattern;
 	}
 
@@ -228,42 +216,43 @@ public class Template implements Serializable {
 	}
 
 	public TemplateType getType() {
-        return type;
-    }
-	
-	public String getTypeDescription(){
-		if (type != null){
+		return type;
+	}
+
+	public String getTypeDescription() {
+		if (type != null) {
 			return type.getDescription();
-		}else{
+		} else {
 			return "---请选择类型---";
 		}
 	}
 
-    public void setType(TemplateType type) {
-        this.type = type;
-    }
+	public void setType(TemplateType type) {
+		this.type = type;
+	}
 
 	public Boolean getIsVerify() {
 		return isVerify;
 	}
-	
+
 	public void setIsVerify(Boolean isVerify) {
 		this.isVerify = isVerify;
 	}
-	
+
 	public FileType getFileType() {
 		return fileType;
 	}
+
 	public void setFileType(FileType fileType) {
 		this.fileType = fileType;
 	}
-	
+
 	@PreUpdate
 	@PrePersist
-	public void afterPersist(){
+	public void afterPersist() {
 		constructPath();
 	}
-	 
+
 	private void constructPath() {
 		StringBuilder builder = new StringBuilder();
 		for (Template template = this; template != null; template = template.parent) {
@@ -275,7 +264,7 @@ public class Template implements Serializable {
 			builder.insert(0, PATH_SEPARATOR);
 		}
 		path = removeStartAndEndPathSeparator(builder.toString());
-		uniquePath = getSite().getId().toString()+ PATH_SEPARATOR + path;
+		uniquePath = getSite().getId().toString() + PATH_SEPARATOR + path;
 	}
 
 	private String removeStartAndEndPathSeparator(final String dir) {
@@ -284,28 +273,5 @@ public class Template implements Serializable {
 		path = StringUtils.removeEnd(path, PATH_SEPARATOR);
 
 		return path;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final Template other = (Template) obj;
-		if (this.id != other.id
-				&& (this.id == null || !this.id.equals(other.id))) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = 7;
-		hash = 61 * hash + (this.id != null ? this.id.hashCode() : 0);
-		return hash;
 	}
 }

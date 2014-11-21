@@ -6,16 +6,11 @@
 
 package com.ewcms.site.model;
 
-import java.io.Serializable;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PostUpdate;
@@ -26,10 +21,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Formula;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 
 /**
  * <ul>
- * <li>id:栏目编号</li>
  * <li>parent:所属父栏目</li>
  * <li>site:栏目所属站点</li>
  * <li>name: 栏目名称</li>
@@ -47,13 +42,12 @@ import com.alibaba.fastjson.annotation.JSONField;
  * <li>appChannel:应用于频道</li>
  * </ul>
  * 
- * @author 周冬初
- * @author wuzhijun
+ * @author 吴智俊
  */
 @Entity
 @Table(name = "site_channel")
-@SequenceGenerator(name = "seq_site_channel", sequenceName = "seq_site_channel_id", allocationSize = 1)
-public class Channel implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_site_channel_id", allocationSize = 1)
+public class Channel extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 7813916065025966481L;
 
@@ -85,9 +79,6 @@ public class Channel implements Serializable {
 
 	private static final String PATH_SEPARATOR = "/";
 	
-	@Id
-	@GeneratedValue(generator = "seq_site_channel", strategy = GenerationType.SEQUENCE)
-	private Long id;
 	@ManyToOne(cascade = { CascadeType.REFRESH }, targetEntity = Channel.class)
 	@JoinColumn(name = "parent_id", nullable = true)
 	private Channel parent;
@@ -128,14 +119,6 @@ public class Channel implements Serializable {
 
 	public Channel() {
 		type = Type.NODE;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
 	}
 
 	public Integer getInternalSort() {
@@ -323,28 +306,5 @@ public class Channel implements Serializable {
 
 	public void setAppChannel(String appChannel) {
 		this.appChannel = appChannel;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		final Channel other = (Channel) obj;
-		if (this.id != other.id
-				&& (this.id == null || !this.id.equals(other.id))) {
-			return false;
-		}
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int hash = 7;
-		hash = 67 * hash + (this.id != null ? this.id.hashCode() : 0);
-		return hash;
 	}
 }

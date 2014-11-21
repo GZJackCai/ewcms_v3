@@ -5,7 +5,6 @@
  */
 package com.ewcms.content.particular.model;
 
-import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.CascadeType;
@@ -14,9 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -27,13 +23,13 @@ import javax.persistence.TemporalType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.site.model.Organ;
 
 /**
  * 企业基本信息
  * 
  * <ul>
- * <li>id:编号</li>
  * <li>name:企业名称</li> 
  * <li>organ:组织机构</li>
  * <li>published:发布时间</li>
@@ -59,15 +55,11 @@ import com.ewcms.site.model.Organ;
  */
 @Entity
 @Table(name = "particular_enterprise_basic")
-@SequenceGenerator(name = "seq_particular_enterprise_basic", sequenceName = "seq_particular_enterprise_basic_id", allocationSize = 1)
-public class EnterpriseBasic implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_particular_enterprise_basic_id", allocationSize = 1)
+public class EnterpriseBasic extends BaseSequenceEntity<Long> {
 
 	private static final long serialVersionUID = 3884541781798152400L;
 
-	@Id
-    @GeneratedValue(generator = "seq_particular_enterprise_basic",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-	private Long id;
 	@Column(name = "name", length = 200)
 	private String name;
 	@OneToOne(cascade = {CascadeType.REFRESH}, fetch = FetchType.EAGER, targetEntity = Organ.class)
@@ -118,14 +110,6 @@ public class EnterpriseBasic implements Serializable {
 		release = false;
 	}
 	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -286,30 +270,5 @@ public class EnterpriseBasic implements Serializable {
 
 	public void setRelease(Boolean release) {
 		this.release = release;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		EnterpriseBasic other = (EnterpriseBasic) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
 	}
 }

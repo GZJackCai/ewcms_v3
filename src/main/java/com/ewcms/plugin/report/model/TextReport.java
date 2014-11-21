@@ -5,7 +5,6 @@
  */
 package com.ewcms.plugin.report.model;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -14,9 +13,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -29,6 +25,7 @@ import javax.persistence.TemporalType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.ewcms.common.model.BaseSequenceEntity;
 import com.ewcms.plugin.externalds.model.BaseDs;
 
 /**
@@ -52,8 +49,8 @@ import com.ewcms.plugin.externalds.model.BaseDs;
  */
 @Entity
 @Table(name = "plugin_report_text")
-@SequenceGenerator(name = "seq_plugin_report_text", sequenceName = "seq_plugin_report_text_id", allocationSize = 1)
-public class TextReport implements Serializable {
+@SequenceGenerator(name = "seq", sequenceName = "seq_plugin_report_text_id", allocationSize = 1)
+public class TextReport extends BaseSequenceEntity<Long> {
 
     private static final long serialVersionUID = 2289611908936617074L;
     
@@ -80,10 +77,7 @@ public class TextReport implements Serializable {
             return this.description;
         }
     }
-	@Id
-    @GeneratedValue(generator = "seq_plugin_report_text",strategy = GenerationType.SEQUENCE)
-	@Column(name = "id")
-    private Long id;
+    
     @Column(name = "name", length = 50, nullable = false, unique = true)
     private String name;
     @Column(name = "textentity")
@@ -108,14 +102,6 @@ public class TextReport implements Serializable {
     @JoinColumn(name = "base_ds_id")
     private BaseDs baseDs = new BaseDs();
     
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
@@ -179,43 +165,5 @@ public class TextReport implements Serializable {
 
     public void setBaseDs(BaseDs baseDs) {
         this.baseDs = baseDs;
-    }
-
-	@Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final TextReport other = (TextReport) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
-            return false;
-        }
-        return true;
     }
 }
