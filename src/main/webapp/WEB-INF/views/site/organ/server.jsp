@@ -20,15 +20,6 @@
 			  <input type="text" id="siteName" name="siteName" readonly="readonly" size="40" value="${site.siteName}"/>
 			  <span style="color:gray;">(内部编号：${site.id})</span>
 			</td>
-		  </tr>				
-		  <tr>
-			<td>发布类型：</td>
-			<td>
-			  <form:select id="outputType" path="siteServer.outputType" onchange="outputTypeChange(this.value);">
-			    <form:option value="" label="------请选择------" />
-			    <form:options itemLabel="description"/>
-			  </form:select>
-			</td>				
 		  </tr>
 		  <tr id="serverInfo1" style="display:none;">
 			<td>服务器IP：</td>
